@@ -25,3 +25,24 @@ Acceptance criteria:
 - [ ] Initialization recorded in agent/DECISIONS.md
 
 Do not begin DISCOVERY, or any other phase, until this task is VERIFIED.
+
+## Change Requests
+
+Ad-hoc, non-PRD asks made directly in chat (see AGENTS.md, "Change Requests"). Use `CR-NNN`
+IDs, distinct from PRD-derived requirement IDs used elsewhere in this backlog. Empty until
+the first one comes in.
+
+<!--
+### CR-001 — [one-line description]
+
+Status: READY
+Requested: YYYY-MM-DD (chat, not in PRD)
+
+Objective:
+
+[what this change does]
+
+Review: [OPTIONAL — orchestrator judgment, or REQUIRED if it touches shared state, auth,
+data, or another CONSTRAINTS.md-sensitive area]
+-->
+

@@ -192,6 +192,44 @@ applicable to this venture.
 
 Agents may prepare materials for the next phase but must not cross a human gate without explicit approval recorded in agent/DECISIONS.md.
 
+## Change Requests
+
+Not every request needs to go through the phase-driven workflow. Small, ad-hoc changes that
+aren't in the PRD — asked for directly in chat, "vibe coded" rather than derived from
+Discovery/Strategy — get a lighter lane: Change Requests.
+
+Trigger: the user asks for something directly in chat that doesn't map to an existing PRD
+requirement, and isn't a "continue" on the phase-driven backlog.
+
+Procedure:
+
+1. Check whether the request maps to an existing PRD requirement. If it does, it's regular
+   backlog work under the relevant phase — do not create a Change Request for it.
+2. If it doesn't map to the PRD, check config/CONSTRAINTS.md and product/v1-scope.md's
+   non-goals (if present). If the request conflicts with either, escalate instead of
+   building it — same "decision requiring business judgment" rule as elsewhere.
+3. Otherwise, add it to agent/BACKLOG.md under a `## Change Requests` section, with its own
+   `CR-NNN` ID (distinct from PRD-derived requirement IDs), the request, and a one-line
+   objective.
+4. Delegate to the Developer directly — skip Discovery/Strategy/UX/PRD ceremony and any
+   human gate. Independent review (Code Reviewer, Functional QA) is the orchestrator's
+   judgment call, not mandatory: skip it for trivial/cosmetic changes, include it for
+   anything touching shared state, auth, data, or other CONSTRAINTS.md-sensitive areas.
+5. Run the same validation as any other code change (lint, typecheck, tests, build) — the
+   IMPLEMENTED/VERIFIED bar from Implementation Rules still applies.
+6. Mark the Change Request IMPLEMENTED or VERIFIED in agent/BACKLOG.md (same status
+   vocabulary as the rest of the backlog), and log one line in agent/RUNLOG.md.
+
+Change Requests are deliberately walled off from the PRD: PRODUCT_ACCEPTANCE only checks
+PRD-traced P0 requirements, so a Change Request will never show up there. DOCUMENTATION
+should still list delivered Change Requests (e.g. a short "Change Requests Delivered"
+section) so a later reviewer isn't confused about scope that never went through
+PRODUCT_STRATEGY.
+
+Do not use Change Requests to accumulate scope that should have gone through
+PRODUCT_STRATEGY — if they start adding up to something structural, say so and suggest
+running that phase properly instead of continuing to patch around it.
+
 ## Scope Rules
 
 - Challenge assumptions instead of treating the initial concept as fact.
