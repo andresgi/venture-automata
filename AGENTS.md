@@ -268,15 +268,21 @@ Never claim work is complete unless its acceptance criteria have been checked.
 
 Once software development begins:
 
-- Use TypeScript.
-- Use a modern supported Next.js version.
+- Use the stack(s) specified in config/CONSTRAINTS.md's Technical Constraints — per
+  platform, if this venture spans more than one (e.g. a standalone backend plus a mobile
+  client). config/CONSTRAINTS.md's platform-specific choices always take precedence here.
+  Only if config/CONSTRAINTS.md doesn't specify a stack for a given platform, default to
+  TypeScript and a modern supported Next.js version for that platform.
 - Prefer simple architecture suitable for an MVP.
 - Never modify production systems without explicit human approval.
 - Never expose or commit secrets.
 - Never commit .env files.
 - Do not perform production deployment without explicit human approval.
 
-For implementation work, run the project's available:
+For implementation work, run the project's available validation commands for each platform
+being built — they may differ per platform (e.g. `next build` for a Next.js web/backend,
+versus a mobile toolchain's own lint/typecheck/build for a React Native/Flutter/native
+client):
 
 - lint
 - typecheck
