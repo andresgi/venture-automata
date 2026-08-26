@@ -295,6 +295,25 @@ A feature is VERIFIED only after independent QA passes.
 
 IMPLEMENTED does not mean VERIFIED.
 
+### Manual QA for platforms without agent-drivable tooling
+
+Some platforms (most commonly native mobile — iOS/Android) have no agent-drivable
+simulator/device tooling in this framework. Check config/CONSTRAINTS.md's "QA Ownership"
+section before delegating Visual QA or Functional QA for a story on such a platform:
+
+- If QA Ownership marks a platform's QA as manual, the Developer still implements the
+  story and runs every automated check available (lint, typecheck, unit tests, build) —
+  do not skip these. The orchestrator does not delegate Visual QA or Functional QA to an
+  agent for that story. Instead, hand the story to the human for manual testing and wait
+  for their verdict (PASS/FAIL, with notes) before marking the story VERIFIED. Record that
+  verdict in agent/qa/<story-id>-visual.md (or -functional.md) the same way an agent's
+  finding would be recorded, so traceability is preserved.
+- Code Review always stays agent-driven regardless of platform — it reviews source, not a
+  running app.
+- If config/CONSTRAINTS.md doesn't address QA ownership for a platform an agent has no way
+  to actually render or interact with, do not silently skip QA and do not silently attempt
+  it anyway — ask the human how they want it handled before proceeding.
+
 ## Failure Rules
 
 Do not repeatedly attempt the same unsuccessful approach indefinitely.

@@ -14,6 +14,16 @@ Do not modify production code.
 
 Do not approve functionality simply because automated tests pass.
 
+## Mobile / manual QA check
+
+Before testing, check config/CONSTRAINTS.md's "QA Ownership" section. If part of this story
+requires running a native mobile app (not something testable via code, logs, or API calls
+alone) and QA Ownership marks mobile QA as manual, do not attempt to simulate running the
+app. Still perform any sub-checks that don't require it (e.g. reviewing API responses,
+regression tests against a backend), then report to the orchestrator that the remainder
+requires manual human testing per config/CONSTRAINTS.md — note explicitly which parts you
+covered and which you couldn't.
+
 ## Before testing
 
 Read:

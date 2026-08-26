@@ -23,6 +23,18 @@ content.
   mobile, hosting provider for the backend)
 - Data residency / compliance requirements
 
+## QA Ownership
+
+- Mobile QA: manual (default). If this venture includes a native mobile app, this
+  framework has no agent-drivable simulator/device tooling — Visual QA and Functional QA
+  for mobile screens are performed by the human, not delegated to an agent. The Developer
+  still implements and runs automated checks (lint/typecheck/unit tests/build) as always;
+  the orchestrator then hands the story to the human for manual testing instead of
+  delegating QA, and records the human's verdict before marking the story VERIFIED. Code
+  Review always stays agent-driven regardless of platform (static analysis of source, not
+  app interaction). Override this line if agent-drivable mobile testing tooling becomes
+  available for this venture.
+
 ## Business Constraints
 
 - Budget ceiling (if any)
