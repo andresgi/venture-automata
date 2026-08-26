@@ -60,9 +60,11 @@ Procedure:
    - config/CONSTRAINTS.md — technical, business, legal/data, and risk-tolerance
      constraints; explicit non-goals. Mark a section "none known" rather than leaving it
      blank or inventing content.
-   - config/WORKFLOW.md — an explicit status (`enabled`, `disabled`, `optional`, or `auto`)
-     for every phase in the phase catalog below. Do not leave any phase unset. When
-     genuinely unsure, use `auto` rather than guessing `enabled`/`disabled`.
+   - config/WORKFLOW.md — an explicit status (`enabled`, `disabled`, `optional`, `auto`, or
+     `provided`) for every phase in the phase catalog below. Do not leave any phase unset.
+     When genuinely unsure, use `auto` rather than guessing `enabled`/`disabled`. If the
+     user already has a deliverable in hand for a phase, see "Fast-start" below and use
+     `provided` instead of deriving it from scratch.
 3. Initialize agent/STATE.md: set Current Phase to the first applicable phase (usually
    DISCOVERY, unless config/WORKFLOW.md disables it), Status to NOT_STARTED, and populate
    Phase Status for every applicable phase.
@@ -79,6 +81,36 @@ actually provided or confirmed — ask, or mark it explicitly as an open questio
 templates/venture-skeleton/ contains blank starter versions of every file this step
 produces, and scripts/new-project.sh scaffolds a new venture directory from it.
 
+### Fast-start: supplying existing deliverables
+
+You don't have to run every phase through its agent from scratch. If you already have
+requirements, an architecture, or any other phase's deliverable in hand — from prior work,
+another tool, or your own judgment — skip deriving it and supply it directly:
+
+1. Tell the orchestrator what you already have and want to skip (e.g. "I have a PRD and a
+   rough architecture — skip Discovery, Benchmark, Strategy, and Brand").
+2. Save the supplied material at that phase's conventional output path(s) — see the "Typical
+   output(s)" column in the phase catalog above. A partial set is fine (e.g. product/prd.md
+   alone, without strategy.md/v1-scope.md) — whatever you actually have.
+3. In config/WORKFLOW.md, mark:
+   - phases you have a deliverable for as `provided` (not `enabled`, not `disabled`).
+   - phases you genuinely don't need at all (no deliverable, nothing to check) as
+     `disabled`. This is the key distinction: `disabled` means no artifact is expected;
+     `provided` means the artifact exists, just not agent-authored.
+
+For a `provided` phase, the orchestrator does not delegate production to that phase's
+agent. Instead it: verifies the expected artifact(s) exist at their conventional path,
+runs that phase's independent critic/reviewer once in review-only mode as a sanity check
+(findings are advisory — record in agent/DECISIONS.md whether you're accepting the
+artifact as-is or want a revision), then marks the phase VERIFIED in agent/STATE.md. Do not
+silently invent the missing parts of an incomplete `provided` deliverable — flag the gap
+(agent/BLOCKERS.md, or ask) instead of fabricating the rest.
+
+Human gates still apply normally: PRODUCT_GATE still requires your explicit approval before
+BRAND/UX/UI/technical work begins even when PRODUCT_STRATEGY is `provided` rather than
+`enabled`, and ARCHITECTURE_GATE still requires approval before BUILD even when
+TECH_ARCHITECTURE is `provided`.
+
 ## Workflow
 
 This process is deliberately generic so it can run any venture, not just this one. Which
@@ -92,31 +124,35 @@ Every phase below maps to a specialist role (see "Available Roles"). config/WORK
 assigns each one a status:
 
 - `enabled` — always runs; required for this venture's V1 to reach COMPLETE.
-- `disabled` — never runs; not required for COMPLETE; not applicable to this venture.
+- `disabled` — never runs; no deliverable is expected; not applicable to this venture.
 - `optional` — does not run by default. Only include it if a human or an approved backlog
   item explicitly asks for it, and record that decision in agent/DECISIONS.md before starting.
 - `auto` — the orchestrator decides, based on this venture's actual product/strategy.md and
   PRD, whether the phase is needed. Record the reasoning and the include/skip decision in
   agent/DECISIONS.md the first time the phase becomes eligible.
+- `provided` — the deliverable already exists, supplied directly by a human instead of
+  produced by the phase's agent. The phase is still required (unlike `disabled`), but its
+  producing agent is not delegated to author it from scratch. See "Project Initialization
+  -> Fast-start" below for exactly how this works.
 
-| Phase | Purpose | Primary agent(s) |
-|---|---|---|
-| DISCOVERY | Validate the venture's core assumptions with evidence | Product Researcher |
-| BENCHMARK | Map competitors and analogous products | Product Researcher |
-| PRODUCT_STRATEGY | Turn evidence into strategy, V1 scope, and a buildable PRD | Product Manager |
-| BRAND | Naming, voice, and identity, distinct from screen-level visual design | UI Designer / UI Critic* |
-| UX | User journeys, information architecture, screen inventory, UX states | UX Designer / UX Critic |
-| UI | Visual design system and screen-level UI specifications | UI Designer / UI Critic |
-| TECH_ARCHITECTURE | Application architecture, data model, security model, implementation plan | Technical Architect |
-| BUILD | Engineering execution (includes Functional QA and Visual QA as built-in sub-steps) | Developer / Code Reviewer / Functional QA / Visual QA |
-| SECURITY_REVIEW | Independent security review of the implementation | Security Reviewer |
-| GROWTH | General acquisition, activation, and retention strategy | Product Manager / Product Researcher* |
-| SUPPLY_GROWTH | Supply-side acquisition, for two-sided marketplaces | Product Manager / Product Researcher* |
-| DEMAND_GROWTH | Demand-side acquisition, for two-sided marketplaces | Product Manager / Product Researcher* |
-| PRODUCT_ACCEPTANCE | Verify the built product against the approved PRD/scope | Product Acceptance |
-| SOP | Operational runbooks for this venture's manual workflows | SOP Writer |
-| DOCUMENTATION | Product and technical documentation of what was actually built | Documentation Writer |
-| RELEASE | Final release-readiness review and the human RELEASE_GATE package | Release Reviewer |
+| Phase | Purpose | Primary agent(s) | Typical output(s) |
+|---|---|---|---|
+| DISCOVERY | Validate the venture's core assumptions with evidence | Product Researcher | product/assumptions.md, product/research.md |
+| BENCHMARK | Map competitors and analogous products | Product Researcher | product/benchmark.md |
+| PRODUCT_STRATEGY | Turn evidence into strategy, V1 scope, and a buildable PRD | Product Manager | product/strategy.md, product/v1-scope.md, product/prd.md |
+| BRAND | Naming, voice, and identity, distinct from screen-level visual design | UI Designer / UI Critic* | (folds into UI's design/UI-SYSTEM.md unless given its own doc) |
+| UX | User journeys, information architecture, screen inventory, UX states | UX Designer / UX Critic | design/journeys.md, design/information-architecture.md, design/screen-inventory.md, design/UX-spec.md |
+| UI | Visual design system and screen-level UI specifications | UI Designer / UI Critic | design/UI-SYSTEM.md, design/UI-SPEC.md |
+| TECH_ARCHITECTURE | Application architecture, data model, security model, implementation plan | Technical Architect | engineering/architecture.md, database.md, security.md, analytics.md, implementation-plan.md |
+| BUILD | Engineering execution (includes Functional QA and Visual QA as built-in sub-steps) | Developer / Code Reviewer / Functional QA / Visual QA | application source code |
+| SECURITY_REVIEW | Independent security review of the implementation | Security Reviewer | agent/qa/security-review.md |
+| GROWTH | General acquisition, activation, and retention strategy | Product Manager / Product Researcher* | (no fixed convention yet) |
+| SUPPLY_GROWTH | Supply-side acquisition, for two-sided marketplaces | Product Manager / Product Researcher* | (no fixed convention yet) |
+| DEMAND_GROWTH | Demand-side acquisition, for two-sided marketplaces | Product Manager / Product Researcher* | (no fixed convention yet) |
+| PRODUCT_ACCEPTANCE | Verify the built product against the approved PRD/scope | Product Acceptance | agent/qa/product-acceptance.md |
+| SOP | Operational runbooks for this venture's manual workflows | SOP Writer | operations/sop/*, operations/SOP-INDEX.md |
+| DOCUMENTATION | Product and technical documentation of what was actually built | Documentation Writer | docs/* |
+| RELEASE | Final release-readiness review and the human RELEASE_GATE package | Release Reviewer | agent/gates/release-gate.md |
 
 \* BRAND, GROWTH, SUPPLY_GROWTH, and DEMAND_GROWTH have no dedicated specialist agent in
 this repository yet. When one of these is applicable and becomes eligible, route the work
@@ -125,8 +161,8 @@ genuinely poor, escalate instead of guessing.
 
 ### Ordering
 
-Among the phases that are applicable (`enabled`, or `auto`/`optional` resolved to
-"include"), the relative order is fixed:
+Among the phases that are applicable (`enabled`, `provided`, or `auto`/`optional` resolved
+to "include"), the relative order is fixed:
 
 DISCOVERY -> BENCHMARK -> PRODUCT_STRATEGY -> PRODUCT_GATE (human) -> [BRAND, UX, UI, in
 any useful order] -> TECH_ARCHITECTURE -> ARCHITECTURE_GATE (human) -> BUILD (including
@@ -143,11 +179,12 @@ recording that decision first.
 Agents must stop and request human review at:
 
 ### PRODUCT_GATE
-Required whenever PRODUCT_STRATEGY is applicable. Before BRAND/UX/UI/technical work begins.
+Required whenever PRODUCT_STRATEGY is applicable (`enabled`, `provided`, or `auto`/
+`optional` resolved to include). Before BRAND/UX/UI/technical work begins.
 
 ### ARCHITECTURE_GATE
-Required whenever TECH_ARCHITECTURE is applicable. Before substantial application
-implementation begins.
+Required whenever TECH_ARCHITECTURE is applicable (`enabled`, `provided`, or `auto`/
+`optional` resolved to include). Before substantial application implementation begins.
 
 ### RELEASE_GATE
 Always required before production release, regardless of which other phases were
@@ -238,9 +275,10 @@ Escalate instead of guessing when there is:
 
 The project is not complete merely because the application builds.
 
-V1 requires the following, for every phase config/WORKFLOW.md marks `enabled` (or resolves
-an `auto`/`optional` phase to "include") — skip any item whose corresponding phase is
-`disabled` or was resolved to "skip":
+V1 requires the following, for every phase config/WORKFLOW.md marks `enabled` or `provided`
+(or resolves an `auto`/`optional` phase to "include") — skip any item whose corresponding
+phase is `disabled` or was resolved to "skip". A `provided` phase's item is satisfied by the
+supplied artifact passing its review-only sanity check, not by agent-authored work.
 
 - Approved product definition (PRODUCT_STRATEGY)
 - Approved V1 scope (PRODUCT_STRATEGY)

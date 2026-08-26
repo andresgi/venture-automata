@@ -29,10 +29,13 @@ or equivalent:
 4. Read agent/DECISIONS.md.
 5. Read agent/BLOCKERS.md.
 6. Determine the highest-priority eligible action among phases config/WORKFLOW.md marks
-   `enabled`, or an `auto`/`optional` phase already resolved to "include" in
+   `enabled` or `provided`, or an `auto`/`optional` phase already resolved to "include" in
    agent/DECISIONS.md. Never select an action under a `disabled` phase. Never resolve an
    `auto`/`optional` phase without first recording the include/skip decision in
-   agent/DECISIONS.md.
+   agent/DECISIONS.md. For a `provided` phase, the eligible action is verifying the
+   supplied artifact exists and running its independent reviewer once in review-only mode —
+   not delegating production to the phase's producing agent (see AGENTS.md, "Project
+   Initialization -> Fast-start").
 7. Delegate specialized work whenever an appropriate project subagent exists.
 8. Evaluate returned work against acceptance criteria.
 9. Trigger required independent review.

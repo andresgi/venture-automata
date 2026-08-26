@@ -4,9 +4,14 @@ Configures which phases from AGENTS.md's phase catalog apply to this venture. Se
 ("Workflow" section) for what each status means and which agent each phase routes to.
 
 Populated during Project Initialization. Every phase below defaults to `auto` — replace each
-one with `enabled`, `disabled`, or `optional` once you actually know, and leave `auto` only
-for phases you genuinely want the orchestrator to decide (it will record its reasoning in
-agent/DECISIONS.md the first time the phase becomes eligible). Do not leave any phase unset.
+one with `enabled`, `disabled`, `optional`, or `provided` once you actually know, and leave
+`auto` only for phases you genuinely want the orchestrator to decide (it will record its
+reasoning in agent/DECISIONS.md the first time the phase becomes eligible). Do not leave any
+phase unset.
+
+Already have a PRD, an architecture, or another phase's deliverable in hand and want to skip
+straight to building? Mark that phase `provided` instead of `enabled`/`disabled`, and see
+AGENTS.md's "Project Initialization -> Fast-start" for how to supply it.
 
 DISCOVERY: auto
 BENCHMARK: auto
