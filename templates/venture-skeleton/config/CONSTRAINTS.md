@@ -7,10 +7,20 @@ content.
 
 ## Technical Constraints
 
-- Language/stack requirements (default: TypeScript, modern Next.js — per AGENTS.md
-  Implementation Rules; override here if different)
+- Platform target(s): web, mobile (iOS/Android), a standalone backend/API, or a
+  combination — state explicitly. Don't assume a single web stack if this venture needs a
+  mobile app and/or a separate backend.
+- Language/stack requirements, per platform if more than one applies. AGENTS.md's
+  Implementation Rules default to TypeScript + a modern Next.js version — that default
+  applies only where nothing more specific is stated here. Anything specified below
+  overrides it for this venture. For a mobile app + backend, spell out each platform
+  separately, e.g.:
+  - Backend/API: [e.g. Node.js/TypeScript, or your choice]
+  - Mobile client: [e.g. React Native/Expo, Flutter, native Swift/Kotlin]
+  - Web client (if any): [e.g. Next.js, or "none — mobile-only"]
 - Required or forbidden vendors/infrastructure
-- Deployment target
+- Deployment target(s) — per platform if more than one (e.g. App Store/Play Store for
+  mobile, hosting provider for the backend)
 - Data residency / compliance requirements
 
 ## Business Constraints
