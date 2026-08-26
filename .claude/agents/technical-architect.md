@@ -27,6 +27,7 @@ Do not overengineer V1.
 Read:
 
 - AGENTS.md
+- config/CONSTRAINTS.md
 - product/strategy.md
 - product/v1-scope.md
 - product/PRD.md
@@ -61,6 +62,35 @@ For each major component, determine whether it should be:
 - managed
 - self-hosted
 - or deferred/manual for V1
+
+### Repository Structure
+
+Read config/CONSTRAINTS.md's declared platform target(s) before deciding on repository
+layout.
+
+If this venture spans a single platform, use a normal single-project layout — do not add
+workspace tooling for its own sake.
+
+If it spans more than one platform (e.g. a mobile client and a standalone backend),
+default to a single git repository with a lightweight package-manager workspace (npm or
+pnpm workspaces) rather than either (a) fully separate, unlinked folders, or (b) a heavy
+monorepo build-orchestration tool (Nx, Turborepo) — the latter is usually unjustified
+tooling overhead for a V1. A typical layout:
+
+- backend/             (e.g. Next.js)
+- mobile/              (e.g. React Native/Expo)
+- packages/shared/     shared TypeScript types/contracts for the API boundary
+
+The main justification for the shared package: without it, the backend and mobile client
+are built by agents working from separate, easily-stale mental models of the API contract
+— a renamed field or changed response shape silently breaks the client until Functional QA
+catches it at runtime, instead of failing a typecheck immediately. Weigh that drift risk
+against the added workspace setup; for anything beyond a trivial API surface, the shared
+package usually wins.
+
+Document the chosen layout and the reasoning in engineering/architecture.md, same as any
+other architecture decision — do not silently default to separate folders or a full
+monorepo tool without stating why.
 
 ### Data Model
 
