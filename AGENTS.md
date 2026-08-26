@@ -304,12 +304,22 @@ section before delegating Visual QA or Functional QA for a story on such a platf
 - If QA Ownership marks a platform's QA as manual, the Developer still implements the
   story and runs every automated check available (lint, typecheck, unit tests, build) —
   do not skip these. The orchestrator does not delegate Visual QA or Functional QA to an
-  agent for that story. Instead, hand the story to the human for manual testing and wait
-  for their verdict (PASS/FAIL, with notes) before marking the story VERIFIED. Record that
-  verdict in agent/qa/<story-id>-visual.md (or -functional.md) the same way an agent's
-  finding would be recorded, so traceability is preserved.
+  agent for that story. Instead, mark the story `AWAITING_MANUAL_QA` in agent/BACKLOG.md,
+  add it to agent/qa/PENDING_MANUAL_QA.md (a running list: story ID, one-line description,
+  date added, what to test), and move on to the next eligible independent story in the
+  same run. Do not stop and wait for the human — `AWAITING_MANUAL_QA` is not a blocker.
+  Only stories that genuinely depend on the queued one (per its dependencies) stay
+  BLOCKED; unrelated work continues.
+- When the human reports back on a queued story, record their verdict in
+  agent/qa/<story-id>-visual.md (or -functional.md) the same way an agent's finding would
+  be recorded, remove it from agent/qa/PENDING_MANUAL_QA.md, and update its status
+  (VERIFIED on PASS, REVISION_REQUIRED on FAIL — same as any other QA outcome).
 - Code Review always stays agent-driven regardless of platform — it reviews source, not a
   running app.
+- agent/qa/PENDING_MANUAL_QA.md must be empty — or every remaining entry explicitly waived
+  by the human and recorded in agent/DECISIONS.md — before PRODUCT_ACCEPTANCE or RELEASE
+  may proceed. The queue not blocking BUILD does not mean it's exempt from release
+  readiness.
 - If config/CONSTRAINTS.md doesn't address QA ownership for a platform an agent has no way
   to actually render or interact with, do not silently skip QA and do not silently attempt
   it anyway — ask the human how they want it handled before proceeding.
@@ -361,6 +371,9 @@ supplied artifact passing its review-only sanity check, not by agent-authored wo
 - Technical architecture documentation (DOCUMENTATION)
 - Known limitations documented (DOCUMENTATION)
 - Release readiness review completed (RELEASE)
+- agent/qa/PENDING_MANUAL_QA.md empty, or every remaining entry explicitly waived and
+  recorded in agent/DECISIONS.md (see "Manual QA for platforms without agent-drivable
+  tooling")
 
 Only a human can approve RELEASE_GATE.
 
@@ -453,6 +466,7 @@ BLOCKED
 READY
 IN_PROGRESS
 IMPLEMENTED
+AWAITING_MANUAL_QA
 REVISION_REQUIRED
 VERIFIED
 DEFERRED
@@ -470,6 +484,12 @@ Agent is actively working on it.
 
 IMPLEMENTED
 Artifact/work has been produced but has not passed independent review.
+
+AWAITING_MANUAL_QA
+Implemented and passed all automated checks; independent QA is a pending manual human
+test (per config/CONSTRAINTS.md "QA Ownership") rather than agent-delegated. Does NOT
+block the orchestrator's "continue" loop — proceed to the next eligible independent
+story. Only stories that genuinely depend on this one remain BLOCKED until it clears.
 
 REVISION_REQUIRED
 Independent review found substantive issues.

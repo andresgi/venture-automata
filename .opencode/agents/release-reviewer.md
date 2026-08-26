@@ -31,6 +31,7 @@ Read:
 - agent/DECISIONS.md
 - agent/qa/product-acceptance.md
 - agent/qa/security-review.md
+- agent/qa/PENDING_MANUAL_QA.md (if present)
 - visual QA reports
 - functional QA reports
 - operations/SOP-INDEX.md
@@ -54,6 +55,8 @@ Run or inspect evidence for:
 - All P0 requirements VERIFIED
 - Product Acceptance passes
 - No accidental scope changes
+- agent/qa/PENDING_MANUAL_QA.md is empty, or every remaining entry is explicitly waived
+  and recorded in agent/DECISIONS.md
 
 ### Engineering
 
@@ -124,6 +127,8 @@ E2E:
 Build:
 
 ## P0 Requirement Status
+
+## Manual QA Queue Status
 
 ## QA Status
 

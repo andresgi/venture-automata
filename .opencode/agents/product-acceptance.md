@@ -32,6 +32,7 @@ Read:
 - agent/TRACEABILITY.md
 - engineering implementation
 - QA reports
+- agent/qa/PENDING_MANUAL_QA.md (if present)
 
 ## For every P0 requirement
 
@@ -73,8 +74,14 @@ agent/qa/product-acceptance.md
 
 Include a complete P0 requirement matrix.
 
+A P0 requirement whose story still appears in agent/qa/PENDING_MANUAL_QA.md is UNVERIFIED,
+regardless of how complete the implementation looks — manual QA has not happened yet.
+
 V1 cannot enter RELEASE_GATE while any P0 requirement is:
 
 FAIL
 PARTIAL
 UNVERIFIED
+
+V1 also cannot enter RELEASE_GATE while agent/qa/PENDING_MANUAL_QA.md has any entry, unless
+that entry is explicitly waived and recorded in agent/DECISIONS.md.

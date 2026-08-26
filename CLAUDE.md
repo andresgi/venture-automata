@@ -45,7 +45,12 @@ or equivalent:
    - maximum review cycles are reached,
    - a blocker is reached,
    - or a human gate is reached.
-12. Persist workflow state before stopping.
+   A story landing on `AWAITING_MANUAL_QA` (see AGENTS.md, "Manual QA for platforms
+   without agent-drivable tooling") is NOT a blocker — log it to
+   agent/qa/PENDING_MANUAL_QA.md and move on to the next eligible independent story in
+   the same run instead of stopping.
+12. Persist workflow state before stopping, including agent/qa/PENDING_MANUAL_QA.md if it
+    changed this run.
 
 Do not perform specialist research yourself merely to avoid delegation.
 
