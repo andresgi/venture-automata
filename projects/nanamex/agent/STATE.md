@@ -40,16 +40,18 @@ RELEASE: NOT_STARTED
 
 ## Current Work
 
-E0-01 VERIFIED 2026-09-02 (repo/tooling/CI scaffold; PR #1
-https://github.com/andresgi/venture-automata/pull/1, CI green, not yet merged — awaiting
-human review/merge). Next: delegating E0-02 (Supabase project setup) to Developer.
+E0-01 and E0-02 VERIFIED 2026-09-02 (repo/CI scaffold; Supabase `nanamex-dev` +
+migrations pipeline, `preview`/`prod` deferred — see agent/DECISIONS.md). Both batched into
+PR #1 (https://github.com/andresgi/venture-automata/pull/1), CI green on both jobs, human
+reviewed and merged into `main`. Next: delegating E0-03 (core schema migration) to
+Developer.
 
 ## Next Eligible Action
 
-E0-02: Developer provisions Supabase projects (dev/preview/prod) and migrations pipeline
-per engineering/implementation-plan.md and architecture.md §13. Then E0-03 through E0-06 in
-order (each has downstream dependents in later epics). Code Reviewer review after each
-story per this project's process.
+E0-03: Developer implements the core schema migration (`profiles`, `perfil_familiar`,
+`perfil_ninera`, `zonas`) per engineering/database.md §1–4, including the `zonas` seed
+script. Then E0-04 through E0-06 in order. Code Reviewer review after each story per this
+project's process.
 
 ## Human Blocker
 
