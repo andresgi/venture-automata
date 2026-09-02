@@ -40,15 +40,16 @@ RELEASE: NOT_STARTED
 
 ## Current Work
 
-Delegating Epic 0 (E0-01 through E0-06: repo/CI scaffold, Supabase setup, core schema
-migration, auth wiring, Twilio Verify, Vercel deployment pipeline) to Developer, per
-engineering/implementation-plan.md.
+E0-01 VERIFIED 2026-09-02 (repo/tooling/CI scaffold; PR #1
+https://github.com/andresgi/venture-automata/pull/1, CI green, not yet merged — awaiting
+human review/merge). Next: delegating E0-02 (Supabase project setup) to Developer.
 
 ## Next Eligible Action
 
-E0-01: Developer sets up repository, tooling, and CI scaffold, then proceeds through E0-02
-through E0-06 in order (each has downstream dependents in later epics). Code Reviewer
-review after each story per this project's process.
+E0-02: Developer provisions Supabase projects (dev/preview/prod) and migrations pipeline
+per engineering/implementation-plan.md and architecture.md §13. Then E0-03 through E0-06 in
+order (each has downstream dependents in later epics). Code Reviewer review after each
+story per this project's process.
 
 ## Human Blocker
 

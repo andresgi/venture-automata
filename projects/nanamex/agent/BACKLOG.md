@@ -200,12 +200,14 @@ Blocks all feature epics — must complete first.
 
 #### E0-01 — Repository, tooling, and CI scaffold
 
-Status: READY
+Status: VERIFIED (2026-09-02; Code Reviewer PASS_WITH_MINOR_ISSUES, both items fixed —
+lang="es" correction, CI proven green on PR #1
+https://github.com/andresgi/venture-automata/pull/1; see agent/RUNLOG.md)
 Dependencies: none.
 
 #### E0-02 — Supabase project setup (dev + preview + prod), migrations pipeline
 
-Status: BLOCKED (depends on E0-01)
+Status: READY (E0-01 VERIFIED)
 
 #### E0-03 — Core schema migration: `profiles`, `perfil_familiar`, `perfil_ninera`, `zonas`
 
