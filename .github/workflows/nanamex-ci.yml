@@ -77,3 +77,20 @@ jobs:
         run: |
           supabase start -x realtime,storage-api,imgproxy,mailpit,edge-runtime,logflare,vector,supavisor,studio
           supabase db reset --local
+
+      - name: Verify zonas seed populated (row count > 0)
+        # Per engineering/implementation-plan.md E0-03's own stated Validation criterion:
+        # "a query confirms seed row count > 0" -- must be an automated, repo-enforced
+        # check, not just a manually-run one, so a future regression (e.g. a broken
+        # ON CONFLICT target, a renamed seed file breaking the sql_paths glob, or an
+        # accidentally-disabled [db.seed]) fails the build instead of silently shipping
+        # zero seeded zonas. `supabase db reset` above only fails on a SQL error, which
+        # none of those regressions would necessarily produce.
+        run: |
+          command -v psql >/dev/null || (sudo apt-get update && sudo apt-get install -y --no-install-recommends postgresql-client)
+          count=$(PGPASSWORD=postgres psql -h 127.0.0.1 -p 55322 -U postgres -d postgres -tAc "select count(*) from public.zonas;")
+          echo "zonas row count: ${count}"
+          if [ -z "${count}" ] || [ "${count}" -le 0 ]; then
+            echo "::error::zonas seed produced 0 rows -- check db/seed.sql, its ON CONFLICT target, and [db.seed] in supabase/config.toml"
+            exit 1
+          fi

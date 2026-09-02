@@ -194,6 +194,48 @@ when, likely tied to actually needing a preview/production deploy). E0-06 (Verce
 deployment pipeline) and any story assuming a preview/prod Supabase instance should treat
 this as an open dependency, not build against instances that don't exist yet.
 
+## 2026-09-02 — E0-03: V1 launch city confirmed as Monterrey
+
+During E0-03 (core schema migration), the Developer flagged that no launch city is
+specified anywhere in product/prd.md, config/PROJECT.md, or config/CONSTRAINTS.md, and
+made a judgment call to seed `zonas` with Ciudad de México data. Per AGENTS.md Failure
+Rules ("decision requiring business judgment"), this was escalated to the human rather
+than silently accepted.
+
+**Human decision: V1 launches in Monterrey, not CDMX.** The Developer's CDMX seed data
+must be reworked to cover Monterrey's municipios/colonias instead before E0-03 is marked
+VERIFIED. `config/PROJECT.md` should also be updated to record Monterrey as the launch
+city so this doesn't need re-deriving later.
+
+## 2026-09-02 — E0-03 VERIFIED
+
+Developer implemented `engineering/database.md` §1–4 as SQL migrations (`profiles`,
+`perfil_familiar`, `perfil_ninera` + `ninera_experiencia_edades`/`ninera_zonas`/
+`referencias`, `zonas`, and all 5 enums including `rango_edad`), plus a `zonas` seed script
+for the launch city. Code Reviewer round 1: REVISE — found 5 Important issues (RLS gaps
+letting a niñera self-set `verification_status`/`publicado`, a profile self-set
+`email_verified`/`phone_verified`, admin self-provisioning at insert, an `on delete cascade`
+against `auth.users` conflicting with the "never hard-delete" retention design, and a
+missing automated CI check for the seed row-count acceptance criterion) plus minor issues.
+Developer fixed all required items in a new follow-up migration
+(`20260902000007_security_hardening.sql`, not editing the already-hosted-pushed
+000004/000006 files) plus the CI check and a stale CDMX comment. Code Reviewer round 2:
+**PASS_WITH_MINOR_ISSUES** — independently verified each fix at the code level, no new
+issues, only one trivial doc lag (README migration count) which the orchestrator fixed
+directly. Full history in agent/reviews/code-E0-03-review.md.
+
+Migrations (`20260902000002`–`20260902000007`) pushed to hosted `nanamex-dev`
+(ref `rgqncanghlvlzrzlgkzi`), confirmed applied via `supabase migration list --linked`.
+Hosted `nanamex-dev`'s `zonas` table has the correct schema but the seed has not yet been
+run against it (no remote DB credentials in the Developer's session) — not a blocker for
+E0-03's stated acceptance criteria, open item for whenever hosted dev data is actually
+needed (e.g. E0-04+ manual testing).
+
+**Launch city confirmed as Monterrey** (see the dedicated entry above) — the `zonas` seed
+covers 9 Monterrey-metro municipios (36 rows total), not CDMX.
+
+**E0-03 marked VERIFIED.** E0-04 (Auth wiring) is now unblocked.
+
 ## 2026-09-02 — Standing authorization: git push + PR per BUILD story
 
 For the remainder of BUILD, the orchestrator may commit, push a branch, and open a PR for

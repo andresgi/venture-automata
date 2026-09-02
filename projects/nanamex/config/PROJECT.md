@@ -68,6 +68,9 @@ Del PRD, sección 9 ("Fuera del MVP") — no construir inicialmente:
 
 ## Notes
 
+- Ciudad de lanzamiento V1: **Monterrey** (decisión humana explícita, 2026-09-02, ver
+  agent/DECISIONS.md — el PRD original no especificaba ciudad; se confirmó durante E0-03 al
+  construir el seed de `zonas`).
 - Modelo de negocio V1: niñeras gratis; familias exploran gratis y pagan para desbloquear
   contacto/contratación (ver PRD sección 7 para rangos de precio de referencia — tratar como
   hipótesis de pricing a validar, no como precio final aprobado).

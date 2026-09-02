@@ -64,12 +64,23 @@ deployment pipeline) until this is revisited — there is no `nanamex-preview` o
   Supabase projects run locally on the same machine.
 - **Hosted (`nanamex-dev`):** `supabase link --project-ref rgqncanghlvlzrzlgkzi` once, then
   `supabase db push --linked` applies pending migrations to the real hosted dev project.
-  Verified manually for E0-02: `db/migrations/20260902000001_bootstrap_extensions.sql`
-  applied cleanly (`supabase migration list --linked` confirms it as applied remotely).
+  Verified manually for E0-02 (`20260902000001_bootstrap_extensions.sql`) and again for
+  E0-03 (`20260902000002`–`20260902000007`, core schema + security hardening) — `supabase
+  migration list --linked` confirms all seven migrations as applied remotely. Note:
+  `supabase db push` only pushes migrations, not seed data — `db/seed.sql` has been
+  verified locally/in CI (below) but not run against the hosted `nanamex-dev` project's
+  data.
 - **CI:** the `migrations` job in `.github/workflows/nanamex-ci.yml` runs
   `supabase start` + `supabase db reset --local` against a fresh, ephemeral local stack on
-  every PR — no hosted secrets needed in CI, and it's a genuine "clean instance" test each
-  run.
+  every PR, then queries `zonas` to assert the seed produced a non-zero row count — no
+  hosted secrets needed in CI, and it's a genuine "clean instance" test each run.
+- **Seed data (E0-03):** `db/seed.sql` (symlinked as `supabase/seed.sql`, same convention as
+  migrations) seeds the `zonas` reference table — Monterrey's launch-city municipios (per
+  `agent/DECISIONS.md` 2026-09-02) plus a representative subset of well-known colonias, each
+  with an approximate real-world centroid. Runs automatically as the last step of
+  `supabase db reset` (`[db.seed]` enabled in `supabase/config.toml`); idempotent via
+  `ON CONFLICT DO NOTHING` against `zonas`' unique `(ciudad, alcaldia_municipio, colonia)`
+  index, so re-running it is always safe.
 
 ## Repository layout
 

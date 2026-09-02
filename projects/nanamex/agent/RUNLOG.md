@@ -59,3 +59,36 @@ perfil_ninera, zonas). Commit + push E0-02 changes to a new branch/PR (same patt
 E0-01) so CI proves the new `migrations` job actually passes in GitHub Actions.
 
 ---
+
+## 2026-09-02 — Developer + Code Reviewer
+
+Objective: E0-03 — Core schema migration (profiles, perfil_familiar, perfil_ninera, zonas)
+(Epic 0).
+Result: Developer implemented database.md §1-4 as SQL migrations (5 enums including
+rango_edad; profiles with role-immutability trigger; perfil_familiar; perfil_ninera +
+ninera_experiencia_edades/ninera_zonas/referencias; zonas), all with RLS enabled. Built a
+zonas seed script, initially for CDMX (flagged as an unresolved launch-city ambiguity per
+AGENTS.md Failure Rules, since no launch city is specified anywhere in product/prd.md,
+config/PROJECT.md, or config/CONSTRAINTS.md). Orchestrator escalated to the human, who
+decided V1 launches in Monterrey; config/PROJECT.md updated, Developer reworked the seed
+to cover 9 Monterrey-metro municipios (36 rows). Code Reviewer round 1: REVISE — RLS
+gaps letting a niñera self-set verification_status/publicado, a profile self-set
+email_verified/phone_verified, admin self-provisioning at insert, an on delete cascade
+against auth.users conflicting with the "never hard-delete" retention design, and a
+missing automated CI check for the seed row-count acceptance criterion. Developer fixed
+all required items via a new follow-up migration
+(20260902000007_security_hardening.sql, since 000004/000006 were already pushed to hosted
+nanamex-dev) plus the CI check and a stale CDMX comment, re-validated locally and against
+hosted nanamex-dev. Code Reviewer round 2: PASS_WITH_MINOR_ISSUES — independently
+verified each fix at the code level; one trivial README doc-lag fixed directly by the
+orchestrator. E0-03 marked VERIFIED.
+Artifacts changed: db/migrations/20260902000002_core_enums.sql through
+20260902000007_security_hardening.sql, db/seed.sql (new), supabase/seed.sql (new symlink),
+supabase/config.toml, .github/workflows/nanamex-ci.yml (seed row-count check), README.md,
+config/PROJECT.md (launch city), agent/reviews/code-E0-03-review.md.
+Next recommended action: E0-04 — Auth wiring (Supabase Auth + role-based middleware).
+Commit + push E0-03 changes to a new branch/PR (same pattern as E0-01/E0-02) so CI proves
+the new migrations job (including the seed row-count check) actually passes in GitHub
+Actions.
+
+---
