@@ -216,6 +216,14 @@ tooling grows materially past what a small internal team needs from two queues.
 
 ## 13. Deployment Strategy
 
+> **Build status (E0-02, 2026-09-02):** only the `nanamex-dev` Supabase project has been
+> provisioned so far. `preview` and `production` projects are deferred pending a human
+> decision on billing (the org already holds other paid projects; adding two more hosted
+> projects has cost implications that couldn't be confirmed programmatically — see
+> `agent/DECISIONS.md`). The design below is unchanged; this note only reflects current
+> provisioning state so later stories (e.g. E0-06 Vercel deployment pipeline) don't assume
+> `preview`/`production` already exist. See `README.md` "Supabase environments" for details.
+
 - Single environment split: `production` and `preview` (Vercel's per-PR preview
   deployments, pointed at a separate Supabase project used as a staging DB — never share a
   DB between preview and production, especially given ID-document sensitivity).

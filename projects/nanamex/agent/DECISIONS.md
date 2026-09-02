@@ -174,3 +174,33 @@ Human explicitly approved: "I approve technical architecture." Basis: engineerin
 architecture.md, database.md, security.md, analytics.md, implementation-plan.md (TA-001),
 independently verified by the orchestrator 2026-09-01 (PASS_WITH_MINOR_ISSUES, both gaps
 fixed). TECH_ARCHITECTURE phase marked VERIFIED. BUILD may now begin.
+
+## 2026-09-02 — E0-02: Supabase preview/prod project creation deferred (dev only for now)
+
+During E0-02 (Supabase project setup), the Developer created `nanamex-dev` (ref
+`rgqncanghlvlzrzlgkzi`, São Paulo/`sa-east-1`) but stopped before creating
+`nanamex-preview`/`nanamex-prod`. Reason: the Supabase org already holds two unrelated
+pre-existing projects (`clin-be`, `diamora` — confirmed unrelated to this venture, not to be
+touched); creating `nanamex-dev` as a 3rd project succeeded with no free-tier warning,
+suggesting the org may be on a paid plan where each additional project carries incremental
+cost (~$10/mo order of magnitude), which the Developer could not confirm via the CLI. Per
+AGENTS.md Failure Rules ("decision requiring business judgment"), this was escalated to the
+human rather than guessed.
+
+**Human decision: skip preview/prod project creation for now — dev only.** E0-02's
+migrations pipeline should be built/validated against `nanamex-dev` only.
+`nanamex-preview`/`nanamex-prod` creation is deferred to a later point (human will decide
+when, likely tied to actually needing a preview/production deploy). E0-06 (Vercel
+deployment pipeline) and any story assuming a preview/prod Supabase instance should treat
+this as an open dependency, not build against instances that don't exist yet.
+
+## 2026-09-02 — Standing authorization: git push + PR per BUILD story
+
+For the remainder of BUILD, the orchestrator may commit, push a branch, and open a PR for
+each VERIFIED story without asking each time (so CI proves green — same pattern used for
+E0-01/PR #1), batching related stories into one PR when it makes sense (e.g. all of
+Epic 0 in one PR). **Merging any PR still always requires separate explicit human
+approval** — this authorization covers push/PR-open only, not merge. Human confirmed this
+standing policy explicitly (chose "Auto push+PR per story" over asking each time or
+manual handling) rather than being asked before every individual push, to avoid
+interrupting for ~50 more implementation-plan.md stories.

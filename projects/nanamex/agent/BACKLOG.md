@@ -207,11 +207,15 @@ Dependencies: none.
 
 #### E0-02 — Supabase project setup (dev + preview + prod), migrations pipeline
 
-Status: READY (E0-01 VERIFIED)
+Status: VERIFIED (2026-09-02; scope adjusted to `nanamex-dev` only — `preview`/`prod`
+creation deferred, human decision, see agent/DECISIONS.md; Code Reviewer
+PASS_WITH_MINOR_ISSUES, sole required fix was removing the reviewer's own stray test
+artifact, done; migration pipeline empirically verified locally and against the real
+hosted nanamex-dev instance; see agent/RUNLOG.md)
 
 #### E0-03 — Core schema migration: `profiles`, `perfil_familiar`, `perfil_ninera`, `zonas`
 
-Status: BLOCKED (depends on E0-02)
+Status: READY (E0-02 VERIFIED)
 
 #### E0-04 — Auth wiring: Supabase Auth + role-based middleware
 
