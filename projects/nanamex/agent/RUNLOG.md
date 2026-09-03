@@ -185,3 +185,40 @@ Next recommended action: E1-01 -- AUTH-01 Landing + role selection, first story 
 (Familia Onboarding).
 
 ---
+
+## 2026-09-03 — Developer + Code Reviewer + Visual QA
+
+Objective: E1-01 -- AUTH-01 Landing + role selection, first story of Epic 1 (Familia
+Onboarding).
+Result: Developer wired real UI-SYSTEM design tokens into the app for the first time
+(Inter/Fraunces via next/font/google, color/spacing/radius/type-scale tokens in
+globals.css, Phosphor Icons), built the AUTH-01 landing page (hero photo, role-selection
+buttons, trust summary, footer), and wired role pre-fill into the existing AUTH-02
+registration flow (query-param mechanism already existed from E0-04, needed no changes).
+Sourced a CC BY 2.0 Wikimedia Commons photo for the hero, manually verified no
+child/implied child in frame. Code Reviewer: PASS_WITH_MINOR_ISSUES -- verified all
+design-token values transcribed correctly, role pre-fill works end-to-end, CC BY
+attribution correctly rendered; flagged that the hero photo doesn't literally depict a
+caregiving moment (Important, non-blocking pending human sign-off). Visual QA round 1:
+REVISE -- desktop hero photo used a fixed 50% width instead of filling remaining space
+next to the 480px copy column, leaving a growing blank gap (240px at 1440px, 480px at
+1920px). Orchestrator escalated the photo-content gap to the human (both reviewers
+independently flagged it); human asked for a better-matching photo to be sourced now.
+Developer fixed the layout bug (flex-fill photo column) and re-verified via
+getBoundingClientRect() measurements (0px gap at all checked widths); ran an exhaustive
+second photo search (Wikimedia Commons full-text + category search, catalog scan,
+Openverse, attempted Unsplash/Pexels) and found no suitable free/CC alternative reachable
+from this environment -- root-caused as a structural gap in free stock catalogs (genuine
+caregiver photos almost always include the child). Escalated back to the human, who
+accepted the current placeholder for now, tracked as a pre-RELEASE_GATE item. Visual QA
+round 2: PASS, layout fix confirmed, no regressions. E1-01 marked VERIFIED.
+Artifacts changed: app/globals.css, app/layout.tsx, app/page.tsx,
+components/marketing/role-select-buttons.tsx, components/marketing/trust-summary.tsx,
+app/legal/terminos/page.tsx, app/legal/privacidad/page.tsx,
+public/images/auth-01-hero.jpg, public/images/README-auth-01-hero.md,
+tests/app/page.test.tsx, tests/setup.ts, package.json/package-lock.json,
+agent/reviews/code-E1-01-review.md, agent/qa/e1-01-visual-qa.md.
+Next recommended action: E1-02 -- AUTH-02/03 registration + verification (familia),
+finalizing the teleofono-only soft-gate flow per journeys.md J-FAM-1.
+
+---

@@ -258,6 +258,32 @@ real merge to `main` shows deployment status "Ignored" is deferred to that first
 
 **This completes Epic 0 (Foundations).**
 
+## Epic 1 — Familia Onboarding
+
+Stories mirror engineering/implementation-plan.md's Epic 1. Full objective/acceptance
+criteria/validation text lives there — this section tracks status only, plus review notes.
+
+#### E1-01 — AUTH-01 Landing + role selection
+
+Status: VERIFIED (2026-09-03; wired real UI-SYSTEM design tokens into the app for the
+first time (Inter/Fraunces, color/spacing/radius/type-scale tokens); Code Reviewer
+PASS_WITH_MINOR_ISSUES; Visual QA REVISE round 1 — desktop hero photo left a growing blank
+gap instead of filling remaining width, fixed and re-verified via `getBoundingClientRect()`
+measurements (0px gap at 1024–1920px), round 2 PASS; role pre-fill into AUTH-02 verified
+end-to-end; no-child-imagery safety check passed both rounds; see agent/DECISIONS.md,
+agent/reviews/code-E1-01-review.md, agent/qa/e1-01-visual-qa.md).
+
+**Pre-RELEASE_GATE backlog item:** the hero photo (CC BY 2.0 Wikimedia Commons, adult woman
+alone in a kitchen) passes the hard no-child-imagery rule but does not literally depict a
+caregiver/family moment as AUTH-01's spec calls for. Developer ran an exhaustive search for
+a better-matching freely-licensed alternative and found none reachable from this
+environment (Unsplash/Pexels blocked without an API key; Openverse unusable; Wikimedia
+Commons has no suitable adults-only caregiving-moment photo). Human accepted the current
+photo as a placeholder. **Before RELEASE_GATE:** replace with either a paid stock license,
+an Unsplash/Pexels API key (to let the Developer search those catalogs), or a
+human-supplied image — and update the alt text (`app/page.tsx`) to match whatever photo is
+finally used.
+
 ## Change Requests
 
 Ad-hoc, non-PRD asks made directly in chat (see AGENTS.md, "Change Requests"). Use `CR-NNN`

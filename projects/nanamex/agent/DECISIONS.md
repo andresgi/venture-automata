@@ -409,6 +409,38 @@ a live production deployment. This closes out the standing verification item fro
 E0-06 review — the manual-promotion safeguard is now confirmed working on a real
 Git-triggered production build, not just documented behavior.
 
+## 2026-09-03 — E1-01: hero photo must depict an actual caregiving/family moment, not a generic lifestyle placeholder
+
+Developer sourced a CC BY 2.0 Wikimedia Commons photo (adult woman alone in a kitchen) for
+AUTH-01's hero, manually verified no child/implied child in frame (satisfying UI-SYSTEM
+§0.10's hard safety rule), and explicitly flagged it as a placeholder since it doesn't
+literally depict a "caregiver/family moment" as UI-SPEC AUTH-01 requires — it's a generic
+warm lifestyle photo. Both Code Reviewer and Visual QA independently caught and flagged
+this same gap. Escalated to the human rather than accepting or rejecting unilaterally.
+
+**Human decision: have the Developer search for a better-matching, freely-licensed photo
+now** (showing a plausible niñera/parent caregiving moment, adults only, home setting) —
+not deferred to a pre-RELEASE_GATE item. The same no-child-imagery verification rigor
+applies to whatever replacement is found.
+
+**Follow-up, same day:** Developer ran an exhaustive second search (Wikimedia Commons
+full-text search across ~15 query variations, category browsing of
+Nannies/Babysitting/Babysitters/Au_pairs/Childminders, a full catalog scan of the current
+photo's uploader's 3,375 files, Openverse API — timed out/unusable from this sandbox — and
+attempted Unsplash/Pexels, both blocked without an API key in this sandbox) and found no
+suitable adults-only caregiving-moment photo in any reachable free/CC catalog. Root cause
+identified, not just bad luck: genuine "caregiver moment" stock photography overwhelmingly
+depicts the child being cared for, which is exactly what UI-SYSTEM §0.10 disallows — an
+adults-only version of that scene is a narrow, uncommon staged shot that doesn't appear to
+exist in the catalogs this sandbox can reach. Full search log in
+`public/images/README-auth-01-hero.md`. Escalated back to the human rather than settling
+for a worse substitute.
+
+**Final human decision: accept the current placeholder (adult woman alone in a kitchen,
+CC BY 2.0, verified no-child-imagery) for now.** Tracked as a pre-RELEASE_GATE item to
+revisit with either a paid stock license, an Unsplash/Pexels API key, or a human-supplied
+image, whichever is most practical when the venture is closer to real launch.
+
 ## 2026-09-02 — Standing authorization: git push + PR per BUILD story
 
 For the remainder of BUILD, the orchestrator may commit, push a branch, and open a PR for

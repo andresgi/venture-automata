@@ -40,59 +40,32 @@ RELEASE: NOT_STARTED
 
 ## Current Work
 
-E0-01 and E0-02 VERIFIED 2026-09-02 (repo/CI scaffold; Supabase `nanamex-dev` +
-migrations pipeline, `preview`/`prod` deferred — see agent/DECISIONS.md). Both batched into
-PR #1 (https://github.com/andresgi/venture-automata/pull/1), CI green on both jobs, human
-reviewed and merged into `main`.
+**Epic 0 (Foundations) is fully complete** — E0-01 through E0-06 all VERIFIED and merged
+into `main` via PRs #1-#5 (human-approved merges throughout). Notable open items carried
+forward: no dedicated `nanamex-prod` Supabase project yet (Production Vercel env reuses
+`nanamex-dev` credentials); no real Twilio credentials yet (manual smoke test deferred).
+Both flagged as pre-RELEASE_GATE items. Full history in agent/DECISIONS.md.
 
-E0-03 VERIFIED 2026-09-02 (core schema migration: `profiles`, `perfil_familiar`,
-`perfil_ninera` + sub-tables, `zonas` + Monterrey seed data; two Code Reviewer cycles, all
-required RLS/FK/CI fixes applied via a follow-up migration; see agent/DECISIONS.md). PR #2
-merged into `main` 2026-09-02 (human-approved merge).
+**Epic 1 (Familia Onboarding), in progress:**
 
-E0-04 VERIFIED 2026-09-02 (Supabase Auth registration/login, native email-confirmation
-gate, role-based proxy/middleware for `/familia/*`/`/ninera/*`/`/admin/*`; two Code
-Reviewer cycles; surfaced and resolved a real architecture/UX conflict — correo is now a
-hard login gate, teléfono remains the soft gate, human decision — see agent/DECISIONS.md).
-PR #3 merged into `main` 2026-09-02 (human-approved merge, retargeted from the E0-03
-branch to `main` after PR #2 merged). Feature branches for both deleted post-merge; local
-`main` fast-forwarded and in sync with `origin/main`.
+E1-01 VERIFIED 2026-09-03 (AUTH-01 landing + role selection; first story to wire real
+UI-SYSTEM design tokens — Inter/Fraunces typefaces, color/spacing/radius/type-scale — into
+the app; Code Reviewer PASS_WITH_MINOR_ISSUES; Visual QA REVISE round 1 — desktop hero
+photo layout bug, fixed and re-verified via precise geometry measurements, round 2 PASS;
+role pre-fill into AUTH-02 verified end-to-end; no-child-imagery safety check passed both
+rounds — see agent/DECISIONS.md, agent/BACKLOG.md). Hero photo is an accepted placeholder
+(passes safety check, doesn't literally depict a caregiving moment) — tracked as a
+pre-RELEASE_GATE backlog item, see agent/BACKLOG.md's E1-01 entry. PR pending.
 
-E0-05 VERIFIED 2026-09-02 (Twilio Verify phone OTP send/confirm, wired to AUTH-03's
-teléfono checklist row on `/verificar`; app-layer resend cooldown; Code Reviewer
-PASS_WITH_MINOR_ISSUES, no required changes; see agent/DECISIONS.md). No real Twilio
-credentials yet — all testing mocked per the story's own validation note; manual smoke
-test against Twilio's test credentials deferred to a pre-RELEASE_GATE checklist item.
-PR #4 merged into `main` 2026-09-02 (human-approved merge).
-
-E0-06 VERIFIED 2026-09-03 (Vercel deployment pipeline: repo connected, Root Directory
-scoped to `projects/nanamex`, env vars set per-environment, Ignored Build Step configured
-and independently verified correct against Vercel's documented convention; `nanamex-preview`
-Supabase project created as a prerequisite; two Code Reviewer cycles — round 1 caught an
-undisclosed production-target deployment attempt in Vercel's history, root-caused as the
-Developer's own CLI setup activity, no content ever served, confirmed it can't recur on
-real Git-triggered builds; round 2 PASS — see agent/DECISIONS.md). PR #5 merged into
-`main` 2026-09-03 (human-approved merge). **The resulting merge-to-main deployment was
-checked live via the Vercel API: `readyState: CANCELED`, `source: git`, `target:
-production`, 0ms build — confirming the Ignored Build Step correctly skipped the
-production build on a real Git-triggered merge, not just documented behavior.** This
-closes out the standing verification item — see agent/DECISIONS.md.
-
-**Epic 0 (Foundations) is now fully complete and its last open verification item is
-closed.** Remaining known gap: no dedicated `nanamex-prod` Supabase project yet (Production
-Vercel env reuses `nanamex-dev` credentials) — flagged as a pre-RELEASE_GATE item.
-
-All feature branches merged and deleted; local `main` fast-forwarded and in sync with
-`origin/main`. Next: delegating E1-01 (AUTH-01 Landing + role selection) to Developer —
-the first story of Epic 1 (Familia Onboarding).
+Next: delegating E1-02 (AUTH-02/03 registration + verification for familia) to Developer.
 
 ## Next Eligible Action
 
-E1-01: Developer implements the AUTH-01 landing page + role selection per
-design/UI-SPEC.md, routing into AUTH-02 (registration) with the role pre-filled. Depends
-on E0-04 (VERIFIED). Per implementation-plan.md, this story requires Visual QA against
-UI-SPEC.md AUTH-01 (confirm no child imagery present) — check config/CONSTRAINTS.md's QA
-Ownership section for whether this is agent-drivable or manual before delegating.
+E1-02: Developer finalizes the soft-gate flow per journeys.md J-FAM-1 (post E0-04's
+correo-hard-gate/teléfono-soft-gate redefinition — see agent/DECISIONS.md) — a family may
+proceed to FAM-01/necesidad creation before completing teléfono verification; both correo
+(already gated at login) and teléfono are required before `Contactar` succeeds (enforced
+server-side, not just UI-hidden). Depends on E0-04, E0-05 (both VERIFIED).
 
 ## Human Blocker
 
