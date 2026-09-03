@@ -337,6 +337,21 @@ Validation: `npm test -- --run` (21 files, 142 tests), `npm run test:db`, `npm r
 `npm run typecheck`, `npm run check:secrets`, and `npm run build` all pass. Build emits only
 the existing Supabase Node 20 deprecation warning.
 
+### E3-01 — Hard filter + weighted scoring implementation
+
+Status: VERIFIED (2026-09-03; Code Review final PASS_WITH_MINOR_ISSUES; full 32 weighted-
+factor pass/fail combinations covered)
+
+Dependencies: E0-03, E2-01.
+
+Delivered: pure typed matching scorer with the single modalidad hard filter, five named
+weights from architecture §15, 60% compatibility threshold, availability coverage across
+all requested days, and comprehensive edge-case tests. Verification status is not an input
+to the scoring path. E3-02 ranking/computeMatches remains separate.
+
+Validation: `npm test` (185 tests), `npm run lint`, `npm run typecheck`,
+`npm run check:secrets`, and `npm run build` all pass.
+
 ## Change Requests
 
 Ad-hoc, non-PRD asks made directly in chat (see AGENTS.md, "Change Requests"). Use `CR-NNN`

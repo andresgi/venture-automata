@@ -47,6 +47,22 @@ Next recommended action: E2-02 — FAM-03 review + publish with initial match co
 
 ---
 
+## 2026-09-03 — Developer + Code Reviewer
+
+Objective: E3-01 — hard filter + weighted scoring implementation.
+Result: Added a pure typed matching scorer implementing architecture §15 exactly: modalidad
+as the sole hard filter; location 25, availability 25, salary overlap 20, child-age overlap
+15, and experience 15; threshold 60; verification status excluded from the path. Code Review
+initially requested complete pass/fail coverage; added all 32 combinations and received final
+PASS_WITH_MINOR_ISSUES. Full validation passed: 185 tests, lint, typecheck, secret scan,
+production build, and existing DB tests. E3-01 marked VERIFIED. E3-02 ranking/computeMatches
+is next.
+Artifacts changed: lib/matching/match-score.ts, tests/lib/matching/match-score.test.ts,
+agent/reviews/code-E3-01-review.md, agent/BACKLOG.md, agent/STATE.md, agent/RUNLOG.md.
+Next recommended action: E3-02 — ranking + computeMatches service.
+
+---
+
 ## 2026-09-02 — Developer + Code Reviewer
 
 Objective: E0-01 — Repository, tooling, and CI scaffold (Epic 0, first BUILD story, after
