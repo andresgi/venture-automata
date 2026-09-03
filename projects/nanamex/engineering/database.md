@@ -24,11 +24,13 @@ contact-verification state, and role-specific denormalized display fields.
 | `email_verified` | boolean | Mirrors Supabase Auth's confirmation state (denormalized for cheap reads). |
 | `phone` | text | E.164 format. |
 | `phone_verified` | boolean | Set true on successful Twilio Verify check. |
+| `phone_otp_last_sent_at` | timestamptz, nullable | Added E0-05. Backs the app-layer OTP resend cooldown (`security.md`'s OTP-brute-force row) in addition to Twilio Verify's own native rate limiting. Not itself a trust signal. |
 | `created_at` | timestamptz | |
 
 **Relationships:** 1:1 `perfil_familiar` or `perfil_ninera` (based on `role`).
 **Ownership:** self (user), except `role` (admin-provisioned for admin accounts) and
-`email_verified`/`phone_verified` (system-set, never user-editable directly).
+`email_verified`/`phone_verified`/`phone_otp_last_sent_at` (system-set, never user-editable
+directly).
 **Lifecycle:** created at registration; soft-deletable (see §12 Reports — `suspender`/
 `eliminar cuenta` sets `status` rather than hard-deleting, to preserve report/pipeline
 history integrity) — see `account_status` below.
