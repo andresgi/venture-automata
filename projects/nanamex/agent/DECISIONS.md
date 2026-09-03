@@ -477,3 +477,33 @@ approval** — this authorization covers push/PR-open only, not merge. Human con
 standing policy explicitly (chose "Auto push+PR per story" over asking each time or
 manual handling) rather than being asked before every individual push, to avoid
 interrupting for ~50 more implementation-plan.md stories.
+
+## 2026-09-03 — Standing authorization: unattended overnight run, including auto-merge
+
+Human requested an unattended overnight run so the "continue" loop (agent/STATE.md ->
+BACKLOG.md -> next eligible action) doesn't stop after each story to ask for a merge or for
+"continue" to be typed again. Extending the 2026-09-02 push+PR authorization above:
+
+1. **Auto-merge authorized for this overnight run.** Once a BUILD story reaches VERIFIED
+   (all automated checks green — lint/typecheck/tests/build — AND independent Code Review
+   plus any required QA has passed per the normal loop in AGENTS.md step 9-11, not merely
+   IMPLEMENTED), the orchestrator may merge its PR into `main` without pausing for
+   per-PR human approval, then continue immediately to the next eligible backlog item.
+   Use a real merge commit (no squash), so any bad merge can be cleanly reverted with
+   `git revert -m 1 <merge-commit>` without disturbing other stories' history.
+2. **Scope of this authorization is BUILD-story PRs only.** It does NOT cover the three
+   human gates in AGENTS.md (PRODUCT_GATE, ARCHITECTURE_GATE, RELEASE_GATE) — those still
+   require explicit recorded human approval before crossing, exactly as before. It also
+   does not authorize any production deployment, destructive data operation, or force-push;
+   those remain subject to the normal confirm-first rules.
+2b. **Stop conditions unchanged from AGENTS.md**: a genuinely BLOCKED backlog item, 3 failed
+   review cycles on the same task (Failure Rules), or a human gate. The human explicitly
+   chose not to add extra pause conditions beyond these for tonight's run.
+3. **Review discipline is not relaxed.** Code Review (and Functional/Visual QA where
+   applicable) must still actually pass before a story is considered mergeable — this
+   authorization removes the human merge click, not the independent-review gate.
+4. **Audit trail for morning review**: every merged story has its own PR/commit, and this
+   file (agent/DECISIONS.md) plus agent/RUNLOG.md record what happened each cycle, so any
+   issue found in the morning can be traced to a specific story and reverted independently.
+5. **Scoped to this run only** — this is not a permanent change to the standing
+   push+PR-only policy above; re-confirm before relying on it for a future overnight run.
