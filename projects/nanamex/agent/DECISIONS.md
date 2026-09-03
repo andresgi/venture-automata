@@ -507,3 +507,20 @@ BACKLOG.md -> next eligible action) doesn't stop after each story to ask for a m
    issue found in the morning can be traced to a specific story and reverted independently.
 5. **Scoped to this run only** — this is not a permanent change to the standing
    push+PR-only policy above; re-confirm before relying on it for a future overnight run.
+
+## 2026-09-03 — E1-03 FAM-01 onboarding verified
+
+E1-03 delivered the required family onboarding fields: `nombre` confirms/updates the
+existing `profiles.nombre` value collected at registration, while `zona` is selected from
+the seeded `zonas` reference table and revalidated server-side. This interpretation is
+accepted because the three UX/UI artifacts consistently name both fields, while the
+database model stores the name on `profiles` and the zone on `perfil_familiar`; no duplicate
+name column was introduced.
+
+Code Review verdict: PASS_WITH_MINOR_ISSUES, with no required changes. Visual QA initially
+returned REVISE because the implementation used placeholder zinc styling, compressed
+spacing, plain error/loading states, and lacked keyboard autocomplete behavior. The
+orchestrator fixed those findings; follow-up Visual QA returned PASS_WITH_MINOR_ISSUES.
+Browser rendering was unavailable, so the follow-up was source-level across 375/430/768/
+1440px plus focused tests. The interim `/familia` redirect must move to FAM-03 when E2-01
+lands. E1-03 is marked VERIFIED.

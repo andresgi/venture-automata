@@ -246,3 +246,25 @@ Next recommended action: E1-03 -- FAM-01 onboarding perfil familiar (nombre + zo
 replacing the /familia placeholder).
 
 ---
+
+## 2026-09-03 — Orchestrator + Code Reviewer + Visual QA
+
+Objective: E1-03 — FAM-01 onboarding perfil familiar (nombre + zona autocomplete), Epic 1.
+Result: Implemented and reviewed the family profile form, server-side role/zona validation,
+real-id autocomplete selection with pin confirmation, and the `/familia` completion gate.
+Code Review verdict PASS_WITH_MINOR_ISSUES with no required changes. Initial Visual QA
+terminated before producing a verdict due to a session-limit API error; a fresh source-level
+review returned REVISE for placeholder styling, spacing, error/loading treatment, and
+keyboard/touch autocomplete gaps. Those were fixed. Follow-up Visual QA returned
+PASS_WITH_MINOR_ISSUES after checking 375/430/768/1440px and focused tests; browser
+rendering was unavailable. Full validation passed: 119 tests, lint, typecheck, secret scan,
+and production build. E1-03 marked VERIFIED. Interim success redirect to `/familia` is
+intentionally retained until FAM-03 exists and is tracked for E2-01.
+Artifacts changed: app/familia/page.tsx, app/familia/perfil/page.tsx, actions/perfil-familiar.ts,
+components/familia/{perfil-familiar-form,zona-autocomplete}.tsx, lib/familia/validation.ts,
+lib/zonas/queries.ts, tests/{actions/perfil-familiar,app/familia-perfil,app/familia}.test.tsx,
+tests/components/familia/zona-autocomplete.test.tsx, tests/lib/familia/validation.test.ts,
+agent/reviews/code-E1-03-review.md, agent/qa/e1-03-visual-qa.md, and agent state logs.
+Next recommended action: E2-01 — FAM-03 wizard, steps 1–7 plus draft autosave.
+
+---
