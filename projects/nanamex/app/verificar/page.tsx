@@ -63,6 +63,28 @@ export default async function VerificarPage() {
           </p>
           <PhoneVerificationForm />
         </section>
+
+        {/*
+         * AUTH-03's real "Continuar" primary action (design/UI-SPEC.md AUTH-03: "enabled
+         * even with one row pending (soft gate per UX Decision)"). Distinct from the OTP
+         * checklist row's own "Verificar" submit button above -- this one always proceeds
+         * to the role's home regardless of teléfono state, since teléfono is a soft gate
+         * (design/journeys.md J-FAM-1, design/UX-spec.md AUTH-03 gating note). A plain link
+         * is sufficient here (no mutation, just navigation), so this stays a Server
+         * Component with no client-side form/state needed.
+         */}
+        <div className="flex flex-col gap-2 border-t border-zinc-200 pt-6">
+          <a
+            href={role ? ROLE_HOME_PATH[role] : "/"}
+            className="flex h-11 items-center justify-center bg-zinc-900 text-sm font-medium text-white"
+          >
+            Continuar
+          </a>
+          <p className="text-center text-sm text-zinc-500">
+            Podrás usar Clin ahora; necesitarás verificar ambos antes de contactar a una
+            candidata.
+          </p>
+        </div>
       </div>
     </main>
   );

@@ -284,6 +284,25 @@ an Unsplash/Pexels API key (to let the Developer search those catalogs), or a
 human-supplied image — and update the alt text (`app/page.tsx`) to match whatever photo is
 finally used.
 
+#### E1-02 — AUTH-02/03 registration + verification (familia)
+
+Status: VERIFIED (2026-09-03; scope narrowed at delegation time since the story's literal
+acceptance criteria reference FAM-01 (E1-03, depends on this story) and server-side
+`Contactar`/entitlement enforcement (E5-01, several epics away) — neither exists yet.
+Delivered scope: confirmed/fixed the correo-hard-gate + teléfono-soft-gate flow end-to-end;
+found and fixed a real gap — `/verificar` had no spec-required "Continuar" soft-gate action
+(AUTH-03), only an OTP-submit button mislabeled the same way, conflating "submit code" with
+"proceed regardless of teléfono status." Code Reviewer PASS, no required changes —
+independently verified route gating is genuinely role-only (never conditioned on
+`phone_verified`), the new "Continuar" link is unconditional, and the scope reduction was
+legitimate (confirmed FAM-01/Contactar genuinely don't exist in the codebase yet); see
+agent/reviews/code-E1-02-review.md).
+
+**Deferred, not silently skipped:** FAM-01 (E1-03's scope), server-side Contactar/
+entitlement enforcement (E5-01's scope), and a "cuenta no verificada" banner UI treatment
+(unbuilt anywhere yet — flagged as an open item for whichever of FAM-13/FAM-01 builds
+first, not assigned an ID here).
+
 ## Change Requests
 
 Ad-hoc, non-PRD asks made directly in chat (see AGENTS.md, "Change Requests"). Use `CR-NNN`

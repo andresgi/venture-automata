@@ -55,17 +55,25 @@ photo layout bug, fixed and re-verified via precise geometry measurements, round
 role pre-fill into AUTH-02 verified end-to-end; no-child-imagery safety check passed both
 rounds — see agent/DECISIONS.md, agent/BACKLOG.md). Hero photo is an accepted placeholder
 (passes safety check, doesn't literally depict a caregiving moment) — tracked as a
-pre-RELEASE_GATE backlog item, see agent/BACKLOG.md's E1-01 entry. PR pending.
+pre-RELEASE_GATE backlog item, see agent/BACKLOG.md's E1-01 entry. PR #6 merged into
+`main` 2026-09-03 (human-approved merge).
 
-Next: delegating E1-02 (AUTH-02/03 registration + verification for familia) to Developer.
+E1-02 VERIFIED 2026-09-03 (AUTH-02/03 registration + verification for familia; scope
+narrowed at delegation time since the story's literal acceptance criteria reference FAM-01
+and Contactar/entitlement enforcement, neither of which exists yet — deferred explicitly to
+E1-03/E5-01 rather than stubbed out; found and fixed a real gap — `/verificar` lacked the
+spec-required "Continuar" soft-gate action, only a mislabeled OTP-submit button; Code
+Reviewer PASS, no required changes, independently verified route gating is genuinely
+role-only — see agent/DECISIONS.md). PR pending.
+
+Next: delegating E1-03 (FAM-01 onboarding perfil familiar) to Developer.
 
 ## Next Eligible Action
 
-E1-02: Developer finalizes the soft-gate flow per journeys.md J-FAM-1 (post E0-04's
-correo-hard-gate/teléfono-soft-gate redefinition — see agent/DECISIONS.md) — a family may
-proceed to FAM-01/necesidad creation before completing teléfono verification; both correo
-(already gated at login) and teléfono are required before `Contactar` succeeds (enforced
-server-side, not just UI-hidden). Depends on E0-04, E0-05 (both VERIFIED).
+E1-03: Developer implements FAM-01 (onboarding perfil familiar) — nombre + zona
+(autocomplete against `zonas`) required to proceed. Depends on E1-02 (VERIFIED), E0-03
+(`zonas` seeded, VERIFIED). This will replace the `/familia` placeholder page that E0-04/
+E1-02 have been targeting.
 
 ## Human Blocker
 
