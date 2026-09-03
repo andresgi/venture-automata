@@ -524,3 +524,58 @@ orchestrator fixed those findings; follow-up Visual QA returned PASS_WITH_MINOR_
 Browser rendering was unavailable, so the follow-up was source-level across 375/430/768/
 1440px plus focused tests. The interim `/familia` redirect must move to FAM-03 when E2-01
 lands. E1-03 is marked VERIFIED.
+
+## 2026-09-03 — E2-02 continuity: picked up mid-flight from a separate tool session
+
+This run continued in a different tool session than the one that completed E1-03 through
+E3-02 (all merged into `main` via PRs #8-#11 plus a direct follow-up fix commit). On
+resuming, this session found E2-02's implementation and its first Code Review (verdict
+REVISE) already sitting as uncommitted changes directly on `main`'s working tree — not on
+a feature branch, deviating from this project's established per-story-branch convention,
+but representing real, valuable in-progress work. Per AGENTS.md git safety guidance
+("investigate unfamiliar state before deleting or overwriting"), this session moved the
+uncommitted work onto a proper feature branch (`nanamex/e2-02-publish-matching`) without
+discarding anything, then continued the normal review loop from where it stood (fix the
+existing REVISE findings, rather than re-implementing).
+
+## 2026-09-03 — E2-02 VERIFIED
+
+Code Review round 1 REVISE (3 required changes): a `profile_completeness`/`perfil_completo`
+field-name mismatch defeated the ranking tie-break (every candidate scored completeness as
+0); the publish RPC (`publish_necesidad_with_matches`) trusted arbitrary match snapshots
+and candidate IDs from its caller with no server-side re-validation of eligibility
+(published/complete/active), a real trust-boundary gap since it's the sole atomic
+persistence step; and the FAM-04 empty-state's "Editar necesidad" link pointed at a
+draft-only route, producing a blank wizard for already-published necesidades. Developer
+fixed all three (mapped the boolean field faithfully onto the 0-100 scale E3-02's contract
+expects; hardened the RPC to re-validate and **raise** — rejecting the whole publish and
+rolling back partial inserts — on any ineligible candidate or out-of-range score, since a
+fabricated snapshot indicates a caller bug or compromised trust boundary, not a transient
+condition; replaced the broken link with an honest `next/link` back to the dashboard,
+deferring real active-necesidad editing to E2-04). Regression-tested each fix by
+temporarily reverting it, confirming the new tests failed with the exact reported symptom,
+then restoring. Code Review round 2: PASS_WITH_MINOR_ISSUES.
+
+Functional QA (real local Supabase stack, not mocks) then exercised the previously-untested
+populated-candidates path and found a new High-severity bug: `perfil_ninera.disponibilidad`
+is stored snake_case (`hora_inicio`/`hora_fin`) per `database.md`, but `candidateFromRow`
+never translated it to the camelCase shape `schedulesOverlap` expects (unlike the sibling
+`toMatchNecesidad` mapping, which correctly does this for the necesidad side) — silently
+zeroing the 25-point availability factor for every real candidate. This had been flagged
+during the first fix round as a deferred, "will matter once niñera onboarding ships" risk;
+QA's real-data test proved it was already live today, not merely a future risk, since the
+candidate query already returns real schema-shaped rows regardless of whether an onboarding
+UI exists yet. Developer fixed it (mirrored the existing correct translation pattern),
+fixed the test fixture that had been masking the bug (it used the wrong camelCase shape),
+and added a regression test. Code Review and Functional QA both independently re-verified:
+PASS.
+
+**E2-02 marked VERIFIED.** Known limitation carried forward: `/familia`'s dashboard doesn't
+yet list active necesidades, so the empty-state's recovery link, while no longer broken,
+has limited practical value until E2-03 (FAM-02 dashboard) lands. Editing an active
+necesidad remains genuinely unbuilt (E2-04's scope). Formal Visual QA was not run
+separately for this story — Functional QA's real end-to-end pass already rendered and
+confirmed the actual output values (match scores, checklist), and the FAM-04 page is an
+explicitly minimal placeholder pending E4-01/E4-03's real card/profile design; this was an
+orchestrator judgment call to avoid duplicate verification of the same minimal UI, not a
+skipped requirement.
