@@ -13,6 +13,28 @@ Next recommended action:
 
 ---
 
+## 2026-09-03 — Developer — E4-02
+
+Objective: Implement FAM-05 filters for FAM-04.
+Result: Added mobile bottom-sheet and desktop persistent-sidebar filters for zona, modalidad,
+pay range, and availability. Filtering is client-side/no-reload and URL state is preserved.
+Added focused filtering and responsive interaction tests. Independent review is pending.
+Artifacts changed: FAM-04 page, candidate filter component, focused tests, backlog.
+Validation: 227 tests, lint, typecheck, secret scan, and production build pass; build retains the
+existing Supabase Node 20 deprecation warning.
+Next recommended action: independent Code Review and Functional/Visual QA for E4-02.
+
+---
+
+## 2026-09-03 — Code Reviewer + Functional QA — E4-02
+
+Objective: Independently verify FAM-05 filters.
+Result: Review findings fixed: malformed URL/form values are normalized, back/forward URL
+changes synchronize filter state, and the mobile sheet now handles focus, Escape, and scroll
+locking. E4-02 marked VERIFIED.
+Validation: 229 tests, lint, typecheck, secret scan, and production build pass.
+Next recommended action: E4-03 -- FAM-06 perfil de niñera detail + pipeline record auto-creation.
+
 ## 2026-09-03 — Developer
 
 Objective: Complete the E2-01 desktop visual/code-review fixes for FAM-03.

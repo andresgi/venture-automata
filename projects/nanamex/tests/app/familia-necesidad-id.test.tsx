@@ -145,7 +145,7 @@ describe("MatchesPage (FAM-04)", () => {
     expect(cta).toHaveAttribute("href", "/familia");
   });
 
-  it("renders the collapsible necesidad-summary header and disabled Filtrar entry point", async () => {
+  it("renders the collapsible necesidad-summary header", async () => {
     mockNecesidadResult = { data: { ...baseNecesidad, pipeline: [] }, error: null };
 
     render(await MatchesPage({ params: params() }));
@@ -153,8 +153,6 @@ describe("MatchesPage (FAM-04)", () => {
     expect(screen.getByText(/Centro, Monterrey/)).toBeInTheDocument();
     expect(screen.getByText(/Planta/)).toBeInTheDocument();
     expect(screen.getByText(/Lun, Mié/)).toBeInTheDocument();
-    const filtrar = screen.getByRole("button", { name: "Filtrar" });
-    expect(filtrar).toBeDisabled();
   });
 
   it("renders ranked candidate cards (default state) with live TrustBadge status and Match Score", async () => {

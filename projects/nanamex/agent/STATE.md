@@ -14,8 +14,8 @@ IN_PROGRESS
 
 ARCHITECTURE_GATE approved by human 2026-09-02 (see agent/DECISIONS.md). TECH_ARCHITECTURE
 VERIFIED. BUILD is proceeding per engineering/implementation-plan.md. Epic 0 Foundations,
-Epic 1 (E1-01–E1-03), E2-01 through E2-03, E3-01/E3-02, and E4-01 are all VERIFIED; the next
-objective is E4-02, FAM-05 filtros.
+Epic 1 (E1-01–E1-03), E2-01 through E2-03, E3-01/E3-02, and E4-01/E4-02 are all VERIFIED;
+the next objective is E4-03, FAM-06 perfil de niñera.
 
 ## Phase Status
 
@@ -75,12 +75,13 @@ for every real candidate, PR #12), E2-03 (FAM-02 dashboard, real card grid repla
 
 Known limitations carried forward: `app/familia/loading.tsx`'s skeleton scope-bleeds to
 the whole `/familia/*` subtree (tracked, non-blocking, see E2-03's BACKLOG.md entry);
-active-necesidad editing remains unbuilt (E2-04's scope); FAM-05 filters and FAM-06 profile
-details remain unbuilt (E4-02/E4-03).
+active-necesidad editing remains unbuilt (E2-04's scope); FAM-06 profile details remain
+unbuilt (E4-03).
 
 ## Next Eligible Action
 
-E4-02: Developer implements FAM-05 filtros, dependent on E4-01.
+E4-03: Developer implements FAM-06 perfil de niñera detail + pipeline record auto-creation,
+dependent on E4-01.
 
 ## Human Blocker
 

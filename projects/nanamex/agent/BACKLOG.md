@@ -451,6 +451,22 @@ is E2-04 scope and is not implemented or faked here (human decision 2026-09-03).
 Validation: `npm test -- --run --no-file-parallelism` (225 tests), `npm run lint`,
 `npm run typecheck`, `npm run check:secrets`, and `npm run build` all pass.
 
+### E4-02 — FAM-05 filtros
+
+Status: VERIFIED (2026-09-03; Code Review PASS_WITH_MINOR_ISSUES after fixes; Functional QA
+PASS_WITH_MINOR_ISSUES after fixes)
+
+Dependencies: E4-01.
+
+Delivered: responsive FAM-05 filter controls for zona, modalidad, pay overlap, and selected
+availability days. Mobile uses an accessible bottom-sheet dialog with draft/apply behavior;
+desktop uses a persistent sidebar with live updates. Applied filters update the candidate list
+without navigation and persist in URL query state. Existing base empty/error states remain
+distinct from the no-results-after-filter message.
+
+Validation: `npm test -- --run --no-file-parallelism` (229 tests), `npm run lint`,
+`npm run typecheck`, `npm run check:secrets`, and `npm run build` all pass.
+
 ## Change Requests
 
 Ad-hoc, non-PRD asks made directly in chat (see AGENTS.md, "Change Requests"). Use `CR-NNN`

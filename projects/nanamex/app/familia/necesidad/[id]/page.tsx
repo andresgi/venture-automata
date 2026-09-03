@@ -3,10 +3,10 @@ import { redirect } from "next/navigation";
 import { CaretDown, UsersThree } from "@phosphor-icons/react/ssr";
 import { createServerSupabaseClient } from "@/lib/supabase/auth-server";
 import { createServiceRoleClient } from "@/lib/supabase/server";
-import { CandidateCard, type CandidateCardData } from "@/components/familia/candidate-card";
 import { RetryBanner } from "@/components/familia/retry-banner";
 import { familiaChecklistLabels } from "@/lib/matching/checklist-labels";
 import type { VerificationStatus } from "@/components/shared/trust-badge";
+import { CandidateFiltersView, type CandidateFilterData } from "@/components/familia/candidate-filters";
 
 // FAM-04 "Listado de candidatas" (design/UI-SPEC.md FAM-04) -- replaces E2-02's minimal
 // placeholder. Auth/data-fetching/redirect logic for the necesidad itself is unchanged from
@@ -44,6 +44,11 @@ type NineraLiveRow = {
   verification_status: VerificationStatus;
   perfil_completo?: boolean;
   created_at?: string;
+  salario_min: number | null;
+  salario_max: number | null;
+  modalidades_aceptadas: string[] | null;
+  disponibilidad: { dia: string; hora_inicio: string; hora_fin: string }[] | null;
+  zonas_trabajo: { zona_id: string; zonas: { alcaldia_municipio: string } | { alcaldia_municipio: string }[] | null }[] | null;
   profiles: { nombre: string | null; created_at?: string; account_status?: string } | { nombre: string | null; created_at?: string; account_status?: string }[] | null;
 };
 
@@ -113,23 +118,6 @@ function NecesidadSummaryHeader({ necesidad }: { necesidad: NecesidadRow }) {
   );
 }
 
-/** Filter entry point (UI-SPEC FAM-04): a single "Filtrar" secondary button opening FAM-05.
- * FAM-05 (filtros) is E4-02's scope and does not exist yet -- rendered disabled rather than
- * omitted so the header layout matches the spec for Visual QA, with no functional
- * destination pretended. */
-function FiltrarButton() {
-  return (
-    <button
-      type="button"
-      disabled
-      title="Filtrar (próximamente)"
-      className="pointer-events-none inline-flex h-11 shrink-0 items-center justify-center rounded-sm border border-border-strong px-4 text-button text-ink-900 opacity-40"
-    >
-      Filtrar
-    </button>
-  );
-}
-
 // UI-SYSTEM §5.8 empty-state template: icon inside a primary-50 circular container ->
 // Fraunces headline -> one body line of guidance (naming the likely blocking field) -> one
 // primary action. Rendered calmly, no error/warning color, per UI-SPEC FAM-04's explicit
@@ -160,7 +148,7 @@ function EmptyState() {
   );
 }
 
-type RankedCandidate = CandidateCardData & { profileCompleteness: number; createdAt: string };
+type RankedCandidate = CandidateFilterData & { profileCompleteness: number; createdAt: string };
 
 function mergeCandidates(pipeline: PipelineRow[], liveRows: NineraLiveRow[]): RankedCandidate[] {
   const liveById = new Map(liveRows.map((row) => [row.profile_id, row]));
@@ -179,9 +167,17 @@ function mergeCandidates(pipeline: PipelineRow[], liveRows: NineraLiveRow[]): Ra
         verificationStatus: live?.verification_status ?? "no_verificada",
         score: row.match_score_snapshot,
         checklist: familiaChecklistLabels(row.match_checklist_snapshot),
+        zonas: (live.zonas_trabajo ?? []).flatMap((entry) => {
+          const zone = Array.isArray(entry.zonas) ? entry.zonas[0] : entry.zonas;
+          return zone?.alcaldia_municipio ? [zone.alcaldia_municipio] : [];
+        }),
+        salarioMin: live.salario_min,
+        salarioMax: live.salario_max,
+        modalidades: live.modalidades_aceptadas ?? [],
+        disponibilidad: live.disponibilidad ?? [],
         profileCompleteness: live.perfil_completo === true ? 100 : 0,
         createdAt: live.created_at ?? "",
-      } satisfies CandidateCardData;
+      } satisfies CandidateFilterData;
     })
     .filter((candidate): candidate is RankedCandidate => candidate !== null)
     .sort((a, b) => b.score - a.score || b.profileCompleteness - a.profileCompleteness || a.createdAt.localeCompare(b.createdAt) || a.ninera_id.localeCompare(b.ninera_id));
@@ -226,7 +222,7 @@ export default async function MatchesPage({ params }: { params: Promise<{ id: st
   const pipeline = row.pipeline ?? [];
   const nineraIds = pipeline.map((match) => match.ninera_id);
 
-  let candidates: CandidateCardData[] = [];
+  let candidates: CandidateFilterData[] = [];
   let liveStatusError = false;
 
   if (nineraIds.length > 0) {
@@ -236,7 +232,7 @@ export default async function MatchesPage({ params }: { params: Promise<{ id: st
     // architecture.md §18's badge-integrity design.
     const { data: liveRows, error: liveError } = await db
       .from("perfil_ninera")
-      .select("profile_id, foto_url, verification_status, perfil_completo, created_at, profiles!inner(nombre, created_at, account_status)")
+      .select("profile_id, foto_url, verification_status, perfil_completo, created_at, salario_min, salario_max, modalidades_aceptadas, disponibilidad, zonas_trabajo: ninera_zonas(zona_id, zonas(alcaldia_municipio)), profiles!inner(nombre, created_at, account_status)")
       .in("profile_id", nineraIds)
       .eq("publicado", true)
       .eq("perfil_completo", true)
@@ -256,18 +252,13 @@ export default async function MatchesPage({ params }: { params: Promise<{ id: st
       <p className="text-body-sm text-ink-600">Listado de candidatas</p>
       <h1 className="mt-2 text-h1">Candidatas para tu necesidad</h1>
       <NecesidadSummaryHeader necesidad={row} />
-      <div className="mt-6 flex justify-end">
-        <FiltrarButton />
-      </div>
       {liveStatusError ? (
         <RetryBanner message="No se pudieron cargar las candidatas. Intenta de nuevo." />
       ) : pipeline.length === 0 || candidates.length === 0 ? (
         <EmptyState />
       ) : (
-        <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {candidates.map((candidate) => (
-            <CandidateCard key={candidate.ninera_id} candidate={candidate} />
-          ))}
+        <div className="mt-6 flex flex-col gap-6 lg:flex-row">
+          <CandidateFiltersView candidates={candidates} />
         </div>
       )}
     </main>
