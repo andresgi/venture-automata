@@ -319,6 +319,24 @@ from `/familia`, and responsive/tokenized form states. The interim success redir
 Follow-up: E2-01 must change the successful FAM-01 redirect from `/familia` to FAM-03 once
 that route exists.
 
+#### E2-01 — FAM-03 crear necesidad: steps 1–7 + draft autosave
+
+Status: VERIFIED (2026-09-03; Code Review PASS_WITH_MINOR_ISSUES; Functional QA
+PASS_WITH_MINOR_ISSUES; Visual QA final PASS; browser rendering unavailable, source-level
+review covered 375, 430, 768, and 1440px)
+
+Dependencies: E1-03, E0-03.
+
+Delivered: responsive mobile seven-step wizard and desktop single scrollable seven-section
+form, fixed age-range choices, zona autocomplete, editable schedules/modalidad/payment/date/
+responsibilities, anchored desktop rail, desktop/mobile autosave controls, resumable drafts,
+server-side validation/authorization, and atomic RPC persistence. E2-02 review/publication is
+explicitly deferred.
+
+Validation: `npm test -- --run` (21 files, 142 tests), `npm run test:db`, `npm run lint`,
+`npm run typecheck`, `npm run check:secrets`, and `npm run build` all pass. Build emits only
+the existing Supabase Node 20 deprecation warning.
+
 ## Change Requests
 
 Ad-hoc, non-PRD asks made directly in chat (see AGENTS.md, "Change Requests"). Use `CR-NNN`

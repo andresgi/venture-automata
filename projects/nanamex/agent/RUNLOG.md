@@ -13,6 +13,40 @@ Next recommended action:
 
 ---
 
+## 2026-09-03 — Developer
+
+Objective: Complete the E2-01 desktop visual/code-review fixes for FAM-03.
+Result: Replaced desktop summaries with editable seven-section form controls, restored
+desktop autosave/navigation actions, added desktop zona autocomplete and MXN prefixes, and
+fixed desktop test `matchMedia` cleanup. Automated validation passed: 21 files/140 tests,
+database RPC tests, lint, typecheck, secret scan, and production build.
+Artifacts changed: components/familia/necesidad-wizard.tsx,
+tests/components/familia/necesidad-wizard.test.tsx, agent/BACKLOG.md, agent/STATE.md.
+Next recommended action: independent Code Review and Visual QA re-review of E2-01.
+
+---
+
+## 2026-09-03 — Developer + Code Reviewer + Functional QA + Visual QA
+
+Objective: Complete and independently verify E2-01 — FAM-03 wizard, steps 1–7 plus draft
+autosave.
+Result: Resolved successive review findings across authorization, atomic child persistence,
+snake_case schedule storage, fresh/resume routing, autosave on forward/back/exit, strict
+age-range schema/DOM enforcement, desktop editable sections and anchored rail, mobile sticky
+navigation, payment/date controls, and responsive validation states. Code Review final verdict
+PASS_WITH_MINOR_ISSUES; Functional QA PASS_WITH_MINOR_ISSUES; Visual QA final PASS. Browser
+rendering was unavailable, so QA used source-level checks at 375/430/768/1440px. Full
+validation passed: 142 tests, `test:db`, lint, typecheck, secret scan, and production build.
+E2-01 marked VERIFIED. E2-02 owns the review/publication boundary.
+Artifacts changed: actions/necesidad.ts, app/familia/{page.tsx,necesidad/page.tsx},
+components/familia/{necesidad-wizard,zona-autocomplete}.tsx, lib/familia/necesidad-*.ts,
+db/migrations/20260903000010_necesidades_drafts.sql, scripts/test-necesidad-rpc.{mjs,sql},
+tests/{actions/necesidad,app/familia-necesidad,components/familia/necesidad-wizard,db/
+necesidad-draft-migration,lib/familia/necesidad-validation}.test.* and QA/review artifacts.
+Next recommended action: E2-02 — FAM-03 review + publish with initial match computation.
+
+---
+
 ## 2026-09-02 — Developer + Code Reviewer
 
 Objective: E0-01 — Repository, tooling, and CI scaffold (Epic 0, first BUILD story, after

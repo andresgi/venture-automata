@@ -34,6 +34,8 @@ export default async function FamiliaHomePage() {
     if (!perfilFamiliar) {
       redirect("/familia/perfil");
     }
+    const { data: drafts } = await db.from("necesidades").select("id, updated_at").eq("familia_id", user.id).eq("estado", "borrador").order("updated_at", { ascending: false });
+    return <FamiliaDashboard drafts={(drafts ?? []) as { id: string; updated_at: string }[]} />;
   }
 
   return (
@@ -42,9 +44,11 @@ export default async function FamiliaHomePage() {
         <UnauthorizedBanner />
       </Suspense>
       <h1 className="text-2xl font-semibold">Mis necesidades</h1>
-      <p className="max-w-md text-sm text-zinc-500">
-        Área familia. Contenido completo llega en una historia de BUILD posterior.
-      </p>
+       <a href="/familia/necesidad" className="rounded-sm bg-primary-600 px-4 py-3 text-button text-white">Crear necesidad</a>
     </main>
   );
+}
+
+function FamiliaDashboard({ drafts }: { drafts: { id: string; updated_at: string }[] }) {
+  return <main className="flex min-h-screen flex-col gap-4 p-8"><Suspense fallback={null}><UnauthorizedBanner /></Suspense><h1 className="text-2xl font-semibold">Mis necesidades</h1><a href="/familia/necesidad" className="w-fit rounded-sm bg-primary-600 px-4 py-3 text-button text-white">Crear necesidad</a>{drafts.map((draft) => <article key={draft.id} className="border border-border p-4"><p className="text-body">Borrador de necesidad</p><a href={`/familia/necesidad?draft=${draft.id}`} className="text-body-sm text-primary-700">Continuar borrador</a></article>)}</main>;
 }
