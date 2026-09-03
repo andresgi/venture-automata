@@ -30,11 +30,13 @@ export function ZonaAutocomplete({
   name,
   defaultZonaId,
   error,
+  onSelect,
 }: {
   zonas: ZonaOption[];
   name: string;
   defaultZonaId?: string | null;
   error?: string;
+  onSelect?: (zona: ZonaOption) => void;
 }) {
   const listboxId = useId();
   const inputId = `${listboxId}-input`;
@@ -60,6 +62,7 @@ export function ZonaAutocomplete({
     setQuery(zonaLabel(zona));
     setIsOpen(false);
     setActiveIndex(0);
+    onSelect?.(zona);
   }
 
   return (

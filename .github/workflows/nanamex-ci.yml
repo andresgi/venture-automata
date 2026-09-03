@@ -94,3 +94,6 @@ jobs:
             echo "::error::zonas seed produced 0 rows -- check db/seed.sql, its ON CONFLICT target, and [db.seed] in supabase/config.toml"
             exit 1
           fi
+
+      - name: Verify necesidad draft RPC authorization and atomic child replacement
+        run: npm run test:db

@@ -81,13 +81,18 @@ review at 375/430/768/1440px; see agent/reviews/code-E1-03-review.md and
 agent/qa/e1-03-visual-qa.md). Interim redirect to `/familia` is tracked for replacement
 when FAM-03 lands.
 
-Next: E2-01 (FAM-03 wizard: steps 1–7 + draft autosave) is the next dependency-cleared
-story; E7 niñera-profile stories may also proceed in parallel if selected from the plan.
+E2-01 VERIFIED 2026-09-03 (FAM-03 seven-step draft wizard with fixed age ranges, server-side
+validation, atomic RPC persistence, resume/new-draft routing, mobile sticky navigation, and
+desktop editable sections/rail; Code Review PASS_WITH_MINOR_ISSUES; Functional QA
+PASS_WITH_MINOR_ISSUES; Visual QA final PASS; browser rendering unavailable, source-level
+review at 375/430/768/1440px; see agent/reviews/code-E2-01-review.md,
+agent/qa/e2-01-functional-qa.md, and agent/qa/e2-01-visual-qa.md). E2-02 review/publication/
+matching remains separate by scope.
 
 ## Next Eligible Action
 
-E2-01: Developer implements FAM-03 wizard (steps 1–7 + draft autosave), dependent on
-E1-03 (VERIFIED), with age-range-only children data and server-side validation.
+E2-02: Developer implements FAM-03 review + publish, including initial match computation,
+dependent on E2-01 and the Epic 3 matching callable function.
 
 ## Human Blocker
 

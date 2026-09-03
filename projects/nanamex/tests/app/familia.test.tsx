@@ -29,10 +29,12 @@ vi.mock("@/lib/supabase/auth-server", () => ({
 }));
 
 let mockPerfilFamiliar: { profile_id: string } | null = null;
+let mockDrafts: { id: string; updated_at: string }[] = [];
 vi.mock("@/lib/supabase/server", () => ({
   createServiceRoleClient: vi.fn(() => ({
     from: vi.fn((table: string) => {
-      if (table !== "perfil_familiar") throw new Error(`Unexpected table: ${table}`);
+       if (table === "necesidades") return { select: vi.fn(() => ({ eq: vi.fn(() => ({ eq: vi.fn(() => ({ order: vi.fn(() => Promise.resolve({ data: mockDrafts })) })) })) })) };
+       if (table !== "perfil_familiar") throw new Error(`Unexpected table: ${table}`);
       return {
         select: vi.fn(() => ({
           eq: vi.fn(() => ({
@@ -53,6 +55,7 @@ beforeEach(() => {
   });
   mockUser = { id: "user-1" };
   mockPerfilFamiliar = null;
+  mockDrafts = [];
 });
 
 describe("FamiliaHomePage (FAM-02 placeholder, FAM-01 gate)", () => {
@@ -70,6 +73,14 @@ describe("FamiliaHomePage (FAM-02 placeholder, FAM-01 gate)", () => {
 
     expect(redirectMock).not.toHaveBeenCalled();
     expect(screen.getByRole("heading", { level: 1, name: "Mis necesidades" })).toBeInTheDocument();
+  });
+
+  it("renders an explicit resume href for each existing draft", async () => {
+    mockPerfilFamiliar = { profile_id: "user-1" };
+    mockDrafts = [{ id: "draft-1", updated_at: "2099-01-01" }];
+    render(await FamiliaHomePage());
+    expect(screen.getByRole("link", { name: "Continuar borrador" })).toHaveAttribute("href", "/familia/necesidad?draft=draft-1");
+    expect(screen.getByRole("link", { name: "Crear necesidad" })).toHaveAttribute("href", "/familia/necesidad");
   });
 
   it("does not attempt the perfil_familiar check (and does not redirect) when there is no session", async () => {
