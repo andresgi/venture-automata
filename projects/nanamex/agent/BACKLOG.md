@@ -352,6 +352,20 @@ to the scoring path. E3-02 ranking/computeMatches remains separate.
 Validation: `npm test` (185 tests), `npm run lint`, `npm run typecheck`,
 `npm run check:secrets`, and `npm run build` all pass.
 
+### E3-02 — Ranking + `computeMatches` service
+
+Status: VERIFIED (2026-09-03; Code Review PASS_WITH_MINOR_ISSUES)
+
+Dependencies: E3-01.
+
+Delivered: repository-backed matching service using E3-01 scoring, modalidad hard-filter
+exclusion, deterministic ranking by score descending, profile completeness descending,
+created-at ascending, then id ascending. Verification status is intentionally absent from
+the ranking/tie-break path. E2-02 can call this service when implementing publication.
+
+Validation: `npm test` (189 tests), `npm run lint`, `npm run typecheck`,
+`npm run check:secrets`, and `npm run build` all pass.
+
 ## Change Requests
 
 Ad-hoc, non-PRD asks made directly in chat (see AGENTS.md, "Change Requests"). Use `CR-NNN`
