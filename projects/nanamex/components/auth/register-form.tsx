@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
-import { registerAction, initialRegisterActionState } from "@/actions/auth";
+import { registerAction } from "@/actions/auth";
 import type { SelfRegisterableRole } from "@/lib/auth/roles";
 
 /**
@@ -14,7 +14,7 @@ import type { SelfRegisterableRole } from "@/lib/auth/roles";
 export function RegisterForm({ role }: { role: SelfRegisterableRole }) {
   const [state, formAction, isPending] = useActionState(
     registerAction,
-    initialRegisterActionState
+    { status: "idle" }
   );
 
   return (

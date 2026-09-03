@@ -15,7 +15,6 @@ export interface PerfilFamiliarActionState {
   fieldErrors?: Record<string, string>;
 }
 
-export const initialPerfilFamiliarActionState: PerfilFamiliarActionState = { status: "idle" };
 
 function fieldErrorsFromZod(error: {
   issues: Array<{ path: PropertyKey[]; message: string }>;

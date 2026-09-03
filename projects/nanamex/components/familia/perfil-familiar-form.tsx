@@ -4,7 +4,6 @@ import { useActionState } from "react";
 import { SpinnerGap, WarningCircle } from "@phosphor-icons/react/ssr";
 import {
   upsertPerfilFamiliarAction,
-  initialPerfilFamiliarActionState,
 } from "@/actions/perfil-familiar";
 import { ZonaAutocomplete } from "@/components/familia/zona-autocomplete";
 import type { ZonaOption } from "@/lib/zonas/queries";
@@ -25,7 +24,7 @@ export function PerfilFamiliarForm({
 }) {
   const [state, formAction, isPending] = useActionState(
     upsertPerfilFamiliarAction,
-    initialPerfilFamiliarActionState
+    { status: "idle" }
   );
 
   return (

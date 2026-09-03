@@ -8,8 +8,6 @@ import { normalizeNecesidadPayload } from "@/lib/familia/necesidad-persistence";
 
 export type NecesidadActionState = { status: "idle" | "saved" | "error"; message?: string; draftId?: string };
 
-export const initialNecesidadActionState: NecesidadActionState = { status: "idle" };
-
 /** Saves only drafts. Publishing/matching deliberately belongs to E2-02. */
 export async function saveNecesidadDraftAction(
   _previous: NecesidadActionState,

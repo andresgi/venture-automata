@@ -50,7 +50,6 @@ export interface RegisterActionState {
   fieldErrors?: Record<string, string>;
 }
 
-export const initialRegisterActionState: RegisterActionState = { status: "idle" };
 
 function fieldErrorsFromZod(error: {
   issues: Array<{ path: PropertyKey[]; message: string }>;
@@ -176,7 +175,6 @@ export interface LoginActionState {
   unconfirmedEmail?: string;
 }
 
-export const initialLoginActionState: LoginActionState = { status: "idle" };
 
 /** AUTH-04 login (design/screen-inventory.md AUTH-04). Redirects to the account's own role
  * home (`/familia`, `/ninera`, `/admin` — see lib/auth/roles.ts), or back to the originally
@@ -241,9 +239,6 @@ export interface ResendConfirmationActionState {
   message?: string;
 }
 
-export const initialResendConfirmationActionState: ResendConfirmationActionState = {
-  status: "idle",
-};
 
 /** AUTH-04's "reenviar correo" action (design/UX-spec.md, added 2026-09-02) — lets a user
  * blocked by the correo hard gate (`EMAIL_NOT_CONFIRMED_MESSAGE` above) re-trigger

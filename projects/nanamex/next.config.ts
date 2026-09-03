@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  allowedDevOrigins: ["127.0.0.1"],
   // This app is nested under projects/nanamex/ in a monorepo that relies on Claude
   // Code's directory-walk-up to inherit the shared AGENTS.md/CLAUDE.md from the repo
   // root (see repo root README.md, "Two ways to run a venture"). Next.js 16's `next dev`

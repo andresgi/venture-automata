@@ -38,7 +38,6 @@ export interface SendPhoneOtpActionState {
   cooldownSecondsRemaining?: number;
 }
 
-export const initialSendPhoneOtpActionState: SendPhoneOtpActionState = { status: "idle" };
 
 async function getCurrentUserId(): Promise<string | null> {
   const supabaseAuth = await createServerSupabaseClient();
@@ -122,7 +121,6 @@ export interface ConfirmPhoneOtpActionState {
   message?: string;
 }
 
-export const initialConfirmPhoneOtpActionState: ConfirmPhoneOtpActionState = { status: "idle" };
 
 /**
  * Confirms a submitted teléfono OTP code. On a correct, unexpired code, sets

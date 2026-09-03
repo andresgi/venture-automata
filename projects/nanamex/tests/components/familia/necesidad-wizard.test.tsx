@@ -72,6 +72,14 @@ describe("NecesidadWizard step 1", () => {
     unmount();
   });
 
+  it("shows the selected modalidad", async () => {
+    render(<NecesidadWizard zonas={[]} draft={{ children: ["0-1"] }} />);
+    fireEvent.click(screen.getByRole("button", { name: "4. Modalidad" }));
+    fireEvent.click(screen.getByRole("button", { name: "Planta" }));
+    expect(screen.getByRole("button", { name: "Planta" })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByRole("button", { name: "Planta" })).toHaveClass("bg-primary-50");
+  });
+
   it("autosaves before navigating backward", async () => {
     render(<NecesidadWizard zonas={[]} draft={{ children: ["0-1"] }} />);
     fireEvent.click(screen.getByRole("button", { name: "Siguiente" }));

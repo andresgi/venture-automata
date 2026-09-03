@@ -3,9 +3,7 @@
 import { useActionState } from "react";
 import {
   loginAction,
-  initialLoginActionState,
   resendConfirmationEmailAction,
-  initialResendConfirmationActionState,
 } from "@/actions/auth";
 
 /** AUTH-04's "reenviar correo" action (design/UX-spec.md, added 2026-09-02 alongside the
@@ -16,7 +14,7 @@ import {
 function ResendConfirmationEmail({ correo }: { correo: string }) {
   const [state, formAction, isPending] = useActionState(
     resendConfirmationEmailAction,
-    initialResendConfirmationActionState
+    { status: "idle" }
   );
 
   return (
@@ -44,7 +42,7 @@ function ResendConfirmationEmail({ correo }: { correo: string }) {
  * entry points (information-architecture.md §3) -- the actual destination is decided
  * server-side by the account's own `profiles.role`, not by which page was used to log in. */
 export function LoginForm({ next, registerHref }: { next?: string; registerHref?: string }) {
-  const [state, formAction, isPending] = useActionState(loginAction, initialLoginActionState);
+  const [state, formAction, isPending] = useActionState(loginAction, { status: "idle" });
 
   return (
     <form action={formAction} className="flex w-full max-w-sm flex-col gap-4">

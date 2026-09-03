@@ -3,9 +3,7 @@
 import { useActionState, useEffect, useState } from "react";
 import {
   sendPhoneOtpAction,
-  initialSendPhoneOtpActionState,
   confirmPhoneOtpAction,
-  initialConfirmPhoneOtpActionState,
   type SendPhoneOtpActionState,
 } from "@/actions/phone-verification";
 
@@ -32,11 +30,11 @@ const RESEND_COOLDOWN_SECONDS = 60;
 export function PhoneVerificationForm() {
   const [sendState, sendFormAction, isSending] = useActionState(
     sendPhoneOtpAction,
-    initialSendPhoneOtpActionState
+    { status: "idle" }
   );
   const [confirmState, confirmFormAction, isConfirming] = useActionState(
     confirmPhoneOtpAction,
-    initialConfirmPhoneOtpActionState
+    { status: "idle" }
   );
 
   // Seeds the cooldown counter from `sendState` during render (React's documented pattern
