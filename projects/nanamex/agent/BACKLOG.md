@@ -303,6 +303,22 @@ entitlement enforcement (E5-01's scope), and a "cuenta no verificada" banner UI 
 (unbuilt anywhere yet — flagged as an open item for whichever of FAM-13/FAM-01 builds
 first, not assigned an ID here).
 
+### E1-03 — FAM-01 onboarding perfil familiar
+
+Status: VERIFIED (2026-09-03; Code Reviewer PASS_WITH_MINOR_ISSUES; Visual QA initial
+REVISE, fixed and follow-up PASS_WITH_MINOR_ISSUES; browser rendering unavailable, source-
+level review covered 375, 430, 768, and 1440px)
+
+Dependencies: E1-02, E0-03 (`zonas` seeded).
+
+Delivered: required `nombre` + `zona` onboarding form, server-side role and zona
+validation, zona autocomplete with real-id submission and pin confirmation, FAM-01 gate
+from `/familia`, and responsive/tokenized form states. The interim success redirect remains
+`/familia` until E2-01 creates FAM-03; tracked below.
+
+Follow-up: E2-01 must change the successful FAM-01 redirect from `/familia` to FAM-03 once
+that route exists.
+
 ## Change Requests
 
 Ad-hoc, non-PRD asks made directly in chat (see AGENTS.md, "Change Requests"). Use `CR-NNN`

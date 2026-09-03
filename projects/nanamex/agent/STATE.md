@@ -1,6 +1,6 @@
 # Project State
 
-Last updated: 2026-09-02
+Last updated: 2026-09-03
 
 ## Current Phase
 
@@ -13,10 +13,9 @@ IN_PROGRESS
 ## Current Objective
 
 ARCHITECTURE_GATE approved by human 2026-09-02 (see agent/DECISIONS.md). TECH_ARCHITECTURE
-VERIFIED. Starting BUILD per engineering/implementation-plan.md, beginning with Epic 0
-(Foundations) — repository/tooling/CI scaffold, Supabase project setup, core schema
-migration, auth wiring, Twilio Verify integration, Vercel deployment pipeline — before any
-feature epic, since later epics depend on this foundation.
+VERIFIED. BUILD is proceeding per engineering/implementation-plan.md. Epic 0 Foundations
+and E1-01 through E1-03 are verified; the next objective is E2-01, the FAM-03 necesidad
+wizard with seven steps and draft autosave.
 
 ## Phase Status
 
@@ -74,14 +73,21 @@ ARCHITECTURE_GATE, RELEASE_GATE) and any production-deployment/destructive-data/
 action still require explicit approval as before. Stop conditions: a genuinely BLOCKED
 item, 3 failed review cycles on the same task, or a human gate.
 
-Next: delegating E1-03 (FAM-01 onboarding perfil familiar) to Developer.
+E1-03 VERIFIED 2026-09-03 (FAM-01 onboarding perfil familiar: required nombre + zona,
+server-side validation, seeded-zona autocomplete, onboarding gate, and responsive Clin
+design-system treatment; Code Reviewer PASS_WITH_MINOR_ISSUES; Visual QA initial REVISE,
+fixed and follow-up PASS_WITH_MINOR_ISSUES; browser rendering unavailable, source-level
+review at 375/430/768/1440px; see agent/reviews/code-E1-03-review.md and
+agent/qa/e1-03-visual-qa.md). Interim redirect to `/familia` is tracked for replacement
+when FAM-03 lands.
+
+Next: E2-01 (FAM-03 wizard: steps 1–7 + draft autosave) is the next dependency-cleared
+story; E7 niñera-profile stories may also proceed in parallel if selected from the plan.
 
 ## Next Eligible Action
 
-E1-03: Developer implements FAM-01 (onboarding perfil familiar) — nombre + zona
-(autocomplete against `zonas`) required to proceed. Depends on E1-02 (VERIFIED), E0-03
-(`zonas` seeded, VERIFIED). This will replace the `/familia` placeholder page that E0-04/
-E1-02 have been targeting.
+E2-01: Developer implements FAM-03 wizard (steps 1–7 + draft autosave), dependent on
+E1-03 (VERIFIED), with age-range-only children data and server-side validation.
 
 ## Human Blocker
 
