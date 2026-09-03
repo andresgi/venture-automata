@@ -1,0 +1,19 @@
+<!--
+  Custom "confirm signup" email template (AUTH-03's correo leg).
+
+  Points at our own `/auth/confirm` Route Handler with a `token_hash`/`type` query string
+  (the token-hash flow) instead of Supabase's default `{{ .ConfirmationURL }}` (which
+  redirects to GoTrue's own `/verify` endpoint and returns tokens as a URL *fragment* —
+  invisible server-side, so it would force a client-side Supabase client just to read
+  `location.hash`). The token-hash flow lets `/auth/confirm` call `supabase.auth.verifyOtp`
+  server-side with the existing cookie-aware server client (lib/supabase/auth-server.ts),
+  keeping this consistent with every other Auth operation in the app (registration, login)
+  being server-side code — see engineering/architecture.md §3.
+-->
+<h2>Confirma tu correo</h2>
+
+<p>Gracias por registrarte en Clin. Confirma tu correo para continuar.</p>
+
+<p><a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=email&next=%2Fverificar">Confirmar mi correo</a></p>
+
+<p>Si tú no creaste esta cuenta, puedes ignorar este mensaje.</p>

@@ -224,11 +224,17 @@ agent/RUNLOG.md and agent/reviews/code-E0-03-review.md)
 
 #### E0-04 — Auth wiring: Supabase Auth + role-based middleware
 
-Status: READY (E0-03 VERIFIED)
+Status: VERIFIED (2026-09-02; Code Reviewer round 1 REVISE — 1 required AUTH-04 login
+error-state fix, arising from the correo-gating redefinition below, not a Developer defect;
+fixed and re-verified, round 2 PASS_WITH_MINOR_ISSUES; see agent/DECISIONS.md and
+agent/reviews/code-E0-04-review.md). Surfaced and resolved a real architecture/UX conflict
+— correo verification redefined as a hard login gate, teléfono remains the soft gate (human
+decision, see agent/DECISIONS.md; design/journeys.md and design/UX-spec.md updated
+accordingly).
 
 #### E0-05 — Twilio Verify integration (phone OTP)
 
-Status: BLOCKED (depends on E0-04)
+Status: READY (E0-04 VERIFIED)
 
 #### E0-06 — Vercel deployment pipeline (preview + production)
 

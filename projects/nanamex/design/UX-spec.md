@@ -139,7 +139,12 @@ screens (AUTH-04 Login, AUTH-05 Recuperar contraseña, FAM-01 Onboarding perfil 
 FAM-07 Favoritas, FAM-13 Cuenta, NIN-01/02 profile wizard steps, NIN-11 Cuenta, ADM-01 Admin
 login) follow standard patterns implied by their one-line purpose in the screen inventory
 and are not separately detailed, to keep this document focused on the screens that carry
-real product/trust decisions.
+real product/trust decisions. One exception, added by the E0-04/AUTH-03 gating redefinition
+(2026-09-02, see agent/DECISIONS.md): AUTH-04 Login needs one specific non-standard error
+state — a login attempt on an account whose correo is not yet confirmed must show a clear
+"confirma tu correo" inline message with a "reenviar correo" action, not a generic
+invalid-credentials error, since this is now the only place a user can discover they're
+blocked pre-confirmation.
 
 ### AUTH-02 — Registro
 
@@ -161,22 +166,33 @@ real product/trust decisions.
 
 - **Purpose:** Confirm ownership of contact channels used for all downstream notifications
   (niñera opportunity pushes, family pipeline-state notifications, OTP-based trust signal).
-- **Entry points:** Immediately after AUTH-02; re-entered from FAM-13/NIN-11 if a channel
-  later becomes unverified (e.g. changed phone number).
-- **Content hierarchy:** Two independent checklist items — Correo (link-based), Teléfono
-  (OTP code entry) — each shows its own pending/verified state; both must complete to fully
-  clear this gate.
-- **Inputs:** 6-digit OTP code (teléfono); no input for correo (click emailed link).
-- **Actions:** Reenviar código / reenviar correo (with cooldown, e.g. 60s); continuar.
+- **Entry points:** Correo confirmation happens out-of-band (emailed link, clicked outside
+  the app) before any session/login is possible at all — see the gating note below. This
+  screen's teléfono checklist item is entered immediately after a successful first login
+  (i.e. correo already confirmed); re-entered from FAM-13/NIN-11 if teléfono later becomes
+  unverified (e.g. changed phone number).
+- **Content hierarchy:** Two checklist items — Correo (link-based), Teléfono (OTP code
+  entry) — each shows its own pending/verified state. Correo is always shown as already
+  verified on this screen (a session cannot exist otherwise, see below); Teléfono is the
+  only item a logged-in user can actually still be completing here.
+- **Inputs:** 6-digit OTP code (teléfono only — correo has no in-app input, it's confirmed
+  via emailed link before login is possible).
+- **Actions:** Reenviar código (teléfono, with cooldown, e.g. 60s); continuar.
 - **Validation:** OTP must match and not be expired (e.g. 10 min); rate-limit resend
   attempts.
-- **System responses:** Both verified → proceed to role-specific onboarding (FAM-01 or
-  NIN-01). Partial verification (e.g. correo pending) → user may continue browsing in a
-  limited state (per J-FAM-1: cannot pass the paywall / cannot have opportunities pushed
-  reliably until both channels are confirmed) but is not fully blocked from the app, to
-  avoid an onboarding dead end.
+- **Gating (redefined from the original soft-gate design — human decision, 2026-09-02, see
+  agent/DECISIONS.md and E0-04 in agent/RUNLOG.md):** Correo is a **hard gate at login** —
+  Supabase Auth's native email-confirmation flow blocks session creation entirely until the
+  link is clicked, so this screen is unreachable at all pre-correo-confirmation (there is no
+  "browse before confirming correo" state; see AUTH-04 login error state for the
+  pre-confirmation experience instead). Teléfono remains a **soft gate**: once logged in, a
+  user may continue browsing and create a necesidad in a "cuenta no verificada" limited
+  state (per J-FAM-1) — cannot pass the paywall / cannot have opportunities pushed reliably
+  until teléfono is also confirmed.
+- **System responses:** Teléfono verified → proceed to role-specific onboarding (FAM-01 or
+  NIN-01).
 - **Exit paths:** FAM-01/NIN-01 (full success); app home in "cuenta no verificada" banner
-  state (partial).
+  state (teléfono still pending).
 - **States:** loading (sending code/checking), error (invalid/expired OTP — clear inline
   message with a retry action, not a full-page failure), success.
 

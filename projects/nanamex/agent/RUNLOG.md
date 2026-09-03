@@ -92,3 +92,36 @@ the new migrations job (including the seed row-count check) actually passes in G
 Actions.
 
 ---
+
+## 2026-09-02 — Developer + Code Reviewer
+
+Objective: E0-04 — Auth wiring: Supabase Auth + role-based middleware (Epic 0).
+Result: Developer implemented registration (email/password), Supabase's native
+email-confirmation flow, role assignment at registration, and a Next.js proxy (renamed
+from middleware per this Next.js version's convention) enforcing
+/familia/*//ninera/*//admin/* route-group access by profiles.role. Surfaced a real
+conflict between architecture.md Sec.6 (Supabase's native email-confirm flow, which blocks
+all sign-in pre-confirmation) and the original UX-spec.md/journeys.md soft-gate design
+(browse before confirming) -- escalated to the human rather than silently resolved. Human
+decision: keep the native gate, redefine soft-gate to teleofono only; orchestrator updated
+design/journeys.md and design/UX-spec.md accordingly (including a new AUTH-04 error-state
+requirement). Code Reviewer round 1: REVISE -- the new AUTH-04 requirement (a distinct
+"confirma tu correo" + resend-email error state) wasn't yet implemented, since it postdated
+the Developer's original work. Developer added resendConfirmationEmailAction, the
+login-form UI, and tests. Code Reviewer round 2: PASS_WITH_MINOR_ISSUES, no required
+changes remain, all 4 acceptance criteria pass (54/54 tests,
+lint/typecheck/build/check:secrets/lockfile all clean). E0-04 marked VERIFIED.
+Artifacts changed: lib/supabase/auth-server.ts, lib/supabase/middleware.ts, proxy.ts,
+lib/auth/{roles,route-access,phone,validation}.ts, lib/supabase/db-errors.ts,
+actions/auth.ts, app/auth/confirm/route.ts, components/auth/{register-form,login-form,
+unauthorized-banner}.tsx, app/{registro,login,admin/login,verificar,familia,ninera,
+admin}/page.tsx, db/migrations/20260902000008_profiles_phone_unique.sql,
+supabase/config.toml, supabase/templates/confirmation.html, package.json/
+package-lock.json, tests/lib/auth/*, tests/lib/supabase/db-errors.test.ts,
+tests/actions/auth.test.ts, tests/proxy.test.ts, design/journeys.md, design/UX-spec.md
+(gating redefinition), agent/reviews/code-E0-04-review.md.
+Next recommended action: E0-05 -- Twilio Verify integration (phone OTP). Built on branch
+nanamex/e0-04-auth-wiring, stacked on nanamex/e0-03-core-schema-migration (PR #2, not yet
+merged) -- PR for this story should target the e0-03 branch until #2 merges.
+
+---

@@ -47,16 +47,24 @@ reviewed and merged into `main`.
 
 E0-03 VERIFIED 2026-09-02 (core schema migration: `profiles`, `perfil_familiar`,
 `perfil_ninera` + sub-tables, `zonas` + Monterrey seed data; two Code Reviewer cycles, all
-required RLS/FK/CI fixes applied via a follow-up migration; see agent/DECISIONS.md). Not
-yet pushed as a PR — pending orchestrator push per the standing authorization. Next:
-delegating E0-04 (auth wiring) to Developer.
+required RLS/FK/CI fixes applied via a follow-up migration; see agent/DECISIONS.md). PR #2
+open (https://github.com/andresgi/venture-automata/pull/2), CI green, awaiting human merge.
+
+E0-04 VERIFIED 2026-09-02 (Supabase Auth registration/login, native email-confirmation
+gate, role-based proxy/middleware for `/familia/*`/`/ninera/*`/`/admin/*`; two Code
+Reviewer cycles; surfaced and resolved a real architecture/UX conflict — correo is now a
+hard login gate, teléfono remains the soft gate, human decision — see agent/DECISIONS.md).
+Built on a branch stacked on top of E0-03 (not yet merged to main) since E0-04 depends on
+E0-03's schema; PR pending, will target the E0-03 branch until #2 merges. Next: delegating
+E0-05 (Twilio Verify phone OTP) to Developer.
 
 ## Next Eligible Action
 
-E0-04: Developer implements Supabase Auth + role-based middleware
-(`/familia/*`/`/ninera/*`/`/admin/*` route-group access by `profiles.role`), per
-engineering/implementation-plan.md. Then E0-05, E0-06 in order. Code Reviewer review after
-each story per this project's process.
+E0-05: Developer implements Twilio Verify phone OTP send/confirm, wired to AUTH-03's
+teléfono checklist row, per engineering/implementation-plan.md. Then E0-06. Code Reviewer
+review after each story per this project's process. Note: PRs #2 (E0-03) and the pending
+E0-04 PR are still open awaiting human merge — E0-05 will stack further on the same branch
+chain until they clear.
 
 ## Human Blocker
 

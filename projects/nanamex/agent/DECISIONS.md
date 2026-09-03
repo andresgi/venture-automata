@@ -236,6 +236,63 @@ covers 9 Monterrey-metro municipios (36 rows total), not CDMX.
 
 **E0-03 marked VERIFIED.** E0-04 (Auth wiring) is now unblocked.
 
+## 2026-09-02 — E0-04: correo verification redefined as a hard login gate
+
+While implementing E0-04 (auth wiring), the Developer found a real conflict between two
+already-VERIFIED artifacts: `engineering/architecture.md` §6 instructs using Supabase
+Auth's built-in email-confirmation flow, but that flow empirically blocks all sign-in (no
+session at all) until the link is clicked — while `design/journeys.md` (J-FAM-1) and
+`design/UX-spec.md` (AUTH-03) design verification as a **soft gate**, letting a family
+browse/create a necesidad before confirming either channel. These are incompatible as
+originally written: a user cannot obtain a session pre-confirmation under Supabase's native
+gate, so "browse before confirming" is not actually reachable. Per AGENTS.md Failure Rules
+("architectural decision with significant downstream consequences"), this was escalated to
+the human rather than resolved unilaterally by the Developer, who correctly implemented the
+literal architecture.md instruction and flagged the conflict instead of inventing a fix.
+
+**Human decision: keep Supabase's native email-confirmation gate (no code change needed —
+matches E0-04 as already built). Redefine "soft gate" to apply to teléfono only.** Correo
+becomes a hard gate at login (cannot log in at all pre-confirmation, no in-app degraded
+state is reachable); teléfono verification remains the original soft gate (can log in,
+browse, and create a necesidad with teléfono unverified; blocked only at the paywall/
+contact step). `design/journeys.md` (J-FAM-1) and `design/UX-spec.md` (AUTH-03) updated to
+reflect this redefinition, plus a new documented AUTH-04 error state ("confirma tu correo"
+inline message + resend action on a pre-confirmation login attempt, since that's now the
+only place a user discovers the block). This is a narrow correction to already-VERIFIED UX
+artifacts, not a full UX revision cycle — same pattern as prior post-review consistency
+fixes.
+
+**Downstream implication for E1-02** (which explicitly owns finalizing this soft-gate
+behavior per implementation-plan.md): E1-02 should build against teléfono-only soft-gating;
+correo-gating is already fully handled by E0-04's login flow and needs no further E1-02
+work.
+
+## 2026-09-02 — E0-04 VERIFIED
+
+Developer implemented registration (email/password via Supabase Auth), Supabase's native
+email-confirmation flow, role assignment at registration, and Next.js proxy/middleware
+enforcing `/familia/*`, `/ninera/*`, `/admin/*` route-group access by `profiles.role`.
+Surfaced a real conflict between architecture.md §6 (Supabase's native email-confirm flow,
+which blocks all sign-in pre-confirmation) and the original UX-spec.md/journeys.md
+soft-gate design (browse before confirming) — escalated rather than silently resolved (see
+the dedicated "E0-04: correo verification redefined as a hard login gate" entry above).
+
+Code Reviewer round 1: REVISE — one required fix (AUTH-04 needed a distinct "confirma tu
+correo" + resend-email error state for a login attempt on an unconfirmed account, a
+requirement that only existed because of the gating redefinition above, so the Developer's
+original implementation predated it through no fault of its own). Developer implemented
+`resendConfirmationEmailAction`, the login-form UI, and tests; also addressed 2 of 3
+optional minor items. Code Reviewer round 2: **PASS_WITH_MINOR_ISSUES**, no required
+changes remain, all 4 acceptance criteria pass. One low-probability edge case (orphaned
+`auth.users` row if `deleteUser` cleanup itself also fails) tracked as a non-blocking note,
+not fixed. Full history in agent/reviews/code-E0-04-review.md.
+
+54/54 tests pass; lint/typecheck/build/check:secrets/lockfile-consistency all clean.
+Empirical local-Supabase testing confirmed the hard email-confirmation gate, duplicate-email
+(422 `user_already_exists`), and role-based route redirects all behave as designed.
+
+**E0-04 marked VERIFIED.** E0-05 (Twilio Verify phone OTP) is now unblocked.
+
 ## 2026-09-02 — Standing authorization: git push + PR per BUILD story
 
 For the remainder of BUILD, the orchestrator may commit, push a branch, and open a PR for
