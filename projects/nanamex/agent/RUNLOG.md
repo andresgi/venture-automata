@@ -63,6 +63,18 @@ Next recommended action: E3-02 — ranking + computeMatches service.
 
 ---
 
+## 2026-09-03 — Developer + Code Reviewer
+
+Objective: E3-02 — ranking + `computeMatches` service.
+Result: Added the repository-backed matching service using E3-01 scoring, the modalidad
+hard filter, and deterministic ranking by score, profile completeness, created time, and id.
+Verification status is not read in ranking or tie-break logic. Code Review verdict
+PASS_WITH_MINOR_ISSUES. Full validation passed: 189 tests, lint, typecheck, secret scan,
+production build, and database tests. E3-02 marked VERIFIED.
+Next recommended action: E2-02 — FAM-03 review + publish with initial match computation.
+
+---
+
 ## 2026-09-02 — Developer + Code Reviewer
 
 Objective: E0-01 — Repository, tooling, and CI scaffold (Epic 0, first BUILD story, after

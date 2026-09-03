@@ -14,8 +14,8 @@ IN_PROGRESS
 
 ARCHITECTURE_GATE approved by human 2026-09-02 (see agent/DECISIONS.md). TECH_ARCHITECTURE
 VERIFIED. BUILD is proceeding per engineering/implementation-plan.md. Epic 0 Foundations
-and E1-01 through E1-03, E2-01, and E3-01 are verified; the next objective is E3-02,
-ranking and `computeMatches`.
+and E1-01 through E1-03, E2-01, E3-01, and E3-02 are verified; the next objective is
+E2-02, FAM-03 review + publish with initial match computation.
 
 ## Phase Status
 
@@ -91,9 +91,8 @@ matching remains separate by scope.
 
 ## Next Eligible Action
 
-E3-02: Developer implements ranking and `computeMatches`, dependent on E3-01, with
-verification status excluded from tie-break logic. E2-02 remains dependent on this callable
-matching service and can follow once E3-02 is available.
+E2-02: Developer implements FAM-03 review + publish, including initial match computation,
+dependent on E2-01 and the now-verified E3-02 matching callable.
 
 ## Human Blocker
 
