@@ -14,8 +14,8 @@ IN_PROGRESS
 
 ARCHITECTURE_GATE approved by human 2026-09-02 (see agent/DECISIONS.md). TECH_ARCHITECTURE
 VERIFIED. BUILD is proceeding per engineering/implementation-plan.md. Epic 0 Foundations,
-Epic 1 (E1-01–E1-03), E2-01 through E2-03, and E3-01/E3-02 are all VERIFIED; the next
-objective is E4-01, FAM-04 listado de candidatas (replacing E2-02's minimal placeholder).
+Epic 1 (E1-01–E1-03), E2-01 through E2-03, E3-01/E3-02, and E4-01 are all VERIFIED; the next
+objective is E4-02, FAM-05 filtros.
 
 ## Phase Status
 
@@ -68,24 +68,19 @@ E2-02 (FAM-03 publish + initial match computation — two real bugs found and fi
 Code Review/Functional QA cycles: a ranking tie-break field mismatch + RPC trust-boundary
 hardening, then a live `disponibilidad` casing bug zeroing the availability match factor
 for every real candidate, PR #12), E2-03 (FAM-02 dashboard, real card grid replacing the
-interim drafts-only placeholder, 2 minor findings fixed directly, PR pending).
+ interim drafts-only placeholder, 2 minor findings fixed directly, PR #13).
 
 **Epic 3 (Matching Engine) — fully VERIFIED**: E3-01 (hard filter + weighted scoring, PR
 #10), E3-02 (`computeMatches` ranking service, PR #11).
 
 Known limitations carried forward: `app/familia/loading.tsx`'s skeleton scope-bleeds to
 the whole `/familia/*` subtree (tracked, non-blocking, see E2-03's BACKLOG.md entry);
-active-necesidad editing remains unbuilt (E2-04's scope); FAM-04 (candidate listing) is
-still E2-02's minimal placeholder pending E4-01.
+active-necesidad editing remains unbuilt (E2-04's scope); FAM-05 filters and FAM-06 profile
+details remain unbuilt (E4-02/E4-03).
 
 ## Next Eligible Action
 
-E4-01: Developer implements FAM-04 listado de candidatas (default/empty/loading/error
-states per UI-SPEC.md, Match Score numeral + up to 3 checklist lines per card, `TrustBadge`
-present in all states without layout shift), replacing E2-02's minimal placeholder at
-`app/familia/necesidad/[id]/page.tsx`. Depends on E3-02 (VERIFIED). Check whether a
-`TrustBadge` component already exists anywhere in the codebase before building — if not,
-this story may need to build it fresh per design/UI-SYSTEM.md §4.1.
+E4-02: Developer implements FAM-05 filtros, dependent on E4-01.
 
 ## Human Blocker
 
