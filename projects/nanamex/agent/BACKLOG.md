@@ -242,10 +242,21 @@ agent/reviews/code-E0-05-review.md)
 
 #### E0-06 — Vercel deployment pipeline (preview + production)
 
-Status: READY (E0-01, E0-02 VERIFIED) — note: `nanamex-preview`/`nanamex-prod` Supabase
-projects still don't exist (deferred per E0-02's decision, see agent/DECISIONS.md); this
-story's "every PR gets a working preview URL against the preview Supabase project"
-acceptance criterion may need that dependency resolved first — flag to human if blocking.
+Status: VERIFIED (2026-09-03; `nanamex-preview` Supabase project created as a prerequisite,
+human-authorized Vercel CLI access; Code Reviewer round 1 REVISE — an undisclosed
+production-target deployment attempt in Vercel's history contradicted the documented
+"never tested" claim; Developer root-caused it as their own CLI setup activity (Vercel
+auto-classifies a brand-new project's first deployment as Production, compounded by a
+Root Directory resolution quirk from deploying out of a subdirectory), confirmed no
+content was ever served, confirmed it can't recur on real Git-triggered builds; round 2
+PASS, all 3 acceptance criteria verified independently against live Vercel API data — see
+agent/DECISIONS.md and agent/reviews/code-E0-06-review.md). Production Vercel env
+currently reuses `nanamex-dev` credentials (no dedicated `nanamex-prod` project yet) —
+explicitly flagged as a pre-RELEASE_GATE open item. Live end-to-end confirmation that a
+real merge to `main` shows deployment status "Ignored" is deferred to that first merge
+(human-approved deferral, not a gap in this story).
+
+**This completes Epic 0 (Foundations).**
 
 ## Change Requests
 

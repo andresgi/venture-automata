@@ -216,13 +216,28 @@ tooling grows materially past what a small internal team needs from two queues.
 
 ## 13. Deployment Strategy
 
-> **Build status (E0-02, 2026-09-02):** only the `nanamex-dev` Supabase project has been
-> provisioned so far. `preview` and `production` projects are deferred pending a human
-> decision on billing (the org already holds other paid projects; adding two more hosted
-> projects has cost implications that couldn't be confirmed programmatically — see
-> `agent/DECISIONS.md`). The design below is unchanged; this note only reflects current
-> provisioning state so later stories (e.g. E0-06 Vercel deployment pipeline) don't assume
-> `preview`/`production` already exist. See `README.md` "Supabase environments" for details.
+> **Build status (E0-06, 2026-09-03):** `nanamex-dev` and `nanamex-preview` Supabase
+> projects are provisioned (see `agent/DECISIONS.md` "2026-09-03 — E0-06 prerequisites").
+> There is still no dedicated `nanamex-prod` project — the Vercel **Production**
+> environment is deliberately pointed at `nanamex-dev`'s credentials for now (explicit
+> human-directed decision, flagged as a pre-`RELEASE_GATE` open item, not a permanent
+> choice). The Vercel project (`nanamex`, org `andres-projects-5977be21`) is linked to
+> `github.com/andresgi/venture-automata` with **Root Directory** `projects/nanamex`, so
+> builds correctly scope to this subdirectory of the monorepo. Every PR against `main`
+> gets an automatic preview deployment (Vercel comments the URL on the PR); production
+> deploys are prevented from happening automatically on merge via the project's **Ignored
+> Build Step** (`if [ "$VERCEL_ENV" == "production" ]; then echo "Skipping automatic
+> production deploy — production is a manual promotion (E0-06)."; exit 0; else exit 1;
+> fi` — skips the build whenever the deployment target is `production`, regardless of
+> trigger). The only way to put a build live in production is `vercel promote
+> <deployment>`, re-aliasing an already-built (and already-reviewed) deployment onto the
+> production domain without triggering a new build — a genuine manual promotion. See
+> `README.md` "Deployment (Vercel)" for the full current state, including a disclosed
+> incident where one of this story's own CLI commands was itself classified as a
+> production-target deployment (Vercel's documented "a new project's first deployment is
+> always Production" behavior) and failed for an unrelated Root-Directory reason before
+> ever serving anything — and why that specific failure mode does not carry over to a
+> real GitHub-triggered build.
 
 - Single environment split: `production` and `preview` (Vercel's per-PR preview
   deployments, pointed at a separate Supabase project used as a staging DB — never share a

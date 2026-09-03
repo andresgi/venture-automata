@@ -155,3 +155,33 @@ deferred decision) -- may need human input if that blocks the "preview URL per P
 criterion.
 
 ---
+
+## 2026-09-03 — Orchestrator + Developer + Code Reviewer
+
+Objective: E0-06 -- Vercel deployment pipeline (preview + production), last story of Epic 0.
+Result: Two prerequisites needed human involvement before starting: (1) nanamex-preview
+Supabase project didn't exist yet (E0-02's deferred decision) -- human chose to create it
+now; orchestrator provisioned it via Supabase CLI (ref okbwvbwxfywwvqaqpgcx, sa-east-1) and
+pushed all 9 existing migrations. (2) Connecting the repo to Vercel needed account
+credentials an agent shouldn't hold unilaterally -- human authenticated the Vercel CLI
+directly via device-code flow in-session. Developer then linked projects/nanamex to a new
+Vercel project, set Root Directory, configured environment variables per-environment
+(Production/Development -> nanamex-dev, Preview -> nanamex-preview), configured Vercel's
+Ignored Build Step as the production-manual-promotion mechanism, and produced a real,
+verified preview deployment. Code Reviewer round 1: REVISE -- independently verified the
+Ignored Build Step exit-code logic was correct (not inverted) and env var scoping was
+correct, but found an undisclosed production-target deployment attempt in Vercel's
+history that contradicted the documented "never tested" claim. Developer investigated and
+confirmed via Vercel API metadata it was their own CLI activity during initial setup (a
+brand-new project's first deployment auto-classified as Production, compounded by a Root
+Directory resolution quirk from deploying out of a subdirectory) -- no content was ever
+served, and confirmed this can't recur on real Git-triggered builds. Docs corrected
+(README.md incident section, architecture.md Sec.13). Code Reviewer round 2: PASS, all 3
+acceptance criteria independently verified against live Vercel API data. E0-06 marked
+VERIFIED. This completes Epic 0 (Foundations).
+Artifacts changed: README.md, engineering/architecture.md Sec.13,
+agent/reviews/code-E0-06-review.md. No application code changed (pure infra/config + docs).
+Next recommended action: E1-01 -- AUTH-01 Landing + role selection, first story of Epic 1
+(Familia Onboarding).
+
+---
