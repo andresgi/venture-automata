@@ -322,6 +322,81 @@ before merge. Full report in agent/reviews/code-E0-05-review.md.
 **E0-05 marked VERIFIED.** E0-06 (Vercel deployment pipeline) is now unblocked — this
 completes all of Epic 0 (Foundations) except E0-06.
 
+## 2026-09-03 — E0-06 prerequisites: nanamex-preview created, Vercel CLI authorized
+
+Before starting E0-06 (Vercel deployment pipeline), two prerequisites needed human
+involvement rather than agent guessing:
+
+1. **`nanamex-preview` Supabase project created.** E0-06's stated acceptance criterion
+   ("every PR gets a working preview URL against the preview Supabase project") assumes a
+   preview project exists, but E0-02 deliberately deferred creating it (see the 2026-09-02
+   "E0-02: Supabase preview/prod project creation deferred" entry above). Asked the human
+   whether to create it now or scope E0-06 to production-only; **human chose to create it
+   now.** Orchestrator provisioned `nanamex-preview` (ref `okbwvbwxfywwvqaqpgcx`,
+   `sa-east-1`, same org/region as `nanamex-dev`) via the Supabase CLI and pushed all 9
+   existing migrations to it (`supabase db push --linked`), confirmed applied. Its `zonas`
+   table has the correct schema but has not been seeded (same known limitation as
+   `nanamex-dev` — no remote DB credentials in this session to run `seed.sql` against a
+   hosted project directly). `nanamex-prod` (a distinct production project, separate from
+   `nanamex-dev`) has NOT been created — see the open item below.
+
+2. **Vercel CLI access.** Connecting the GitHub repo to Vercel and configuring
+   per-environment env vars requires a Vercel account login — an external-system action an
+   agent should not take unilaterally without human authorization (per AGENTS.md's
+   production-system caution and the same reasoning applied to Supabase project creation).
+   Asked the human how to proceed; **human chose to authenticate the Vercel CLI directly**
+   (ran `vercel login` themselves via the device-code flow in this session, confirmed via
+   `vercel whoami` → `andresgi`). The CLI's auth token persists at
+   `~/Library/Application Support/com.vercel.cli`, accessible to any agent in this
+   environment — the Developer building E0-06 does not need to re-authenticate.
+
+**Open item for RELEASE_GATE / when actually needed:** this venture currently has
+`nanamex-dev` (development) and `nanamex-preview` (Vercel per-PR previews) but no
+dedicated `nanamex-prod` project — `architecture.md` §13's three-environment design
+(development/preview/production, never sharing a DB) is not yet fully realized. E0-06
+should build against `nanamex-dev` as production for now (flag this explicitly, don't
+silently treat `nanamex-dev` as permanent production) and this gap should be revisited
+before RELEASE_GATE.
+
+## 2026-09-03 — E0-06: production-skip mechanism verified correct; documentation corrected after Code Review caught an undisclosed deployment
+
+Developer configured Vercel's "Ignored Build Step" (`commandForIgnoringBuildStep`) as the
+mechanism enforcing "production deploy is a manual promotion, never automatic on merge to
+`main`," and reported deliberately not testing the production-skip branch live (to avoid
+risking an unauthorized production deployment), which the human accepted on Vercel's
+documented behavior, deferring live verification to the first real merge to `main`.
+
+**Code Reviewer caught a discrepancy**: live Vercel deployment history showed an actual
+production-target deployment attempt (status `Error`) that contradicted the "never
+tested" framing. Investigation (Developer, on request) confirmed via Vercel API metadata
+(`source: cli`, `creator: andresgi`) that this was the Developer's own `npx vercel deploy`
+run from `projects/nanamex/` during initial setup — not a deliberate test, not a git-
+integration race, and not an inverted Ignored Build Step. Root cause: (1) Vercel
+auto-classifies a brand-new project's very first deployment as Production regardless of
+branch (documented platform behavior), and (2) running `vercel deploy` from a
+subdirectory uploads only that subdirectory as the source tree, so the configured Root
+Directory (`projects/nanamex`) couldn't be found inside it — the deployment failed at
+file-setup time, before the Ignored Build Step logic ever ran. Confirmed no content was
+ever served (production alias returned `404 DEPLOYMENT_NOT_FOUND`) — no security exposure.
+Confirmed this failure mode is specific to CLI-local partial-tree uploads and **cannot
+recur** on a genuine GitHub-triggered production build, since Vercel's Git integration
+always starts from a full repository clone at its root.
+
+**Separately, independently verified by Code Reviewer**: the Ignored Build Step's actual
+exit-code logic (`exit 0` when `VERCEL_ENV == production`, `exit 1` otherwise) is
+objectively correct against Vercel's own documented convention ("if the command returns 0,
+the build is skipped; 1+ proceeds") — not inverted. Env var scoping (Production/
+Development → `nanamex-dev`, Preview → `nanamex-preview`) was independently confirmed via
+hash comparison.
+
+`README.md` and `engineering/architecture.md` §13 updated with a full incident disclosure
+(both deployment IDs, root cause, confirmation nothing was served, why it can't recur, and
+a preventive note to always deploy from the monorepo root for this project).
+
+**Standing plan unchanged: verify empirically at the first real merge to `main` that the
+resulting deployment shows status "Ignored."** Not a blocker for marking E0-06 VERIFIED
+now — the documentation-accuracy issue that blocked the first review pass is resolved.
+
 ## 2026-09-02 — Standing authorization: git push + PR per BUILD story
 
 For the remainder of BUILD, the orchestrator may commit, push a branch, and open a PR for

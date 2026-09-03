@@ -65,17 +65,29 @@ credentials yet — all testing mocked per the story's own validation note; manu
 test against Twilio's test credentials deferred to a pre-RELEASE_GATE checklist item.
 PR pending.
 
-This completes all of Epic 0 (Foundations) except E0-06. Next: delegating E0-06 (Vercel
-deployment pipeline) to Developer — note its acceptance criteria assume a preview Supabase
-project that doesn't exist yet (E0-02's deferred decision); may need to flag to human if
-that's a hard blocker for the "preview URL per PR" criterion.
+E0-06 VERIFIED 2026-09-03 (Vercel deployment pipeline: repo connected, Root Directory
+scoped to `projects/nanamex`, env vars set per-environment, Ignored Build Step configured
+and independently verified correct against Vercel's documented convention; `nanamex-preview`
+Supabase project created as a prerequisite; two Code Reviewer cycles — round 1 caught an
+undisclosed production-target deployment attempt in Vercel's history, root-caused as the
+Developer's own CLI setup activity, no content ever served, confirmed it can't recur on
+real Git-triggered builds; round 2 PASS — see agent/DECISIONS.md). PR pending.
+
+**Epic 0 (Foundations) is now fully complete.** Production Vercel env currently reuses
+`nanamex-dev` credentials (no dedicated `nanamex-prod` project yet) — flagged as a
+pre-RELEASE_GATE open item. Live confirmation that a real merge to `main` shows deployment
+status "Ignored" is deferred to that first merge (human-approved).
+
+Next: delegating E1-01 (AUTH-01 Landing + role selection) to Developer — the first story
+of Epic 1 (Familia Onboarding).
 
 ## Next Eligible Action
 
-E0-06: Developer connects the repo to Vercel, configures environment variables per
-environment, confirms preview deployments work per-PR, per
-engineering/implementation-plan.md. This is the last Epic 0 story. Code Reviewer review
-after. Work resumes directly on `main` (no pending unmerged PRs).
+E1-01: Developer implements the AUTH-01 landing page + role selection per
+design/UI-SPEC.md, routing into AUTH-02 (registration) with the role pre-filled. Depends
+on E0-04 (VERIFIED). Per implementation-plan.md, this story requires Visual QA against
+UI-SPEC.md AUTH-01 (confirm no child imagery present) — check config/CONSTRAINTS.md's QA
+Ownership section for whether this is agent-drivable or manual before delegating.
 
 ## Human Blocker
 
