@@ -222,3 +222,27 @@ Next recommended action: E1-02 -- AUTH-02/03 registration + verification (famili
 finalizing the teleofono-only soft-gate flow per journeys.md J-FAM-1.
 
 ---
+
+## 2026-09-03 — Developer + Code Reviewer
+
+Objective: E1-02 -- AUTH-02/03 registration + verification (familia), Epic 1.
+Result: Story's literal acceptance criteria referenced FAM-01 (E1-03, depends on this
+story) and server-side Contactar/entitlement enforcement (E5-01, several epics away) --
+neither exists yet, so orchestrator narrowed the delegated scope before starting: confirm/
+fix the correo-hard-gate + teleofono-soft-gate flow for what's buildable today, defer the
+rest explicitly. Developer found most of the flow was already correct from E0-04/E0-05,
+but found a real gap: UI-SPEC.md's AUTH-03 spec requires a "Continuar" action on
+/verificar that proceeds regardless of teleofono status -- no such action existed, only an
+OTP-submit button itself mislabeled "Continuar." Fixed: added the actual unconditional
+soft-gate "Continuar" link (targets role home) and renamed the OTP-submit button to
+"Verificar" to disambiguate. Code Reviewer: PASS, no required changes --
+independently verified route gating (proxy.ts/route-access.ts) is genuinely role-only,
+the new Continuar link has no defeating conditional, the button rename doesn't break
+existing tests, and the scope reduction was legitimate (confirmed FAM-01/Contactar
+genuinely don't exist yet). E1-02 marked VERIFIED.
+Artifacts changed: app/verificar/page.tsx, components/auth/phone-verification-form.tsx,
+tests/app/verificar.test.tsx (new), agent/reviews/code-E1-02-review.md.
+Next recommended action: E1-03 -- FAM-01 onboarding perfil familiar (nombre + zona,
+replacing the /familia placeholder).
+
+---

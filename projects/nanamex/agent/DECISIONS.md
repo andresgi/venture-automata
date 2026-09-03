@@ -441,6 +441,32 @@ CC BY 2.0, verified no-child-imagery) for now.** Tracked as a pre-RELEASE_GATE i
 revisit with either a paid stock license, an Unsplash/Pexels API key, or a human-supplied
 image, whichever is most practical when the venture is closer to real launch.
 
+## 2026-09-03 — E1-02 scoped down and VERIFIED
+
+E1-02's stated acceptance criteria (engineering/implementation-plan.md) reference FAM-01
+(story E1-03, which depends on E1-02) and a server-side `Contactar`/entitlement check
+(story E5-01, several epics away) — neither exists yet in the codebase, so those criteria
+cannot be built or tested against right now. Orchestrator narrowed the delegated scope
+before starting: confirm/fix the correo-hard-gate + teléfono-soft-gate flow end-to-end for
+what's actually buildable today, and explicitly defer the rest rather than stub it out.
+
+Developer confirmed most of the flow was already correct from E0-04/E0-05, but found a
+real gap: design/UI-SPEC.md's AUTH-03 spec requires a "Continuar" action on `/verificar`
+that proceeds regardless of teléfono-verification status — no such action existed; the
+OTP-submit button was itself mislabeled "Continuar," conflating "submit the code" with
+"skip ahead." Fixed: added the actual soft-gate "Continuar" link (unconditional, targets
+the user's role home) and renamed the OTP-submit button to "Verificar" to disambiguate.
+
+Code Reviewer: PASS, no required changes. Independently verified route gating
+(`proxy.ts`/`route-access.ts`) is genuinely role-only, never conditioned on
+`phone_verified`; the new "Continuar" link has no leftover conditional that would defeat
+the soft gate; the button rename doesn't break any existing test; and the scope reduction
+was legitimate (FAM-01/Contactar genuinely don't exist yet).
+
+**E1-02 marked VERIFIED.** Deferred: FAM-01 (E1-03), Contactar/entitlement enforcement
+(E5-01), and a "cuenta no verificada" banner UI treatment (unbuilt anywhere — flagged for
+whichever of FAM-13/FAM-01 builds it first).
+
 ## 2026-09-02 — Standing authorization: git push + PR per BUILD story
 
 For the remainder of BUILD, the orchestrator may commit, push a branch, and open a PR for

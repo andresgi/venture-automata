@@ -127,7 +127,7 @@ export function PhoneVerificationForm() {
           disabled={isConfirming}
           className="h-11 bg-zinc-900 text-sm font-medium text-white disabled:opacity-60"
         >
-          {isConfirming ? "Verificando…" : "Continuar"}
+          {isConfirming ? "Verificando…" : "Verificar"}
         </button>
       </form>
     </div>
