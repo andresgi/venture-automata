@@ -13,9 +13,9 @@ IN_PROGRESS
 ## Current Objective
 
 ARCHITECTURE_GATE approved by human 2026-09-02 (see agent/DECISIONS.md). TECH_ARCHITECTURE
-VERIFIED. BUILD is proceeding per engineering/implementation-plan.md. Epic 0 Foundations
-and E1-01 through E1-03, E2-01, E3-01, and E3-02 are verified; the next objective is
-E2-02, FAM-03 review + publish with initial match computation.
+VERIFIED. BUILD is proceeding per engineering/implementation-plan.md. Epic 0 Foundations,
+E1-01 through E1-03, E2-01, E2-02, E3-01, and E3-02 are all VERIFIED; the next objective is
+E2-03, FAM-02 dashboard (Mis necesidades).
 
 ## Phase Status
 
@@ -89,10 +89,38 @@ review at 375/430/768/1440px; see agent/reviews/code-E2-01-review.md,
 agent/qa/e2-01-functional-qa.md, and agent/qa/e2-01-visual-qa.md). E2-02 review/publication/
 matching remains separate by scope.
 
+E3-01 VERIFIED 2026-09-03 (Match Score hard filter + weighted scoring engine, Code Review
+PASS_WITH_MINOR_ISSUES). E3-02 VERIFIED 2026-09-03 (repository-backed `computeMatches`
+ranking service, Code Review PASS_WITH_MINOR_ISSUES). Both merged into `main` (PRs #10,
+#11) before this session picked up.
+
+**Continuity note:** this session resumed in a different tool than the one that completed
+E1-03 through E3-02. On resuming, E2-02's implementation and its first Code Review (verdict
+REVISE) were found as uncommitted changes directly on `main`'s working tree (not a feature
+branch, a deviation from convention, but real in-progress work) — moved onto a proper
+feature branch (`nanamex/e2-02-publish-matching`) without discarding anything, then the
+review loop continued normally. See agent/DECISIONS.md "E2-02 continuity" entry.
+
+E2-02 VERIFIED 2026-09-03 (FAM-03 revisión + publicar: publish transitions borrador→activa
+server-side, computes and atomically persists initial match/pipeline snapshots, redirects
+to FAM-04 populated or empty. Code Review round 1 REVISE — 3 required fixes (ranking
+tie-break field mismatch, RPC trust-boundary hardening against arbitrary/ineligible
+candidates, broken empty-state edit link); round 2 PASS_WITH_MINOR_ISSUES. Functional QA
+(real local Supabase) then found a new High-severity bug in the previously-untested
+populated-candidates path — a `disponibilidad` snake_case/camelCase mismatch silently
+zeroing the availability match factor for every real candidate, already live today, not
+just a future risk as first assessed; fixed and both Code Review and Functional QA
+re-verified PASS. See agent/reviews/code-E2-02-review.md (three rounds preserved) and
+agent/qa/e2-02-functional-qa.md. Known limitation: `/familia` doesn't yet list active
+necesidades, so the empty-state recovery link has limited value until E2-03; active-
+necesidad editing remains E2-04's scope). PR pending.
+
 ## Next Eligible Action
 
-E2-02: Developer implements FAM-03 review + publish, including initial match computation,
-dependent on E2-01 and the now-verified E3-02 matching callable.
+E2-03: Developer implements FAM-02 dashboard (Mis necesidades) — card grid, pipeline
+summary counts, empty/loading states, per UI-SPEC.md FAM-02. Depends on E2-02 (VERIFIED).
+This will also resolve E2-02's known limitation (no dashboard listing for active
+necesidades).
 
 ## Human Blocker
 

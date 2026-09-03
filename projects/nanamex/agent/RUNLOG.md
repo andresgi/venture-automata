@@ -330,3 +330,33 @@ agent/reviews/code-E1-03-review.md, agent/qa/e1-03-visual-qa.md, and agent state
 Next recommended action: E2-01 — FAM-03 wizard, steps 1–7 plus draft autosave.
 
 ---
+
+## 2026-09-03 — Developer + Code Reviewer + Functional QA (session continuity)
+
+Objective: E2-02 -- FAM-03 revision + publicar (publish, initial match computation,
+redirect to FAM-04), Epic 2. This entry covers a different tool session picking up mid-
+flight: E1-03 through E3-02 had already been completed and merged (PRs #8-#11) by a prior
+session before this one resumed. E2-02's implementation and its first Code Review (verdict
+REVISE) were found as uncommitted changes directly on main's working tree -- moved onto a
+proper feature branch (nanamex/e2-02-publish-matching) without discarding anything, then
+the review loop continued.
+Result: Code Review round 1 REVISE -- 3 required fixes (a profile_completeness/
+perfil_completo field mismatch defeating the ranking tie-break; the publish RPC trusted
+arbitrary/ineligible candidate IDs and snapshots with no server-side re-validation; a
+broken "Editar necesidad" empty-state link for published necesidades). Developer fixed
+all three, regression-testing each by reverting and confirming failures, then restoring.
+Code Review round 2: PASS_WITH_MINOR_ISSUES. Functional QA (real local Supabase, not
+mocks) then exercised the previously-untested populated-candidates path and found a new
+High-severity bug: a disponibilidad snake_case/camelCase mismatch silently zeroed the
+25-point availability match factor for every real candidate -- already live today, not a
+future-only risk as first assessed. Developer fixed it (mirrored the existing correct
+translation pattern), fixed the masking test fixture, added a regression test. Code Review
+and Functional QA both re-verified: PASS. E2-02 marked VERIFIED.
+Artifacts changed: actions/necesidad.ts, db/migrations/20260903000011_necesidad_publish_pipeline.sql,
+app/familia/necesidad/[id]/page.tsx, scripts/test-necesidad-rpc.sql,
+tests/actions/necesidad.test.ts, agent/reviews/code-E2-02-review.md (three rounds),
+agent/qa/e2-02-functional-qa.md.
+Next recommended action: E2-03 -- FAM-02 dashboard (Mis necesidades), which will also
+resolve E2-02's known limitation (no dashboard listing for active necesidades).
+
+---

@@ -333,6 +333,43 @@ responsibilities, anchored desktop rail, desktop/mobile autosave controls, resum
 server-side validation/authorization, and atomic RPC persistence. E2-02 review/publication is
 explicitly deferred.
 
+#### E2-02 — FAM-03 revisión + publicar
+
+Status: VERIFIED (2026-09-03; implementation picked up mid-flight from a separate tool
+session — see agent/DECISIONS.md "E2-02 continuity" entry. Code Reviewer round 1 REVISE
+(3 required changes: profile_completeness/perfil_completo field mismatch defeating the
+ranking tie-break; publish RPC trusted arbitrary/ineligible candidate IDs and snapshots
+with no server-side re-validation; broken "Editar necesidad" empty-state link for
+published necesidades). Developer fixed all 3, regression-tested each fix by reverting and
+confirming the new tests fail, then restoring. Code Reviewer round 2: PASS_WITH_MINOR_ISSUES.
+Functional QA (real local Supabase, not mocks) found a new High-severity bug in the
+previously-untested populated-candidates path — `disponibilidad` snake_case/camelCase
+mismatch silently zeroed the 25-point availability match factor for every real candidate,
+already live today, not a future-only risk as first assessed. Developer fixed (mirrored
+the existing correct translation pattern), Code Reviewer and Functional QA both
+independently re-verified: PASS. See agent/reviews/code-E2-02-review.md (three review
+rounds preserved) and agent/qa/e2-02-functional-qa.md.
+
+**Known limitation carried forward:** `/familia`'s dashboard doesn't yet list active
+necesidades, so the empty-state's "Volver a mis necesidades" recovery link, while no
+longer broken, has limited practical value until E2-03/E2-04. Editing an active necesidad
+remains genuinely unbuilt (E2-04's scope).
+
+Dependencies: E2-01, E3-02.
+
+Objective:
+
+Add the review step for a completed necesidad, publish it from `borrador` to `activa`,
+trigger initial match computation, and redirect to FAM-04 with populated or empty results.
+
+Acceptance criteria:
+
+- [x] Publish transitions `estado: borrador -> activa` server-side.
+- [x] Publishing calls `computeMatches` and persists the initial match/pipeline results.
+- [x] Successful publish redirects to FAM-04.
+- [x] Zero eligible niñeras reaches the documented FAM-04 empty state instead of an error.
+- [x] Server-side authorization prevents publishing another family's draft.
+
 Validation: `npm test -- --run` (21 files, 142 tests), `npm run test:db`, `npm run lint`,
 `npm run typecheck`, `npm run check:secrets`, and `npm run build` all pass. Build emits only
 the existing Supabase Node 20 deprecation warning.

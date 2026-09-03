@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createServerSupabaseClient } from "@/lib/supabase/auth-server";
 import { createServiceRoleClient } from "@/lib/supabase/server";
@@ -44,11 +45,11 @@ export default async function FamiliaHomePage() {
         <UnauthorizedBanner />
       </Suspense>
       <h1 className="text-2xl font-semibold">Mis necesidades</h1>
-       <a href="/familia/necesidad" className="rounded-sm bg-primary-600 px-4 py-3 text-button text-white">Crear necesidad</a>
+       <Link href="/familia/necesidad" className="rounded-sm bg-primary-600 px-4 py-3 text-button text-white">Crear necesidad</Link>
     </main>
   );
 }
 
 function FamiliaDashboard({ drafts }: { drafts: { id: string; updated_at: string }[] }) {
-  return <main className="flex min-h-screen flex-col gap-4 p-8"><Suspense fallback={null}><UnauthorizedBanner /></Suspense><h1 className="text-2xl font-semibold">Mis necesidades</h1><a href="/familia/necesidad" className="w-fit rounded-sm bg-primary-600 px-4 py-3 text-button text-white">Crear necesidad</a>{drafts.map((draft) => <article key={draft.id} className="border border-border p-4"><p className="text-body">Borrador de necesidad</p><a href={`/familia/necesidad?draft=${draft.id}`} className="text-body-sm text-primary-700">Continuar borrador</a></article>)}</main>;
+  return <main className="flex min-h-screen flex-col gap-4 p-8"><Suspense fallback={null}><UnauthorizedBanner /></Suspense><h1 className="text-2xl font-semibold">Mis necesidades</h1><Link href="/familia/necesidad" className="w-fit rounded-sm bg-primary-600 px-4 py-3 text-button text-white">Crear necesidad</Link>{drafts.map((draft) => <article key={draft.id} className="border border-border p-4"><p className="text-body">Borrador de necesidad</p><Link href={`/familia/necesidad?draft=${draft.id}`} className="text-body-sm text-primary-700">Continuar borrador</Link></article>)}</main>;
 }
