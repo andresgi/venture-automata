@@ -1,26 +1,108 @@
 @import "tailwindcss";
 
+/*
+ * Design tokens wired from design/UI-SYSTEM.md. E1-01 is the first BUILD story to wire
+ * the real design system in (Epic 0's auth screens deliberately used plain Tailwind
+ * neutral grays as a placeholder -- see agent/RUNLOG.md E0-04/E0-05 entries). Only the
+ * tokens actually needed by screens built so far (AUTH-01 landing + the existing
+ * AUTH-02..05 forms) are wired here -- see §7 below for what's intentionally deferred.
+ */
+@theme {
+  /* Neutrals (warm, not cool gray) -- UI-SYSTEM §3.1 */
+  --color-bg: #fbf8f3;
+  --color-bg-raised: #ffffff;
+  --color-border: #e8e1d6;
+  --color-border-strong: #d8cfc0;
+  --color-ink-900: #241f19;
+  --color-ink-600: #5c554a;
+  --color-ink-400: #8f877a;
+  --color-ink-200: #c9c1b3;
+
+  /* Brand accent (terracotta) -- UI-SYSTEM §3.2 */
+  --color-primary-50: #fbeae1;
+  --color-primary-100: #f3cbb4;
+  --color-primary-600: #c1522c;
+  --color-primary-700: #9c4020;
+
+  /* Danger (destructive/error only) -- UI-SYSTEM §3.4 */
+  --color-danger-50: #fbeae8;
+  --color-danger-600: #b3261e;
+  --color-danger-700: #8c1e17;
+
+  /*
+   * Border radius -- UI-SYSTEM §0.6. Tailwind's `--radius-*` theme namespace maps
+   * directly onto the `rounded-sm`/`rounded-md`/`rounded-lg` utilities, so overriding
+   * these three keys here is enough -- no new utility names needed. `rounded-full`
+   * keeps Tailwind's own default (already 9999px, matches `--radius-full`).
+   */
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+
+  --font-sans: var(--font-inter);
+}
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  /* UI-SYSTEM §3.1 -- modal/sheet scrim. Not used by any screen built yet; kept as a
+     token now that other §3.1 neutrals are wired, so later stories reference it instead
+     of re-deriving the value. */
+  --overlay-scrim: rgba(36, 31, 25, 0.45);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-inter), sans-serif;
+}
+
+/*
+ * Type scale -- UI-SYSTEM §1. Implemented as plain CSS classes rather than Tailwind
+ * `--text-*` theme tokens because several of these have distinct mobile/desktop sizes,
+ * which that theme namespace doesn't express per-token. The 1024px breakpoint below
+ * matches UI-SYSTEM §2's `lg >= 1024px` (also Tailwind's own default `lg:` breakpoint --
+ * kept in sync deliberately).
+ *
+ * Only the tokens actually used by screens built so far are defined (display, h1, body,
+ * body-sm, button) -- the rest land with the screens that need them, per this story's
+ * "only what E1-01 touches" scope.
+ */
+.text-display {
+  font-family: var(--font-fraunces), serif;
+  font-weight: 500;
+  font-size: 32px;
+  line-height: 38px;
+}
+
+.text-h1 {
+  font-weight: 600;
+  font-size: 22px;
+  line-height: 28px;
+}
+
+.text-body {
+  font-weight: 400;
+  font-size: 15px;
+  line-height: 22px;
+}
+
+.text-body-sm {
+  font-weight: 400;
+  font-size: 13px;
+  line-height: 18px;
+}
+
+.text-button {
+  font-weight: 500;
+  font-size: 15px;
+  line-height: 20px;
+}
+
+@media (min-width: 1024px) {
+  .text-display {
+    font-size: 56px;
+    line-height: 60px;
+  }
+
+  .text-h1 {
+    font-size: 26px;
+    line-height: 32px;
+  }
 }
