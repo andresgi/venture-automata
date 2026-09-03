@@ -64,7 +64,15 @@ and Contactar/entitlement enforcement, neither of which exists yet — deferred 
 E1-03/E5-01 rather than stubbed out; found and fixed a real gap — `/verificar` lacked the
 spec-required "Continuar" soft-gate action, only a mislabeled OTP-submit button; Code
 Reviewer PASS, no required changes, independently verified route gating is genuinely
-role-only — see agent/DECISIONS.md). PR pending.
+role-only — see agent/DECISIONS.md). PR #7 merged into `main` 2026-09-03.
+
+**Standing authorization for an unattended overnight run recorded 2026-09-03** (see
+agent/DECISIONS.md) — orchestrator may auto-merge BUILD-story PRs once CI + Code
+Review/QA pass, without pausing for per-PR human approval, and continue straight to the
+next eligible action. Scope: BUILD-story PRs only; human gates (PRODUCT_GATE,
+ARCHITECTURE_GATE, RELEASE_GATE) and any production-deployment/destructive-data/force-push
+action still require explicit approval as before. Stop conditions: a genuinely BLOCKED
+item, 3 failed review cycles on the same task, or a human gate.
 
 Next: delegating E1-03 (FAM-01 onboarding perfil familiar) to Developer.
 
