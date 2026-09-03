@@ -431,6 +431,26 @@ the ranking/tie-break path. E2-02 can call this service when implementing public
 Validation: `npm test` (189 tests), `npm run lint`, `npm run typecheck`,
 `npm run check:secrets`, and `npm run build` all pass.
 
+### E4-01 — FAM-04 listado de candidatas
+
+Status: VERIFIED (2026-09-03; Code Review PASS_WITH_MINOR_ISSUES after fixes; Functional QA
+PASS_WITH_MINOR_ISSUES with accepted scope exception)
+
+Dependencies: E3-02.
+
+Delivered: populated, empty, loading, and retry states; candidate cards with avatar/name,
+live TrustBadge, Match Score, and Spanish checklist labels; collapsible necesidad summary;
+current candidate eligibility filtering; deterministic snapshot/live-row ranking; and safe
+handling for missing live candidate records. FAM-05 filtering, FAM-06 profile details, and
+favorites remain deferred to their owning stories.
+
+Accepted scope exception: the empty-state action remains `Volver a mis necesidades` linking
+to `/familia`. The UI spec says `Editar necesidad`, but editing an already-published necesidad
+is E2-04 scope and is not implemented or faked here (human decision 2026-09-03).
+
+Validation: `npm test -- --run --no-file-parallelism` (225 tests), `npm run lint`,
+`npm run typecheck`, `npm run check:secrets`, and `npm run build` all pass.
+
 ## Change Requests
 
 Ad-hoc, non-PRD asks made directly in chat (see AGENTS.md, "Change Requests"). Use `CR-NNN`

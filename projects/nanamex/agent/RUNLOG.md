@@ -387,3 +387,15 @@ Next recommended action: E4-01 -- FAM-04 listado de candidatas, replacing E2-02'
 placeholder. Check whether a TrustBadge component exists yet before building.
 
 ---
+
+## 2026-09-03 — E4-01 Developer + Code Reviewer + Functional QA
+
+Objective: E4-01 -- FAM-04 listado de candidatas.
+Result: Replaced the E2-02 placeholder with populated/empty/loading/retry states, candidate
+cards, live verification badges, match scores/checklists, collapsible necesidad summary, and
+current eligibility filtering. Fixed review findings for deterministic ranking, stale candidate
+filtering, missing live-row handling, and test harness assumptions. Human accepted the honest
+dashboard CTA while deferring published-necesidad editing to E2-04.
+Validation: 225 tests, lint, typecheck, check:secrets, and production build pass. E4-01 marked
+VERIFIED.
+Next recommended action: E4-02 -- FAM-05 filtros.

@@ -604,3 +604,10 @@ tokens. Card action links measured only 18px tall on mobile (below the 44px touc
 convention) — fixed with `min-h-11`.
 
 **E2-03 marked VERIFIED.** 198/198 tests pass after fixes.
+## 2026-09-03 — E4-01 empty-state recovery CTA scope accepted
+
+FAM-04's UI specification calls for an `Editar necesidad` action in the no-candidates state.
+The implementation retains the honest `Volver a mis necesidades` action because editing an
+already-published necesidad is explicitly owned by E2-04 and is not yet implemented. Human
+approved retaining the current behavior rather than introducing a misleading link or pulling
+E2-04 into E4-01.

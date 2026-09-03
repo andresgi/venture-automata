@@ -30,6 +30,27 @@
   --color-danger-700: #8c1e17;
 
   /*
+   * Trust states (reserved, three hues only) -- UI-SYSTEM §3.3. Wired here for the first
+   * time by E4-01 (`TrustBadge`, §4.1). "No verificada" deliberately has no dedicated hue
+   * (it reuses the ink-600/border-strong/bg-raised neutrals already defined above) -- only
+   * the amber "en proceso" and teal "verificada" hues are new tokens.
+   *
+   * NOTE: UI-SYSTEM §3.3's table only lists two hex values for the
+   * `trust-verified-50 / 600 / 800` row (#E7F5EE / #1F7A5C) -- the darkest "800" shade
+   * (label text on the light-50 badge background, mirroring the pattern the pending row
+   * does specify all three shades for) is missing from the source document. `#144F3C`
+   * below is a same-hue darkening of `trust-verified-600` at roughly the lightness-
+   * reduction ratio the documented `trust-pending-600 -> 800` step uses, not a value taken
+   * directly from UI-SYSTEM.md. Flagged for the UI Designer/reviewer to confirm or replace.
+   */
+  --color-trust-pending-50: #fcf2de;
+  --color-trust-pending-600: #b8791a;
+  --color-trust-pending-800: #7a4e0c;
+  --color-trust-verified-50: #e7f5ee;
+  --color-trust-verified-600: #1f7a5c;
+  --color-trust-verified-800: #144f3c;
+
+  /*
    * Border radius -- UI-SYSTEM §0.6. Tailwind's `--radius-*` theme namespace maps
    * directly onto the `rounded-sm`/`rounded-md`/`rounded-lg` utilities, so overriding
    * these three keys here is enough -- no new utility names needed. `rounded-full`
@@ -66,7 +87,7 @@ body {
  * `caption` were added by E2-03 (FAM-02 dashboard) -- `h2` had already been referenced by
  * E2-02's FAM-04 placeholder (app/familia/necesidad/[id]/page.tsx) without ever being
  * defined here, a latent gap this story closes as a side effect of needing the same token
- * itself.
+ * itself. `numeral-lg` added by E4-01 (FAM-04's Match Score numeral, §4.3).
  */
 .text-display {
   font-family: var(--font-fraunces), serif;
@@ -118,6 +139,12 @@ body {
   line-height: 20px;
 }
 
+.text-numeral-lg {
+  font-weight: 700;
+  font-size: 28px;
+  line-height: 32px;
+}
+
 @media (min-width: 1024px) {
   .text-display {
     font-size: 56px;
@@ -137,5 +164,10 @@ body {
   .text-headline {
     font-size: 34px;
     line-height: 40px;
+  }
+
+  .text-numeral-lg {
+    font-size: 34px;
+    line-height: 38px;
   }
 }
