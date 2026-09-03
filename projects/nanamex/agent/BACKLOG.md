@@ -215,11 +215,16 @@ hosted nanamex-dev instance; see agent/RUNLOG.md)
 
 #### E0-03 — Core schema migration: `profiles`, `perfil_familiar`, `perfil_ninera`, `zonas`
 
-Status: READY (E0-02 VERIFIED)
+Status: VERIFIED (2026-09-02; Code Reviewer round 1 REVISE — 5 Important RLS/FK/CI issues,
+all fixed via follow-up migration `20260902000007_security_hardening.sql`; round 2
+PASS_WITH_MINOR_ISSUES, one trivial README doc-lag fixed directly by orchestrator; launch
+city corrected mid-story from an unspecified default to Monterrey, human decision, see
+agent/DECISIONS.md; migrations pushed to hosted `nanamex-dev`, confirmed applied; see
+agent/RUNLOG.md and agent/reviews/code-E0-03-review.md)
 
 #### E0-04 — Auth wiring: Supabase Auth + role-based middleware
 
-Status: BLOCKED (depends on E0-03)
+Status: READY (E0-03 VERIFIED)
 
 #### E0-05 — Twilio Verify integration (phone OTP)
 

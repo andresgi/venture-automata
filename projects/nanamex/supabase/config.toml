@@ -61,10 +61,10 @@ schema_paths = []
 
 [db.seed]
 # If enabled, seeds the database after migrations during a db reset.
-# Disabled for now: no seed.sql exists yet. The `zonas` reference-table seed script is
-# E0-03's scope (engineering/implementation-plan.md) — re-enable and point sql_paths at it
-# there, not here.
-enabled = false
+# Enabled per E0-03 (engineering/implementation-plan.md): seed.sql is a symlink to
+# ../db/seed.sql, which populates the `zonas` reference table (Monterrey municipios/colonias,
+# per agent/DECISIONS.md 2026-09-02 "V1 launch city confirmed as Monterrey").
+enabled = true
 # Specifies an ordered list of seed files to load during db reset.
 # Supports glob patterns relative to supabase directory: "./seeds/*.sql"
 sql_paths = ["./seed.sql"]

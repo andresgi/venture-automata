@@ -43,15 +43,20 @@ RELEASE: NOT_STARTED
 E0-01 and E0-02 VERIFIED 2026-09-02 (repo/CI scaffold; Supabase `nanamex-dev` +
 migrations pipeline, `preview`/`prod` deferred — see agent/DECISIONS.md). Both batched into
 PR #1 (https://github.com/andresgi/venture-automata/pull/1), CI green on both jobs, human
-reviewed and merged into `main`. Next: delegating E0-03 (core schema migration) to
-Developer.
+reviewed and merged into `main`.
+
+E0-03 VERIFIED 2026-09-02 (core schema migration: `profiles`, `perfil_familiar`,
+`perfil_ninera` + sub-tables, `zonas` + Monterrey seed data; two Code Reviewer cycles, all
+required RLS/FK/CI fixes applied via a follow-up migration; see agent/DECISIONS.md). Not
+yet pushed as a PR — pending orchestrator push per the standing authorization. Next:
+delegating E0-04 (auth wiring) to Developer.
 
 ## Next Eligible Action
 
-E0-03: Developer implements the core schema migration (`profiles`, `perfil_familiar`,
-`perfil_ninera`, `zonas`) per engineering/database.md §1–4, including the `zonas` seed
-script. Then E0-04 through E0-06 in order. Code Reviewer review after each story per this
-project's process.
+E0-04: Developer implements Supabase Auth + role-based middleware
+(`/familia/*`/`/ninera/*`/`/admin/*` route-group access by `profiles.role`), per
+engineering/implementation-plan.md. Then E0-05, E0-06 in order. Code Reviewer review after
+each story per this project's process.
 
 ## Human Blocker
 
