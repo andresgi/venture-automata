@@ -100,7 +100,9 @@ openai_api_key = "env(OPENAI_API_KEY)"
 [inbucket]
 enabled = true
 # Port to use for the email testing server web interface.
-port = 54324
+# Shifted from the CLI's 54xxx default to 55xxx, same reasoning as [api]/[db] above (E0-02)
+# -- this port was missed in that original shift (E0-04 fix).
+port = 55324
 # Uncomment to expose additional ports for testing user applications that send emails.
 # smtp_port = 54325
 # pop3_port = 54326
@@ -207,7 +209,7 @@ enable_signup = true
 # addresses. If disabled, only the new email is required to confirm.
 double_confirm_changes = true
 # If enabled, users need to confirm their email address before signing in.
-enable_confirmations = false
+enable_confirmations = true
 # If enabled, users will need to reauthenticate or have logged in recently to change their password.
 secure_password_change = false
 # Controls the minimum amount of time that must pass before sending another signup confirmation or password reset email.
@@ -226,6 +228,13 @@ otp_expiry = 3600
 # pass = "env(SENDGRID_API_KEY)"
 # admin_email = "admin@email.com"
 # sender_name = "Admin"
+
+# E0-04: custom "confirm signup" template pointing at our own /auth/confirm route (token-
+# hash flow) instead of Supabase's default fragment-based redirect -- see
+# supabase/templates/confirmation.html for why.
+[auth.email.template.confirmation]
+subject = "Confirma tu correo — Clin"
+content_path = "./supabase/templates/confirmation.html"
 
 # Uncomment to customize email template
 # [auth.email.template.invite]
@@ -371,7 +380,9 @@ deno_version = 2
 
 [analytics]
 enabled = true
-port = 54327
+# Shifted from the CLI's 54xxx default to 55xxx, same reasoning as [api]/[db] above (E0-02)
+# -- this port was missed in that original shift (E0-04 fix).
+port = 55327
 # Configure one of the supported backends: `postgres`, `bigquery`.
 backend = "postgres"
 

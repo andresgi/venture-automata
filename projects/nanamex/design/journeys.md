@@ -21,10 +21,29 @@ Roles: **Familia** (family), **Niñera** (nanny/babysitter), **Admin** (internal
   3. Verificación de correo (link) y teléfono (OTP) — both required per PRD "Confianza y seguridad."
   4. Perfil familiar mínimo (nombre, zona general).
   5. Redirect to "Crear necesidad" (FAM-03).
-- **Decisions:** verification is a **soft gate**, not a hard one — a family may proceed to create a necesidad (FAM-03) before completing phone/email verification, to avoid an onboarding dead end. Full verification (both channels) is required before the family can pass the paywall/contact a candidate (FAM-08), since verified contact info is foundational trust infrastructure for the niñera side too, and paid contact is where that trust signal actually matters.
-- **System behavior:** OTP resend with cooldown; email link expires (24h) and can be re-sent; duplicate email/phone blocks registration with a clear "ya existe una cuenta" message + login link.
+- **Decisions:** verification gating differs by channel, per E0-04's resolution of a
+  conflict between this soft-gate design and Supabase Auth's native email-confirmation
+  behavior (human decision, 2026-09-02, see agent/DECISIONS.md):
+  - **Correo is a hard gate at login**, not a soft one — Supabase Auth blocks session
+    creation entirely until the confirmation link is clicked (no account activity, including
+    creating a necesidad, is possible pre-confirmation). This is a redefinition from the
+    original "soft gate" intent (browse before confirming); it was kept for the
+    login-blocking safety net Supabase's native flow provides, rather than building a
+    custom bypass.
+  - **Teléfono remains a soft gate**, exactly as originally designed — once logged in (i.e.
+    correo confirmed), a family may proceed to create a necesidad (FAM-03) before completing
+    phone verification. Full verification (both channels) is still required before the
+    family can pass the paywall/contact a candidate (FAM-08).
+- **System behavior:** OTP resend with cooldown; email link expires (24h) and can be re-sent;
+  duplicate email/phone blocks registration with a clear "ya existe una cuenta" message +
+  login link.
 - **Outcome:** Verified family account, ready to create a necesidad.
-- **Failure paths:** OTP not received → resend / change number. Email verification abandoned → account exists but is limited (see FAM-13 "cuenta no verificada" banner); family can still create a necesidad in a soft-gated state per product intent to reduce onboarding friction, but cannot proceed past the paywall (FAM-08) until both are verified — contacting a candidate requires full trust signals on both sides.
+- **Failure paths:** OTP not received → resend / change number. Correo confirmation
+  abandoned → account exists in Supabase Auth but cannot log in at all (no in-app "cuenta no
+  verificada" state is reachable pre-correo-confirmation, since no session exists yet).
+  Teléfono verification abandoned after a successful login → account is fully usable and can
+  create a necesidad (see FAM-13 "cuenta no verificada" banner for the teléfono-only case),
+  but cannot proceed past the paywall (FAM-08) until phone is also verified.
 
 ### J-FAM-2 — Crear necesidad (vacante)
 
