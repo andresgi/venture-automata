@@ -14,8 +14,8 @@ IN_PROGRESS
 
 ARCHITECTURE_GATE approved by human 2026-09-02 (see agent/DECISIONS.md). TECH_ARCHITECTURE
 VERIFIED. BUILD is proceeding per engineering/implementation-plan.md. Epic 0 Foundations,
-E1-01 through E1-03, E2-01, E2-02, E3-01, and E3-02 are all VERIFIED; the next objective is
-E2-03, FAM-02 dashboard (Mis necesidades).
+Epic 1 (E1-01–E1-03), E2-01 through E2-03, and E3-01/E3-02 are all VERIFIED; the next
+objective is E4-01, FAM-04 listado de candidatas (replacing E2-02's minimal placeholder).
 
 ## Phase Status
 
@@ -40,87 +40,52 @@ RELEASE: NOT_STARTED
 ## Current Work
 
 **Epic 0 (Foundations) is fully complete** — E0-01 through E0-06 all VERIFIED and merged
-into `main` via PRs #1-#5 (human-approved merges throughout). Notable open items carried
-forward: no dedicated `nanamex-prod` Supabase project yet (Production Vercel env reuses
-`nanamex-dev` credentials); no real Twilio credentials yet (manual smoke test deferred).
-Both flagged as pre-RELEASE_GATE items. Full history in agent/DECISIONS.md.
-
-**Epic 1 (Familia Onboarding), in progress:**
-
-E1-01 VERIFIED 2026-09-03 (AUTH-01 landing + role selection; first story to wire real
-UI-SYSTEM design tokens — Inter/Fraunces typefaces, color/spacing/radius/type-scale — into
-the app; Code Reviewer PASS_WITH_MINOR_ISSUES; Visual QA REVISE round 1 — desktop hero
-photo layout bug, fixed and re-verified via precise geometry measurements, round 2 PASS;
-role pre-fill into AUTH-02 verified end-to-end; no-child-imagery safety check passed both
-rounds — see agent/DECISIONS.md, agent/BACKLOG.md). Hero photo is an accepted placeholder
-(passes safety check, doesn't literally depict a caregiving moment) — tracked as a
-pre-RELEASE_GATE backlog item, see agent/BACKLOG.md's E1-01 entry. PR #6 merged into
-`main` 2026-09-03 (human-approved merge).
-
-E1-02 VERIFIED 2026-09-03 (AUTH-02/03 registration + verification for familia; scope
-narrowed at delegation time since the story's literal acceptance criteria reference FAM-01
-and Contactar/entitlement enforcement, neither of which exists yet — deferred explicitly to
-E1-03/E5-01 rather than stubbed out; found and fixed a real gap — `/verificar` lacked the
-spec-required "Continuar" soft-gate action, only a mislabeled OTP-submit button; Code
-Reviewer PASS, no required changes, independently verified route gating is genuinely
-role-only — see agent/DECISIONS.md). PR #7 merged into `main` 2026-09-03.
+(PRs #1-#5). Notable open items: no dedicated `nanamex-prod` Supabase project yet
+(Production Vercel env reuses `nanamex-dev`); no real Twilio credentials yet (manual smoke
+test deferred). Both flagged as pre-RELEASE_GATE items. Full history in agent/DECISIONS.md.
 
 **Standing authorization for an unattended overnight run recorded 2026-09-03** (see
 agent/DECISIONS.md) — orchestrator may auto-merge BUILD-story PRs once CI + Code
 Review/QA pass, without pausing for per-PR human approval, and continue straight to the
-next eligible action. Scope: BUILD-story PRs only; human gates (PRODUCT_GATE,
-ARCHITECTURE_GATE, RELEASE_GATE) and any production-deployment/destructive-data/force-push
-action still require explicit approval as before. Stop conditions: a genuinely BLOCKED
-item, 3 failed review cycles on the same task, or a human gate.
+next eligible action. Scope: BUILD-story PRs only; human gates and any production-
+deployment/destructive-data/force-push action still require explicit approval as before.
+Stop conditions: a genuinely BLOCKED item, 3 failed review cycles on the same task, or a
+human gate.
 
-E1-03 VERIFIED 2026-09-03 (FAM-01 onboarding perfil familiar: required nombre + zona,
-server-side validation, seeded-zona autocomplete, onboarding gate, and responsive Clin
-design-system treatment; Code Reviewer PASS_WITH_MINOR_ISSUES; Visual QA initial REVISE,
-fixed and follow-up PASS_WITH_MINOR_ISSUES; browser rendering unavailable, source-level
-review at 375/430/768/1440px; see agent/reviews/code-E1-03-review.md and
-agent/qa/e1-03-visual-qa.md). Interim redirect to `/familia` is tracked for replacement
-when FAM-03 lands.
+**Continuity note:** partway through this run, work continued in a different tool session
+(E1-03 through E3-02 were completed and merged there, PRs #8-#11). On resuming, E2-02's
+implementation and its first Code Review were found as uncommitted changes directly on
+`main`'s working tree — moved onto a proper feature branch without discarding anything,
+then the review loop continued normally. See agent/DECISIONS.md "E2-02 continuity" entry.
 
-E2-01 VERIFIED 2026-09-03 (FAM-03 seven-step draft wizard with fixed age ranges, server-side
-validation, atomic RPC persistence, resume/new-draft routing, mobile sticky navigation, and
-desktop editable sections/rail; Code Review PASS_WITH_MINOR_ISSUES; Functional QA
-PASS_WITH_MINOR_ISSUES; Visual QA final PASS; browser rendering unavailable, source-level
-review at 375/430/768/1440px; see agent/reviews/code-E2-01-review.md,
-agent/qa/e2-01-functional-qa.md, and agent/qa/e2-01-visual-qa.md). E2-02 review/publication/
-matching remains separate by scope.
+**Epic 1 (Familia Onboarding) — fully VERIFIED**: E1-01 (AUTH-01 landing, first UI-SYSTEM
+design-token wiring, PR #6), E1-02 (AUTH-02/03 registration+verification, scope narrowed
+to what's buildable given forward dependencies, PR #7), E1-03 (FAM-01 onboarding, PR #8).
+Full details in agent/DECISIONS.md and agent/BACKLOG.md.
 
-E3-01 VERIFIED 2026-09-03 (Match Score hard filter + weighted scoring engine, Code Review
-PASS_WITH_MINOR_ISSUES). E3-02 VERIFIED 2026-09-03 (repository-backed `computeMatches`
-ranking service, Code Review PASS_WITH_MINOR_ISSUES). Both merged into `main` (PRs #10,
-#11) before this session picked up.
+**Epic 2 (Necesidad Creation) — fully VERIFIED**: E2-01 (FAM-03 seven-step wizard, PR #9),
+E2-02 (FAM-03 publish + initial match computation — two real bugs found and fixed via
+Code Review/Functional QA cycles: a ranking tie-break field mismatch + RPC trust-boundary
+hardening, then a live `disponibilidad` casing bug zeroing the availability match factor
+for every real candidate, PR #12), E2-03 (FAM-02 dashboard, real card grid replacing the
+interim drafts-only placeholder, 2 minor findings fixed directly, PR pending).
 
-**Continuity note:** this session resumed in a different tool than the one that completed
-E1-03 through E3-02. On resuming, E2-02's implementation and its first Code Review (verdict
-REVISE) were found as uncommitted changes directly on `main`'s working tree (not a feature
-branch, a deviation from convention, but real in-progress work) — moved onto a proper
-feature branch (`nanamex/e2-02-publish-matching`) without discarding anything, then the
-review loop continued normally. See agent/DECISIONS.md "E2-02 continuity" entry.
+**Epic 3 (Matching Engine) — fully VERIFIED**: E3-01 (hard filter + weighted scoring, PR
+#10), E3-02 (`computeMatches` ranking service, PR #11).
 
-E2-02 VERIFIED 2026-09-03 (FAM-03 revisión + publicar: publish transitions borrador→activa
-server-side, computes and atomically persists initial match/pipeline snapshots, redirects
-to FAM-04 populated or empty. Code Review round 1 REVISE — 3 required fixes (ranking
-tie-break field mismatch, RPC trust-boundary hardening against arbitrary/ineligible
-candidates, broken empty-state edit link); round 2 PASS_WITH_MINOR_ISSUES. Functional QA
-(real local Supabase) then found a new High-severity bug in the previously-untested
-populated-candidates path — a `disponibilidad` snake_case/camelCase mismatch silently
-zeroing the availability match factor for every real candidate, already live today, not
-just a future risk as first assessed; fixed and both Code Review and Functional QA
-re-verified PASS. See agent/reviews/code-E2-02-review.md (three rounds preserved) and
-agent/qa/e2-02-functional-qa.md. Known limitation: `/familia` doesn't yet list active
-necesidades, so the empty-state recovery link has limited value until E2-03; active-
-necesidad editing remains E2-04's scope). PR pending.
+Known limitations carried forward: `app/familia/loading.tsx`'s skeleton scope-bleeds to
+the whole `/familia/*` subtree (tracked, non-blocking, see E2-03's BACKLOG.md entry);
+active-necesidad editing remains unbuilt (E2-04's scope); FAM-04 (candidate listing) is
+still E2-02's minimal placeholder pending E4-01.
 
 ## Next Eligible Action
 
-E2-03: Developer implements FAM-02 dashboard (Mis necesidades) — card grid, pipeline
-summary counts, empty/loading states, per UI-SPEC.md FAM-02. Depends on E2-02 (VERIFIED).
-This will also resolve E2-02's known limitation (no dashboard listing for active
-necesidades).
+E4-01: Developer implements FAM-04 listado de candidatas (default/empty/loading/error
+states per UI-SPEC.md, Match Score numeral + up to 3 checklist lines per card, `TrustBadge`
+present in all states without layout shift), replacing E2-02's minimal placeholder at
+`app/familia/necesidad/[id]/page.tsx`. Depends on E3-02 (VERIFIED). Check whether a
+`TrustBadge` component already exists anywhere in the codebase before building — if not,
+this story may need to build it fresh per design/UI-SYSTEM.md §4.1.
 
 ## Human Blocker
 
