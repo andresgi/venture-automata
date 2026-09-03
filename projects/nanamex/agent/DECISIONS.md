@@ -579,3 +579,28 @@ confirmed the actual output values (match scores, checklist), and the FAM-04 pag
 explicitly minimal placeholder pending E4-01/E4-03's real card/profile design; this was an
 orchestrator judgment call to avoid duplicate verification of the same minimal UI, not a
 skipped requirement.
+
+## 2026-09-03 — E2-03 VERIFIED
+
+Rebuilt `app/familia/page.tsx` from the interim drafts-only placeholder into the real
+FAM-02 dashboard: card grid of all borrador+activa necesidades, empty state, loading
+skeleton, pipeline summary line. Preserved the FAM-01 completion gate unchanged (confirmed
+by Code Review, a real regression risk on any full-file rewrite). Fixed a latent gap from
+E2-02: `text-h2` was referenced in FAM-04's JSX but never defined in `globals.css`.
+
+Code Review: PASS_WITH_MINOR_ISSUES — 2 non-blocking issues, both addressed directly
+(orchestrator fix, not a new Developer cycle, given their narrow/mechanical nature): a
+misleading code comment mischaracterizing UI-SPEC's mobile-button spec text was corrected
+to accurately describe the always-inline-top choice as a deliberate simplification rather
+than a literal spec reading; the `loading.tsx` route-segment scope-bleed (applies to the
+whole `/familia/*` subtree, not just this page) was left as a tracked, non-blocking
+limitation rather than restructured now (see agent/BACKLOG.md's E2-03 entry).
+
+Visual QA: PASS with one minor finding, fixed directly — real browser/Playwright
+verification via a full register→confirm→login flow against real local Supabase
+(including forcing the loading skeleton to render live by locking the `necesidades`
+table), confirmed empty state, populated dashboard, navigation targets, typography/color
+tokens. Card action links measured only 18px tall on mobile (below the 44px touch-target
+convention) — fixed with `min-h-11`.
+
+**E2-03 marked VERIFIED.** 198/198 tests pass after fixes.

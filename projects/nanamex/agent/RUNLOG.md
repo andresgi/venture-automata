@@ -360,3 +360,30 @@ Next recommended action: E2-03 -- FAM-02 dashboard (Mis necesidades), which will
 resolve E2-02's known limitation (no dashboard listing for active necesidades).
 
 ---
+
+## 2026-09-03 — Developer + Code Reviewer + Visual QA
+
+Objective: E2-03 -- FAM-02 dashboard (Mis necesidades), Epic 2.
+Result: Rebuilt app/familia/page.tsx from the interim drafts-only placeholder into the real
+FAM-02 dashboard -- card grid of all borrador+activa necesidades (zona, modalidad, status
+chip, plain-text pipeline summary for active ones), empty state, loading skeleton
+(app/familia/loading.tsx), FAM-01 completion gate preserved unchanged. Fixed a latent gap
+from E2-02: text-h2 was referenced in FAM-04's JSX but never defined in globals.css. Code
+Review: PASS_WITH_MINOR_ISSUES -- 2 non-blocking issues (a misleading code comment about
+the mobile button spec, corrected directly; a loading.tsx route-segment scope-bleed to the
+whole /familia/* subtree, tracked as a known limitation rather than restructured now).
+Visual QA: PASS with one minor finding, fixed directly -- real browser/Playwright
+verification via a full register-confirm-login flow against real local Supabase (including
+forcing the loading skeleton to render live by locking the necesidades table); card action
+links measured 18px tall on mobile (below the 44px touch-target convention), fixed with
+min-h-11. E2-03 marked VERIFIED, 198/198 tests pass.
+Artifacts changed: app/familia/page.tsx, app/familia/loading.tsx, app/globals.css,
+tests/app/familia.test.tsx, tests/app/familia-loading.test.tsx,
+agent/reviews/code-E2-03-review.md, agent/qa/e2-03-visual-qa.md.
+Also pushed 4 previously-unpushed migrations (000008-000011) to both hosted Supabase
+projects (nanamex-dev, nanamex-preview), which had fallen behind during the other tool
+session's work.
+Next recommended action: E4-01 -- FAM-04 listado de candidatas, replacing E2-02's minimal
+placeholder. Check whether a TrustBadge component exists yet before building.
+
+---

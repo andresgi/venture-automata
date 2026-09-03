@@ -60,9 +60,13 @@ body {
  * matches UI-SYSTEM §2's `lg >= 1024px` (also Tailwind's own default `lg:` breakpoint --
  * kept in sync deliberately).
  *
- * Only the tokens actually used by screens built so far are defined (display, h1, body,
- * body-sm, button) -- the rest land with the screens that need them, per this story's
- * "only what E1-01 touches" scope.
+ * Only the tokens actually used by screens built so far are defined (display, h1, h2,
+ * headline, body, body-sm, caption, button) -- the rest land with the screens that need
+ * them, per this story's original "only what E1-01 touches" scope. `h2`/`headline`/
+ * `caption` were added by E2-03 (FAM-02 dashboard) -- `h2` had already been referenced by
+ * E2-02's FAM-04 placeholder (app/familia/necesidad/[id]/page.tsx) without ever being
+ * defined here, a latent gap this story closes as a side effect of needing the same token
+ * itself.
  */
 .text-display {
   font-family: var(--font-fraunces), serif;
@@ -75,6 +79,25 @@ body {
   font-weight: 600;
   font-size: 22px;
   line-height: 28px;
+}
+
+.text-h2 {
+  font-weight: 600;
+  font-size: 18px;
+  line-height: 24px;
+}
+
+.text-headline {
+  font-family: var(--font-fraunces), serif;
+  font-weight: 500;
+  font-size: 26px;
+  line-height: 32px;
+}
+
+.text-caption {
+  font-weight: 500;
+  font-size: 12px;
+  line-height: 16px;
 }
 
 .text-body {
@@ -104,5 +127,15 @@ body {
   .text-h1 {
     font-size: 26px;
     line-height: 32px;
+  }
+
+  .text-h2 {
+    font-size: 20px;
+    line-height: 28px;
+  }
+
+  .text-headline {
+    font-size: 34px;
+    line-height: 40px;
   }
 }

@@ -374,6 +374,34 @@ Validation: `npm test -- --run` (21 files, 142 tests), `npm run test:db`, `npm r
 `npm run typecheck`, `npm run check:secrets`, and `npm run build` all pass. Build emits only
 the existing Supabase Node 20 deprecation warning.
 
+#### E2-03 — FAM-02 dashboard (Mis necesidades)
+
+Status: VERIFIED (2026-09-03; Code Review PASS_WITH_MINOR_ISSUES — 2 non-blocking issues,
+both fixed directly: a `loading.tsx` route-segment scope note corrected (see Known
+limitation below, not fully fixed) and a code comment mischaracterizing the mobile
+sticky-bottom-button spec text corrected to accurately describe the simplification.
+Visual QA PASS — real browser/Playwright verification via a full register→confirm→login
+flow against real local Supabase, including forcing the loading skeleton to render by
+locking the `necesidades` table; one minor finding (18px mobile touch target on card
+action links, below the 44px convention) fixed directly. See
+agent/reviews/code-E2-03-review.md and agent/qa/e2-03-visual-qa.md.)
+
+Dependencies: E2-02.
+
+Delivered: real FAM-02 dashboard replacing the interim drafts-only placeholder — card grid
+of all borrador+activa necesidades (zona, modalidad, status chip, plain-text pipeline
+summary for active necesidades), empty state, loading skeleton (`app/familia/loading.tsx`),
+and the FAM-01 completion gate preserved unchanged. Also fixed a latent gap from E2-02:
+`text-h2` was referenced in FAM-04's JSX but never defined in `globals.css`.
+
+**Known limitation (non-blocking, tracked):** `app/familia/loading.tsx` uses Next.js's
+route-segment `loading.tsx` convention, which applies to the entire `/familia/*` subtree,
+not just this page — navigating to `/familia/perfil`, `/familia/necesidad`, or
+`/familia/necesidad/[id]` will transiently show FAM-02's skeleton shape instead of a
+route-appropriate one. Low-impact (self-corrects within a frame or two), not fixed in this
+story; revisit if it becomes noticeable once those routes see more real traffic, e.g. by
+adding narrower nested `loading.tsx` files or restructuring the route groups.
+
 ### E3-01 — Hard filter + weighted scoring implementation
 
 Status: VERIFIED (2026-09-03; Code Review final PASS_WITH_MINOR_ISSUES; full 32 weighted-
