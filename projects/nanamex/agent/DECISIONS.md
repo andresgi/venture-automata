@@ -293,6 +293,35 @@ Empirical local-Supabase testing confirmed the hard email-confirmation gate, dup
 
 **E0-04 marked VERIFIED.** E0-05 (Twilio Verify phone OTP) is now unblocked.
 
+## 2026-09-02 — E0-05 VERIFIED
+
+Developer implemented Twilio Verify phone OTP send/confirm (`lib/twilio/verify.ts`,
+`actions/phone-verification.ts`, `components/auth/phone-verification-form.tsx`), wired to
+AUTH-03's teléfono checklist row on `/verificar`. Added `profiles.phone_otp_last_sent_at`
+(migration `20260902000009`) to back an app-layer ~60s resend cooldown enforced strictly
+before any Twilio call, on top of Twilio's own native rate limiting, per security.md's
+defense-in-depth guidance. `phone_verified`/`phone_otp_last_sent_at` are written only via
+the service-role client, protected from non-privileged writes by an extension of E0-03's
+`profiles_protect_system_fields` trigger. All testing mocks the Twilio SDK per this story's
+own validation note — no real Twilio credentials exist yet (human will supply later); a
+manual smoke test against Twilio's test credentials is deferred to a pre-RELEASE_GATE
+checklist item, not a gap in this story.
+
+Code Reviewer: **PASS_WITH_MINOR_ISSUES** on the first pass, no required changes. Verified
+Twilio SDK usage against the actual installed package's type definitions (not just the
+Developer's own mocks) — correct method names/argument shapes/error-field access. All 4
+acceptance criteria pass (resend cooldown; invalid/expired code shows inline error without
+touching `email_verified`; success sets `phone_verified=true`; Twilio fully mocked in
+tests). Three non-blocking optional follow-ups noted (cooldown check-and-stamp atomicity,
+whether a rate-limited send should still stamp the cooldown timestamp, and whether the
+first OTP send should auto-trigger vs. require an explicit click) — deferred, not required
+before merge. Full report in agent/reviews/code-E0-05-review.md.
+
+83/83 tests pass; lint/typecheck/build/check:secrets all clean.
+
+**E0-05 marked VERIFIED.** E0-06 (Vercel deployment pipeline) is now unblocked — this
+completes all of Epic 0 (Foundations) except E0-06.
+
 ## 2026-09-02 — Standing authorization: git push + PR per BUILD story
 
 For the remainder of BUILD, the orchestrator may commit, push a branch, and open a PR for

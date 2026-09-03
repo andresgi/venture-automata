@@ -234,11 +234,18 @@ accordingly).
 
 #### E0-05 — Twilio Verify integration (phone OTP)
 
-Status: READY (E0-04 VERIFIED)
+Status: VERIFIED (2026-09-02; Code Reviewer PASS_WITH_MINOR_ISSUES, no required changes;
+3 optional non-blocking follow-ups tracked; Twilio SDK usage verified against the real
+package's type definitions, not just mocks — no real Twilio credentials exist yet, manual
+smoke test deferred to pre-RELEASE_GATE; see agent/DECISIONS.md and
+agent/reviews/code-E0-05-review.md)
 
 #### E0-06 — Vercel deployment pipeline (preview + production)
 
-Status: BLOCKED (depends on E0-01, E0-02)
+Status: READY (E0-01, E0-02 VERIFIED) — note: `nanamex-preview`/`nanamex-prod` Supabase
+projects still don't exist (deferred per E0-02's decision, see agent/DECISIONS.md); this
+story's "every PR gets a working preview URL against the preview Supabase project"
+acceptance criterion may need that dependency resolved first — flag to human if blocking.
 
 ## Change Requests
 

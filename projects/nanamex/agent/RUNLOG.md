@@ -125,3 +125,33 @@ nanamex/e0-04-auth-wiring, stacked on nanamex/e0-03-core-schema-migration (PR #2
 merged) -- PR for this story should target the e0-03 branch until #2 merges.
 
 ---
+
+## 2026-09-02 — Developer + Code Reviewer
+
+Objective: E0-05 -- Twilio Verify integration (phone OTP) (Epic 0).
+Result: Developer implemented a lazy Twilio Verify client wrapper, send/confirm server
+actions, and UI wired to AUTH-03's teleofono checklist row on /verificar. Added
+profiles.phone_otp_last_sent_at (migration 20260902000009) to back an app-layer ~60s
+resend cooldown enforced before any Twilio call, on top of Twilio's native rate limiting.
+phone_verified/phone_otp_last_sent_at written only via the service-role client, protected
+by an extension of E0-03's profiles_protect_system_fields trigger. No real Twilio
+credentials exist yet (human to supply later) -- all testing mocks the Twilio SDK per the
+story's own validation note. Code Reviewer: PASS_WITH_MINOR_ISSUES, no required changes --
+independently verified the Twilio SDK usage against the actual installed package's type
+definitions (not just the Developer's own mocks), confirmed all 4 acceptance criteria
+pass. Three optional non-blocking follow-ups tracked (cooldown atomicity, whether a
+rate-limited send should still stamp the cooldown, first-OTP auto-send vs. manual click).
+Manual smoke test against Twilio's test credentials deferred to a pre-RELEASE_GATE
+checklist item since no credentials exist yet. E0-05 marked VERIFIED.
+Artifacts changed: lib/twilio/verify.ts, actions/phone-verification.ts,
+components/auth/phone-verification-form.tsx,
+db/migrations/20260902000009_profiles_phone_otp_cooldown.sql,
+tests/lib/twilio/verify.test.ts, tests/actions/phone-verification.test.ts,
+app/verificar/page.tsx, lib/auth/validation.ts, engineering/database.md,
+package.json/package-lock.json, agent/reviews/code-E0-05-review.md.
+Next recommended action: E0-06 -- Vercel deployment pipeline (last Epic 0 story). Note its
+acceptance criteria assume a preview Supabase project that doesn't exist yet (E0-02's
+deferred decision) -- may need human input if that blocks the "preview URL per PR"
+criterion.
+
+---

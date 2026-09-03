@@ -58,14 +58,24 @@ PR #3 merged into `main` 2026-09-02 (human-approved merge, retargeted from the E
 branch to `main` after PR #2 merged). Feature branches for both deleted post-merge; local
 `main` fast-forwarded and in sync with `origin/main`.
 
-Next: delegating E0-05 (Twilio Verify phone OTP) to Developer.
+E0-05 VERIFIED 2026-09-02 (Twilio Verify phone OTP send/confirm, wired to AUTH-03's
+teléfono checklist row on `/verificar`; app-layer resend cooldown; Code Reviewer
+PASS_WITH_MINOR_ISSUES, no required changes; see agent/DECISIONS.md). No real Twilio
+credentials yet — all testing mocked per the story's own validation note; manual smoke
+test against Twilio's test credentials deferred to a pre-RELEASE_GATE checklist item.
+PR pending.
+
+This completes all of Epic 0 (Foundations) except E0-06. Next: delegating E0-06 (Vercel
+deployment pipeline) to Developer — note its acceptance criteria assume a preview Supabase
+project that doesn't exist yet (E0-02's deferred decision); may need to flag to human if
+that's a hard blocker for the "preview URL per PR" criterion.
 
 ## Next Eligible Action
 
-E0-05: Developer implements Twilio Verify phone OTP send/confirm, wired to AUTH-03's
-teléfono checklist row, per engineering/implementation-plan.md. Then E0-06. Code Reviewer
-review after each story per this project's process. Work resumes directly on `main`
-(no pending unmerged PRs).
+E0-06: Developer connects the repo to Vercel, configures environment variables per
+environment, confirms preview deployments work per-PR, per
+engineering/implementation-plan.md. This is the last Epic 0 story. Code Reviewer review
+after. Work resumes directly on `main` (no pending unmerged PRs).
 
 ## Human Blocker
 

@@ -60,3 +60,11 @@ export const loginSchema = z.object({
 });
 
 export type LoginInput = z.infer<typeof loginSchema>;
+
+/** AUTH-03 teléfono OTP validation (design/UX-spec.md AUTH-03 "Inputs": "6-digit OTP code").
+ * Twilio Verify is the source of truth for whether the code is actually correct/unexpired
+ * (engineering/architecture.md §6) -- this only guards the shape before it's sent to Twilio. */
+export const phoneOtpCodeSchema = z
+  .string()
+  .trim()
+  .regex(/^\d{6}$/, "Ingresa el código de 6 dígitos.");

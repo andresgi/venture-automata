@@ -1,16 +1,69 @@
-// AUTH-03 "Verificación de correo/teléfono" placeholder (design/UX-spec.md AUTH-03).
-// registerAction redirects here immediately after account creation. The full two-checklist
-// (correo + teléfono OTP) screen depends on E0-05's Twilio Verify integration for the
-// teléfono leg -- out of scope for E0-04, which only wires the correo leg
-// (app/auth/confirm/route.ts) and registration itself.
-export default function VerificarPage() {
+import { redirect } from "next/navigation";
+import { createServerSupabaseClient } from "@/lib/supabase/auth-server";
+import { createServiceRoleClient } from "@/lib/supabase/server";
+import { ROLE_HOME_PATH, type AppRole } from "@/lib/auth/roles";
+import { PhoneVerificationForm } from "@/components/auth/phone-verification-form";
+
+/**
+ * AUTH-03 "Verificación de correo/teléfono" (design/UX-spec.md AUTH-03). Correo is confirmed
+ * out-of-band before any session can exist at all (the E0-04 hard-gate redefinition,
+ * agent/DECISIONS.md 2026-09-02) -- reaching this page at all means correo is already
+ * verified, so this screen only has one real checklist item left to complete: teléfono
+ * (E0-05, Twilio Verify OTP).
+ *
+ * Forced dynamic: this page reads the caller's own session/profile on every request (whether
+ * teléfono is already verified determines whether it redirects away at all) -- it must never
+ * be attempted as part of `next build`'s static generation, which runs without a real
+ * request/cookie context and would otherwise fail the build the moment
+ * NEXT_PUBLIC_SUPABASE_* env vars aren't set at build time (they're intentionally *not*
+ * baked into the build in this project -- see engineering/architecture.md §13, per-
+ * environment Vercel env vars).
+ */
+export const dynamic = "force-dynamic";
+
+export default async function VerificarPage() {
+  const supabaseAuth = await createServerSupabaseClient();
+  const {
+    data: { user },
+  } = await supabaseAuth.auth.getUser();
+
+  if (!user) {
+    redirect("/login");
+  }
+
+  const db = createServiceRoleClient();
+  const { data: profile } = await db
+    .from("profiles")
+    .select("role, phone_verified")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  const role = profile?.role as AppRole | undefined;
+
+  // Teléfono is a soft gate (design/UX-spec.md AUTH-03 gating note) -- once verified, there
+  // is nothing left to do on this screen; proceed straight to the role's own home.
+  if (profile?.phone_verified) {
+    redirect(role ? ROLE_HOME_PATH[role] : "/");
+  }
+
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center gap-4 p-8 text-center">
+    <main className="flex min-h-screen flex-col items-center justify-center gap-6 p-8 text-center">
       <h1 className="text-2xl font-semibold">Verifica tu cuenta</h1>
-      <p className="max-w-md text-sm text-zinc-500">
-        Te enviamos un correo para confirmar tu cuenta. Revisa tu bandeja de entrada y sigue
-        el enlace. La verificación de teléfono llega en una historia posterior.
-      </p>
+
+      <div className="flex w-full max-w-sm flex-col gap-6 text-left">
+        <section className="flex items-center gap-2 text-sm text-emerald-700" aria-label="Correo">
+          <span aria-hidden>✓</span>
+          <span>Correo verificado</span>
+        </section>
+
+        <section aria-label="Teléfono">
+          <h2 className="mb-1 text-sm font-medium">Teléfono</h2>
+          <p className="mb-3 text-sm text-zinc-500">
+            Te enviaremos un código de 6 dígitos por SMS para confirmar tu número.
+          </p>
+          <PhoneVerificationForm />
+        </section>
+      </div>
     </main>
   );
 }
