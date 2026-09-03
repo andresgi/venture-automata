@@ -397,6 +397,18 @@ a preventive note to always deploy from the monorepo root for this project).
 resulting deployment shows status "Ignored."** Not a blocker for marking E0-06 VERIFIED
 now — the documentation-accuracy issue that blocked the first review pass is resolved.
 
+## 2026-09-03 — E0-06: production-skip mechanism confirmed on a real Git-triggered merge
+
+PR #5 (E0-06) merged into `main` (human-approved). Checked the resulting Vercel deployment
+via the API: `dpl_58weyJT3VtnYsfQbfXBzVByTzsjx` — `source: git` (genuine GitHub-triggered,
+not a CLI deploy), `target: production`, `meta.githubCommitRef: main`, `readyState:
+CANCELED`, build duration effectively 0ms (no build executed). Vercel's API/CLI label this
+outcome "Canceled" rather than literally "Ignored," but it is the same mechanism and the
+same result: the Ignored Build Step correctly prevented the merge to `main` from producing
+a live production deployment. This closes out the standing verification item from the
+E0-06 review — the manual-promotion safeguard is now confirmed working on a real
+Git-triggered production build, not just documented behavior.
+
 ## 2026-09-02 — Standing authorization: git push + PR per BUILD story
 
 For the remainder of BUILD, the orchestrator may commit, push a branch, and open a PR for

@@ -63,7 +63,7 @@ teléfono checklist row on `/verificar`; app-layer resend cooldown; Code Reviewe
 PASS_WITH_MINOR_ISSUES, no required changes; see agent/DECISIONS.md). No real Twilio
 credentials yet — all testing mocked per the story's own validation note; manual smoke
 test against Twilio's test credentials deferred to a pre-RELEASE_GATE checklist item.
-PR pending.
+PR #4 merged into `main` 2026-09-02 (human-approved merge).
 
 E0-06 VERIFIED 2026-09-03 (Vercel deployment pipeline: repo connected, Root Directory
 scoped to `projects/nanamex`, env vars set per-environment, Ignored Build Step configured
@@ -71,15 +71,20 @@ and independently verified correct against Vercel's documented convention; `nana
 Supabase project created as a prerequisite; two Code Reviewer cycles — round 1 caught an
 undisclosed production-target deployment attempt in Vercel's history, root-caused as the
 Developer's own CLI setup activity, no content ever served, confirmed it can't recur on
-real Git-triggered builds; round 2 PASS — see agent/DECISIONS.md). PR pending.
+real Git-triggered builds; round 2 PASS — see agent/DECISIONS.md). PR #5 merged into
+`main` 2026-09-03 (human-approved merge). **The resulting merge-to-main deployment was
+checked live via the Vercel API: `readyState: CANCELED`, `source: git`, `target:
+production`, 0ms build — confirming the Ignored Build Step correctly skipped the
+production build on a real Git-triggered merge, not just documented behavior.** This
+closes out the standing verification item — see agent/DECISIONS.md.
 
-**Epic 0 (Foundations) is now fully complete.** Production Vercel env currently reuses
-`nanamex-dev` credentials (no dedicated `nanamex-prod` project yet) — flagged as a
-pre-RELEASE_GATE open item. Live confirmation that a real merge to `main` shows deployment
-status "Ignored" is deferred to that first merge (human-approved).
+**Epic 0 (Foundations) is now fully complete and its last open verification item is
+closed.** Remaining known gap: no dedicated `nanamex-prod` Supabase project yet (Production
+Vercel env reuses `nanamex-dev` credentials) — flagged as a pre-RELEASE_GATE item.
 
-Next: delegating E1-01 (AUTH-01 Landing + role selection) to Developer — the first story
-of Epic 1 (Familia Onboarding).
+All feature branches merged and deleted; local `main` fast-forwarded and in sync with
+`origin/main`. Next: delegating E1-01 (AUTH-01 Landing + role selection) to Developer —
+the first story of Epic 1 (Familia Onboarding).
 
 ## Next Eligible Action
 
