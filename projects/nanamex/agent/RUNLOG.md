@@ -13,6 +13,24 @@ Next recommended action:
 
 ---
 
+## 2026-09-04 — Developer — E5-04 review fixes
+
+Objective: Resolve the E5-04 Code Review findings without adding E6 pipeline UI or Epic 10
+notification delivery.
+Result: FAM-10 now enforces authenticated active familia, verification, and FAM-01 onboarding
+before reads; direct non-entitled access is routed through the existing FAM-08 marker flow;
+candidate phone data is read only after an explicit object/array contacto relation is present.
+Added route/action authorization, entitlement, pre-success disclosure, success/retry, and
+concurrent DB contact coverage. E5-04 remains IMPLEMENTED pending independent re-review.
+Artifacts changed: FAM-10/FAM-06 route and action components, focused route/action tests, DB
+contact probe, and backlog run log.
+Validation: 365 tests, lint, typecheck, secret scan, production build, and test:db pass. Build
+retains the existing Supabase Node 20 deprecation warning.
+Next recommended action: independent Code Review and Functional/Visual QA; do not mark VERIFIED
+or merge before those reviews.
+
+---
+
 ## 2026-09-03 — Developer — E4-02
 
 Objective: Implement FAM-05 filters for FAM-04.
@@ -421,3 +439,178 @@ dashboard CTA while deferring published-necesidad editing to E2-04.
 Validation: 225 tests, lint, typecheck, check:secrets, and production build pass. E4-01 marked
 VERIFIED.
 Next recommended action: E4-02 -- FAM-05 filtros.
+
+## 2026-09-03 — E4-03 Developer
+
+Objective: Implement FAM-06 candidate detail with pipeline snapshot and funnel analytics.
+Result: Added authenticated/current-eligibility candidate detail route, live TrustBadge,
+full match/profile/reference display, and FAM-04 profile navigation. Added atomic Supabase
+RPC and durable analytics event table: every profile view is recorded, while compatible-match
+events are unique per necesidad/candidate pair. Favorites, contact/paywall, and reporting
+remain deferred to their owning stories.
+Validation: 235 tests, lint, typecheck, secret scan, and production build pass.
+Next recommended action: independent Code Review and Functional QA for E4-03.
+
+---
+
+## 2026-09-03 — E4-03 Code Reviewer + Functional QA + Visual QA (round 1)
+
+Objective: Independently review FAM-06 candidate detail + pipeline/analytics auto-creation.
+Result: Code Review REVISE (Docker unavailable, so `npm run test:db`/the E4-03 RPC probe
+never ran; unrelated test-invoice-generator/.claude/settings.json noted as out-of-scope
+housekeeping). Functional QA FAIL (BUG-001, Medium: mobile overlay and references-section
+gaps). Visual QA REVISE (V01-V05: tooltip clipping, tablet full-bleed regression, loading
+composition shift, error-state conflation, reference spacing).
+Artifacts: agent/reviews/code-E4-03-review.md, agent/qa/e4-03-functional.md,
+agent/qa/e4-03-visual.md.
+Next recommended action: send consolidated findings back to Developer.
+
+---
+
+## 2026-09-03 — E4-03 Developer (fix round)
+
+Objective: Fix round-1 review findings for E4-03.
+Result: Found the application-source fixes for BUG-001/V01-V05 were already correct in the
+tree from a prior session. The actual blocker was the E4-03 DB probe itself
+(scripts/test-e4-03-profile-view.sql/.mjs) — fixed 4 real bugs (impossible fixture state
+violating a CHECK constraint, a role/privilege mismatch for DDL, and teardown
+ordering/cross-test dependency bugs). Ran `npm run test:db` twice consecutively end-to-end
+against real Postgres (Docker now available) — the E4-03 probe's ownership, eligibility,
+frozen-snapshot, threshold, and concurrency assertions all passed.
+Validation: 245 tests, lint, typecheck, secret scan, production build, and test:db (E4-03
+probe included) all pass.
+Next recommended action: round 2 independent re-review.
+
+---
+
+## 2026-09-03 — E4-03 Code Reviewer + Functional QA + Visual QA (round 2)
+
+Objective: Re-verify E4-03 after the fix round.
+Result: Code Review PASS_WITH_MINOR_ISSUES (re-ran test:db and full suite; re-verified
+BUG-01/V01-V05 fixes at source level; flagged excluding the unrelated
+test-invoice-generator/.claude/settings.json changes from this story's commit — housekeeping,
+not a defect). Functional QA PASS (re-verified TC-003 fix; test:db now genuinely
+runtime-verifies TC-004/TC-005). Visual QA PASS (all five findings resolved at source level;
+browser/screenshot tooling still unavailable in this environment, flagged for RELEASE_GATE
+scrutiny, non-blocking). E4-03 marked VERIFIED.
+Artifacts: agent/reviews/code-E4-03-review.md (round 2 appended), agent/qa/e4-03-functional.md
+(round 2 appended), agent/qa/e4-03-visual.md (round 2 appended).
+Next recommended action: E4-04 — FAM-07 favoritas.
+
+---
+
+## 2026-09-03 — E4-04 Developer + Code Reviewer + Functional QA + Visual QA (3 rounds)
+
+Objective: Implement and independently verify E4-04 — FAM-07 favoritas.
+Result: Developer built `set_candidate_favorite` RPC (mirrors E4-03's trust-boundary
+pattern), FavoriteToggle UI on FAM-04/FAM-06, and a new FAM-07 listing page grouped by
+necesidad. Round 1: Code Review REVISE, Functional QA and Visual QA REVISION_REQUIRED, all
+three independently flagging FavoriteToggle's silent (sr-only-only) failure feedback; Code
+Review also flagged FAM-07's `estado = 'activa'` query scoping vs. the "across all
+necesidades" spec. Fix round 1: added a shared Toast component, try/catch around the action
+call, dropped the estado filter (closed-necesidad favorites now show, de-emphasized, with
+mutation genuinely disabled). Round 2: all three reviewers independently caught a new bug
+the fix introduced — Toast used a non-existent Tailwind class (`bg-raised` vs.
+`bg-bg-raised`), rendering with no background; plus two Visual QA minor items. Fix round 2:
+one-line class fix + two minor fixes. Round 3 (final allowed cycle): Code Review PASS,
+Functional QA VERIFIED, Visual QA VERIFIED; `npm run test:db` ran live and clean. E4-04
+marked VERIFIED — this completes Epic 4.
+Validation: 272 tests, lint, typecheck, secret scan, production build, and test:db (live,
+round 3) all pass.
+Artifacts: db/migrations/20260903000013_candidate_favorites.sql, actions/favorites.ts,
+components/{familia/favorite-toggle,shared/toast}.tsx, components/familia/{candidate-card,
+candidate-detail-actions}.tsx, app/familia/{favoritas/page,page}.tsx,
+app/familia/necesidad/[id]/{page,candidatas/[ninId]/{page,loading}}.tsx,
+scripts/test-e4-04-favorites.{sql,mjs}, agent/reviews/code-E4-04-review.md (3 rounds),
+agent/qa/e4-04-{functional,visual}.md (3 rounds each).
+Note: committed locally on branch nanamex/e4-03-fam06-candidate-detail; `git push` is
+currently blocked by this session's permission settings (see agent/DECISIONS.md) — push/PR
+for E4-03+E4-04 remains outstanding.
+Next recommended action: E5-01 — Stripe integration, Checkout Session creation (Epic 5).
+
+---
+
+## 2026-09-04 — E5-01 Developer + Code Reviewer + Functional QA + Visual QA
+
+Objective: Implement and independently verify E5-01 — Stripe Checkout Session creation
+(Epic 5), using test-mode/dummy Stripe credentials per human decision (see
+agent/DECISIONS.md).
+Result: Built `createCheckoutSessionAction`/`checkEntitlementAction` with full server-side
+gating (auth, verification re-check, necesidad/candidate eligibility, active-entitlement
+short-circuit), new `entitlements`/`payments` tables, and a durable payment-boundary design
+(idempotency key, claim lease, safe pending-URL reuse). Code Review round 1: REVISE — the
+"Contactar" button redirected directly to Stripe instead of the approved FAM-08→FAM-09 flow
+(undocumented at the time), plus missing recovery-variant regression tests. Escalated the
+routing gap to the human: accepted as a temporary, documented exception since FAM-08/FAM-09
+are E5-03's scope and don't exist yet (same pattern as E1-02's scope narrowing) — E5-03 must
+replace it. Developer documented the exception and added the missing tests. Code Review
+round 2: PASS_WITH_MINOR_ISSUES. Functional QA: PASS. Visual QA: PASS. E5-01 marked
+VERIFIED.
+Validation: 305 tests, lint, typecheck, secret scan, production build, and test:db
+(including a new live concurrency probe for the payment-boundary unique constraint) all
+pass.
+Artifacts: actions/entitlements.ts, lib/stripe/client.ts, components/familia/
+contact-button.tsx, components/familia/candidate-detail-actions.tsx, components/shared/
+toast.tsx, db/migrations/20260903000014_entitlements_payments.sql,
+db/migrations/20260904000015_payment_boundary.sql,
+scripts/test-e5-01-payment-boundary.{mjs,sql}, agent/reviews/code-E5-01-review.md (2
+rounds), agent/qa/e5-01-{functional,visual}.md.
+Note: committed locally on branch nanamex/e4-03-fam06-candidate-detail (3rd commit); git
+push remains blocked by this session's permission settings.
+Next recommended action: E5-02 — Stripe webhook handler (entitlement activation).
+
+## 2026-09-04 — Orchestrator / Functional QA
+
+Objective: Verify E5-02 (Stripe webhook handler, entitlement activation) — implementation
+and Code Review PASS were already present on disk from a prior session; ran independent
+Functional QA and closed out the story.
+Result: Functional QA PASS_WITH_MINOR_ISSUES (agent/qa/e5-02-functional.md) — independently
+re-verified signature verification, idempotency, and repurchase-expiry-stacking against
+live Postgres (run twice), plus full validation suite. One new finding: route path
+(`/api/stripe/webhook`) didn't match docs (`/api/webhooks/stripe`). Orchestrator fixed
+directly (moved route, updated test file + doc comment), re-verified lint/typecheck/315
+tests/check:secrets/build clean. E5-02 marked VERIFIED (agent/BACKLOG.md, agent/STATE.md,
+agent/DECISIONS.md updated). Next recommended action: E5-03 — FAM-08/09 paywall + checkout
+screens (must retire E5-01's documented interim direct-to-Stripe redirect).
+
+## 2026-09-04 — Orchestrator / Developer + Code Reviewer + Functional QA + Visual QA
+
+Objective: Implement and verify E5-03 (FAM-08/09 paywall + checkout screens), retiring
+E5-01's documented interim direct-to-Stripe redirect with the real `Contactar` -> FAM-08 ->
+FAM-09 flow.
+Result: Developer built `PaywallGate` (shared FAM-08/FAM-09 dialog shell) and
+`CheckoutReturnBanner`, wired `ContactButton` through the real flow. Code Review
+PASS_WITH_MINOR_ISSUES (3 Important issues), Functional QA PASS_WITH_MINOR_ISSUES (1 new
+issue), Visual QA PASS_WITH_MINOR_ISSUES (3 findings) — all run independently. Orchestrator
+fixed 6 of the 7 total findings directly rather than looping back to the Developer (all
+mechanical/well-specified): SSR hydration-mismatch fix in `CheckoutReturnBanner` (switched
+to `useSearchParams`/`useRouter`, matching the existing `UnauthorizedBanner` pattern),
+already-entitled interim behavior recorded as a decision, `already_entitled` test coverage
+added, banner-duration fix (pinned local state + 4s delayed URL-strip matching `Toast`'s
+convention), mobile-overflow fix (dialog now scrolls on all breakpoints, not just desktop),
+desktop-button-width fix. One finding (FAM-09 success-icon animation) deferred as
+non-blocking cosmetic follow-up. Full validation suite (329 tests, lint, typecheck,
+check:secrets, build) re-run clean after every fix. E5-03 marked VERIFIED (agent/BACKLOG.md,
+agent/STATE.md, agent/DECISIONS.md updated). Next recommended action: E5-04 (FAM-10
+solicitar entrevista) and E5-05 (FAM-13 entitlement/payment history) — both eligible in
+parallel, dependency E5-02 already VERIFIED.
+
+2026-09-04 — E5-05 VERIFIED: Built and independently verified the session-authorized FAM-13
+account page with contact verification status, live current entitlement/days remaining, payment
+history, account-specific loading/error/empty states, persistent responsive familia navigation,
+and the approved password-change placeholder. Added consistent FAM-01 direct-route guards and
+regression tests. Code Review, Functional QA, and Visual QA passed. Validation passed: 355
+tests, lint, typecheck, secret scan, production build, and test:db. Next recommended action:
+E5-04 — FAM-10 solicitar entrevista.
+
+---
+
+## 2026-09-04 — E5-04 VERIFIED
+
+Implemented and independently verified FAM-10 solicitar entrevista: atomic paid contact
+transaction, durable `contacto` and `candidate_contacted` event, idempotent lifecycle handling,
+post-expiry and closed-necesidad access, server-backed delayed-payment return state, FAM-10 form,
+cancellation, and interim handoff. Code Review PASS_WITH_MINOR_ISSUES, Functional QA PASS, and
+Visual QA PASS_WITH_SCOPE_LIMITATION. FAM-11 remains E6 scope and Epic 10 notification delivery
+remains deferred. Validation: 388 tests, lint, typecheck, secret scan, production build, and
+test:db all pass. Next recommended action: E6-01.

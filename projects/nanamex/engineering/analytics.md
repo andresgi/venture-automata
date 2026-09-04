@@ -38,10 +38,13 @@ silently reintroduce the exact ambiguity the addendum exists to remove.
 | `report_filed` / `report_resolved` | FAM-12/NIN-10 submit; ADM-05 resolve | `reportado_id`, `categoria`, `resolucion?` | Moderation load (SOP) |
 | `necesidad_edited_matching_fields` | Architecture §17 trigger | `necesidad_id`, changed fields | Re-match frequency, mid-flow-edit prevalence |
 
-All events fire from server actions (server-side PostHog capture), not client-side, so
+All events will fire from server actions (server-side PostHog capture), not client-side, so
 event integrity doesn't depend on a user's browser executing JS successfully — this also
 keeps `familia_id`/`ninera_id` attribution reliable (server always knows the authenticated
-user; a client-side event could be spoofed or dropped).
+user; a client-side event could be spoofed or dropped). E4-03 owns creation and durable
+recording of `analytics_events`; PostHog capture is deferred to E11-01, which must add
+vendor delivery around these existing durable writes without recreating the table or
+emitting duplicate domain events.
 
 ## 3. North Star and Its Diagnostic Pair (the addendum's specific fix)
 

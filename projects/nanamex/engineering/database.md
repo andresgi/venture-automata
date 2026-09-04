@@ -261,15 +261,21 @@ history, `FAM-13`).
 | `id` | uuid, PK | |
 | `familia_id` | uuid, FK | |
 | `provider` | text | `stripe` |
-| `provider_payment_id` | text | Stripe PaymentIntent/Checkout Session ID — idempotency key for webhook processing. |
+| `provider_payment_id` | text, nullable | Stripe Checkout Session ID once created; nullable during recovery before the provider call/link succeeds. |
+| `idempotency_key` | text, unique | Durable local/Stripe idempotency boundary, created before calling Stripe. |
+| `checkout_url` | text, nullable | Hosted Checkout URL, persisted for safe retries. |
+| `provider_session_status` | text | Local projection: `not_created`, `open`, `expired`, `complete`, or `unknown`; never grants entitlement. |
+| `provider_session_expires_at` | timestamptz, nullable | Stripe Checkout `expires_at`, normalized from Unix seconds and persisted when the session is linked; a provider projection used as a local hint, never payment proof. |
+| `checkout_claimed_at` | timestamptz, nullable | Short checkout-creation lease preventing concurrent provider calls. |
 | `amount` | int (cents, MXN) | |
 | `status` | enum(`pendiente`,`exitoso`,`fallido`) | |
 | `created_at` | timestamptz | |
 
 **Ownership:** system. **Lifecycle:** created on checkout initiation (`pendiente`),
-finalized by the Stripe webhook (`exitoso`/`fallido`) — the webhook handler is the only
-writer of `status`, keyed by `provider_payment_id` for idempotency (a redelivered webhook
-must not create a second entitlement).
+ finalized by the Stripe webhook (`exitoso`/`fallido`), or marked `fallido` by the
+ server-side stale-return cleanup only after a never-created or Stripe-confirmed-expired
+ boundary. The webhook remains the only path that can mark a payment successful or create an
+ entitlement; stale cleanup is guarded by `status = 'pendiente'` and never grants access.
 
 ---
 
@@ -348,6 +354,10 @@ does).
 ---
 
 ## 12. `analytics_events` (thin, application-owned log — supplements PostHog)
+
+**Migration ownership:** E4-03 creates this shared table and owns durable FAM-06 event
+writes. E11-01 must consume and extend this schema in a follow-up migration; it must not
+recreate the table. PostHog delivery is intentionally deferred to E11-01.
 
 **Purpose:** Not a replacement for PostHog (the system of record for funnel analysis, per
 `engineering/analytics.md`), but a durable, queryable Postgres log for the specific

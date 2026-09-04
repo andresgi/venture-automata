@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { createServerSupabaseClient } from "@/lib/supabase/auth-server";
 import { createServiceRoleClient } from "@/lib/supabase/server";
+import { getFamiliaOnboardingState } from "@/lib/auth/familia-onboarding";
 import { listZonas } from "@/lib/zonas/queries";
 import { NecesidadWizard } from "@/components/familia/necesidad-wizard";
 
@@ -9,6 +10,9 @@ export const dynamic = "force-dynamic";
 export default async function NecesidadPage({ searchParams }: { searchParams: Promise<{ draft?: string }> }) {
   const { data: { user } } = await (await createServerSupabaseClient()).auth.getUser();
   if (!user) redirect("/login");
+  const onboarding = await getFamiliaOnboardingState(user.id);
+  if (!onboarding.isFamilia) redirect("/familia");
+  if (!onboarding.isOnboarded) redirect("/familia/perfil");
   const { draft: draftId } = await searchParams;
   const db = createServiceRoleClient();
   const [{ data: profile }, zonas, draft] = await Promise.all([

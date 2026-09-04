@@ -61,13 +61,19 @@
   --radius-lg: 20px;
 
   --font-sans: var(--font-inter);
-}
 
-:root {
-  /* UI-SYSTEM §3.1 -- modal/sheet scrim. Not used by any screen built yet; kept as a
-     token now that other §3.1 neutrals are wired, so later stories reference it instead
-     of re-deriving the value. */
-  --overlay-scrim: rgba(36, 31, 25, 0.45);
+  /*
+   * Elevation -- UI-SYSTEM §5.6/§5.9. `elevation-2` (toasts) wired by E4-04.
+   * `elevation-3` (modals/dialogs, UI-SYSTEM §6) wired here by E5-03 (FAM-08/FAM-09's
+   * desktop dialog shell -- the first screen that needs it).
+   */
+  --shadow-elevation-2: 0 8px 24px rgba(36, 31, 25, 0.12);
+  --shadow-elevation-3: 0 16px 48px rgba(36, 31, 25, 0.18);
+
+  /* UI-SYSTEM §3.1 -- modal/sheet scrim (warm-tinted, not pure black). Moved into
+     `@theme` (from a plain `:root` custom property) by E5-03 so Tailwind v4 generates the
+     `bg-overlay-scrim` utility used by FAM-08/FAM-09's desktop dialog backdrop. */
+  --color-overlay-scrim: rgba(36, 31, 25, 0.45);
 }
 
 body {

@@ -1,6 +1,6 @@
 # Project State
 
-Last updated: 2026-09-03
+Last updated: 2026-09-04
 
 ## Current Phase
 
@@ -14,8 +14,9 @@ IN_PROGRESS
 
 ARCHITECTURE_GATE approved by human 2026-09-02 (see agent/DECISIONS.md). TECH_ARCHITECTURE
 VERIFIED. BUILD is proceeding per engineering/implementation-plan.md. Epic 0 Foundations,
-Epic 1 (E1-01–E1-03), E2-01 through E2-03, E3-01/E3-02, and E4-01/E4-02 are all VERIFIED;
-the next objective is E4-03, FAM-06 perfil de niñera.
+Epic 1 (E1-01–E1-03), E2-01 through E2-03, E3-01/E3-02, E4-01 through E4-04, and E5-01
+through E5-03 are all VERIFIED. E5-03 retired E5-01's documented temporary direct-to-Stripe
+redirect with the real FAM-08/FAM-09 flow (see agent/DECISIONS.md 2026-09-04).
 
 ## Phase Status
 
@@ -78,10 +79,22 @@ the whole `/familia/*` subtree (tracked, non-blocking, see E2-03's BACKLOG.md en
 active-necesidad editing remains unbuilt (E2-04's scope); FAM-06 profile details remain
 unbuilt (E4-03).
 
+**Epic 5 (Paywall, Payments, Entitlements) — in progress**: E5-01 (Stripe Checkout Session
+creation), E5-02 (Stripe webhook handler / entitlement activation, `POST
+/api/webhooks/stripe`, idempotent + correctly stacks `expires_at` on repurchase), and E5-03
+(real FAM-08/FAM-09 paywall + checkout screens, retiring E5-01's interim direct-redirect)
+all VERIFIED. E5-05 (FAM-13 entitlement/payment history) is now VERIFIED; E5-04 (FAM-10
+solicitar entrevista) is now VERIFIED; Epic 5 is complete.
+
+**Pre-RELEASE_GATE backlog item (E5-03):** FAM-09's success confirmation has no icon
+animation per spec; deferred as cosmetic, no motion convention exists yet in this codebase
+(agent/qa/e5-03-visual.md V03).
+
 ## Next Eligible Action
 
-E4-03: Developer implements FAM-06 perfil de niñera detail + pipeline record auto-creation,
-dependent on E4-01.
+E6-01: FAM-11 estado de candidatas (pipeline management), dependency E5-04 now VERIFIED.
+Adds family pipeline views and manual transitions from `contactada` onward, plus discard from
+any state. The `nueva -> contactada` transition remains exclusively owned by E5-04.
 
 ## Human Blocker
 

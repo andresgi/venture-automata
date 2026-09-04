@@ -445,6 +445,10 @@ triggering action (e.g. `candidate_contacted` still succeeds even if the SMS sen
 ### E11-01 — PostHog SDK integration (server + client) + `analytics_events` table writer
 
 Dependencies: E0-04.
+Ownership note: E4-03 creates the durable `analytics_events` table and writes its FAM-06
+events. E11-01 consumes and extends this schema (no replacement migration), adding PostHog
+delivery without duplicating domain events or dropping durable records.
+
 Acceptance criteria: every event in `analytics.md` §2 fires from the correct server action
 with the specified properties; events also write to `analytics_events` for the
 North-Star/SLA computations that must not depend on a third-party vendor being reachable.

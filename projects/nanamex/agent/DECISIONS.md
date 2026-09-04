@@ -4,6 +4,30 @@ Important product, technical, operational, and workflow decisions are recorded h
 
 Do not record trivial implementation choices.
 
+## 2026-09-04 — E5-04 stale checkout-return policy approved
+
+An old local `payments.status = pendiente` row must not make a revisited `checkout=success`
+return appear pending indefinitely. The server uses the local boundary age (30 minutes) only
+as a recovery threshold and consults Stripe for provider-backed rows. Recent rows are kept in
+the pending/finalizing state. An old `open` unexpired session is expired at Stripe before
+cleanup, `complete` remains finalizing, and provider lookup errors fail closed without mutation. Only a
+Stripe-confirmed `expired` session, or a boundary that never reached Stripe, is marked
+`fallido` and has its stored checkout URL cleared. No entitlement is granted by this cleanup;
+the client returns the family to the candidate paywall/new-contact path. The webhook remains
+the only successful entitlement authority. Regression coverage was added for recent pending
+returns and stale local/provider-expired returns. E5-04 remains IMPLEMENTED pending
+independent review and QA; this decision does not mark it VERIFIED or authorize a merge.
+
+---
+
+## 2026-09-04 — E5-04 notification handoff narrowed
+
+E5-04 implements only the paid contact transaction and its durable
+`candidate_contacted` event. Epic 10's Resend/Twilio notification infrastructure is not
+present, so no notification call or invented queue is added. E10 must consume the committed
+`contacto`/analytics handoff and provide non-blocking, retryable delivery later. FAM-11
+pipeline management remains explicitly deferred to E6.
+
 ---
 
 ## 2026-08-31 — Project Initialization complete
@@ -611,3 +635,295 @@ The implementation retains the honest `Volver a mis necesidades` action because 
 already-published necesidad is explicitly owned by E2-04 and is not yet implemented. Human
 approved retaining the current behavior rather than introducing a misleading link or pulling
 E2-04 into E4-01.
+
+## 2026-09-03 — E4-03 FAM-06 implementation
+
+Implemented the smallest FAM-06 surface. Candidate views are written through a SECURITY
+DEFINER RPC after server-side family ownership, active-necesidad, and current candidate
+eligibility checks. The RPC creates the pipeline row only when absent, preserving the first
+snapshot, writes `candidate_profile_viewed` for every view, and uses a partial unique index
+plus `ON CONFLICT DO NOTHING` to make `compatible_match_found` exactly-once per pair. The
+implementation intentionally leaves favorite, contact/paywall, and report actions disabled
+until their owning stories.
+
+## 2026-09-03 — E4-03 review-resolution decisions
+
+Human approved the recommended resolution for the outstanding E4-03 findings:
+
+1. **Analytics table ownership:** E4-03 owns creation of the durable `analytics_events` table;
+   E11-01 must consume and extend that schema rather than recreate it.
+2. **PostHog timing:** server-side PostHog capture is deferred to E11-01. E4-03 retains the
+   durable Postgres event log now, and E11-01 must wire capture without duplicate events or
+   losing the existing durable events.
+3. **Mobile FAM-06 presentation:** implement the approved photo/name/TrustBadge overlay and
+   reference disclosure treatment rather than accepting a UX deviation.
+
+Executable integration coverage, including authorization, eligibility, snapshot preservation,
+repeated/concurrent views, and the compatibility threshold, remains required before E4-03 can
+   be marked VERIFIED.
+
+## 2026-09-03 — E4-03 VERIFIED
+
+Round 1 independent review found real gaps: Code Review REVISE (Docker was unavailable, so
+`npm run test:db` — and with it the E4-03 RPC probe covering ownership, atomicity,
+idempotency, and threshold behavior — never actually ran; also flagged unrelated
+`test-invoice-generator`/`.claude/settings.json` changes sitting in the working tree,
+unrelated to this story, to keep out of its commit); Functional QA FAIL (BUG-001, Medium:
+mobile FAM-06 rendered name/badge below the photo instead of overlaid on a scrim, and the
+references section was missing the mandatory unverified-disclosure copy, contact note, and
+heading-icon/divider treatment); Visual QA REVISE (V01 tooltip clipped by an overflow-hidden
+ancestor, V02 the 768px hero lost its full-bleed treatment early, V03 the loading skeleton
+omitted the sticky action bar causing layout shift, V04 (Medium) operational/query failures
+were shown as generic "candidate unavailable" with no retry, V05 double-applied spacing
+before References).
+
+Sent back to the Developer. Investigation found the application-source fixes for BUG-001 and
+V01–V05 were already correct in the working tree from a prior session — the actual blocker
+was the E4-03 database probe tooling itself (`scripts/test-e4-03-profile-view.sql`/`.mjs`),
+which had four real bugs (an impossible fixture state violating a CHECK constraint, a
+role/privilege mismatch for its own DDL, and teardown ordering/cross-test dependency bugs
+that would produce false failures once Docker was available). Developer fixed the probe,
+ran `npm run test:db` twice consecutively end-to-end against real Postgres with Docker
+running — the E4-03 probe's ownership, eligibility, frozen-snapshot, sub-60/exact-60
+threshold, and concurrent-idempotency assertions all passed.
+
+Round 2 independent re-review, run in parallel: Code Review **PASS_WITH_MINOR_ISSUES**
+(independently re-ran `test:db` and the full validation suite, re-verified the RPC/migration
+and the BUG-001/V01-V05 fixes at the source level; confirmed the unrelated
+test-invoice-generator/.claude/settings.json items are still outside `projects/nanamex` and
+must stay out of this story's commit — a commit-hygiene note, not an implementation defect).
+Functional QA **PASS** (re-verified TC-003 mobile overlay/references fix, and re-ran
+`test:db` confirming TC-004/TC-005's pipeline/analytics assertions are now genuinely
+runtime-verified, not code-inspection-only). Visual QA **PASS** (re-confirmed all five
+findings resolved at the source level; browser/screenshot tooling remains unavailable in
+this environment for both rounds — flagged as a non-blocking note for RELEASE_GATE-level
+scrutiny, not a gap in this story).
+
+**E4-03 marked VERIFIED.** This completes Epic 4 (Candidate listing, filtering, and detail)
+except any deferred favorite/contact/report scope owned by E4-04/E5/E9. Per the 2026-09-03
+overnight standing authorization, proceeding to commit/PR/merge without a per-story pause,
+excluding the unrelated test-invoice-generator/.claude/settings.json changes from the diff,
+then continuing to the next eligible backlog item.
+
+**Note on push:** the `git push` step of this authorization was blocked by this session's
+permission settings (denied twice, not a transient failure) — E4-03 is committed locally on
+branch `nanamex/e4-03-fam06-candidate-detail` but not yet pushed/opened as a PR. Continued
+with local BUILD work (E4-04) on top of that branch rather than retrying the blocked push
+indefinitely; push/PR/merge for both E4-03 and E4-04 remains outstanding pending either a
+permission change or the human running it themselves.
+
+## 2026-09-03 — E4-04 VERIFIED
+
+FAM-07 "Favoritas" — free/unlimited favoriting (UX-spec Decision 4) via a new
+`set_candidate_favorite` SECURITY DEFINER RPC mirroring E4-03's trust-boundary pattern, plus
+a FAM-07 listing screen grouped by necesidad. Went through all 3 review cycles AGENTS.md
+permits, converging cleanly rather than stalling:
+
+- **Round 1** — Code Review REVISE, Functional QA REVISION_REQUIRED, Visual QA
+  REVISION_REQUIRED, all three independently catching the same defect: `FavoriteToggle`'s
+  failure-revert path showed only an `sr-only` (screen-reader-only) message, no visible
+  feedback to sighted users, despite `UI-SYSTEM.md` §5.6 explicitly naming "favorited" as a
+  toast use case. Code Review separately flagged that FAM-07's query filtered to
+  `estado = 'activa'` necesidades only, contradicting the "across all necesidades" spec.
+- **Fix round 1**: built a new shared `Toast` component per §5.6, wired into
+  `FavoriteToggle` for visible success/failure feedback plus a `try/catch` around the action
+  call; dropped the `estado = 'activa'` filter so closed-necesidad favorites still show
+  (de-emphasized, with favorite/unfavorite genuinely disabled — not just dimmed — since the
+  RPC's ownership check requires an active necesidad in both directions); documented the
+  closed-necesidad favorite/unfavorite interaction as a tracked E6 follow-up.
+- **Round 2** — Code Review REVISE, Functional QA and Visual QA both REVISION_REQUIRED
+  again, all three independently catching a *new* bug introduced by the round-1 fix: the
+  new `Toast` component used a non-existent Tailwind class (`bg-raised` instead of
+  `bg-bg-raised`), which Tailwind v4 silently drops rather than erroring at build time — the
+  toast rendered with a shadow but no background fill, undermining the very fix it existed
+  to deliver. Visual QA also caught two minor items (opacity double-compounding on
+  closed-necesidad cards, a disabled-button alignment inconsistency).
+- **Fix round 2**: one-line class fix plus the two minor items.
+- **Round 3 (final cycle)** — Code Review PASS, Functional QA VERIFIED, Visual QA VERIFIED.
+  `npm run test:db` ran live and clean this round with no environment contention (rounds 1-2
+  had agents competing for the same local Supabase/Docker instance when reviewed in
+  parallel — noted for future runs: stagger or serialize DB-touching QA agents rather than
+  running all three in parallel when `test:db` is involved).
+
+**E4-04 marked VERIFIED.** This completes Epic 4 in full. Per the standing overnight
+authorization, this and E4-03 remain committed locally pending the blocked-push issue noted
+above — proceeding to the next eligible backlog item (E5-01) rather than stopping.
+
+## 2026-09-03 — E5-01: use Stripe test-mode/dummy credentials, not real production keys
+
+Before starting E5-01 (Stripe Checkout Session creation), asked the human how to handle
+Stripe credentials, same pattern as E0-05's Twilio check-in. **Human decision: use dummy/
+placeholder values** — no real Stripe account/live keys are being supplied for this venture
+yet. Developer should use Stripe test-mode conventions (e.g. `sk_test_...`/`pk_test_...`
+placeholder-shaped values in `.env.example`, Stripe's official test card numbers for any
+manual verification) and mock the Stripe SDK in automated tests, the same testing posture
+E0-05 used for Twilio (no real credentials existed there either, and it was still marked
+VERIFIED). A real Stripe account/live keys remain a pre-RELEASE_GATE item, not a BUILD
+blocker.
+
+## 2026-09-04 — E5-01: direct-to-Stripe redirect accepted as a temporary, documented exception
+
+E5-01's Code Review round 1 found `ContactButton` redirects straight to Stripe's hosted
+Checkout URL instead of routing through the approved `Contactar` → FAM-08 (paywall) → FAM-09
+(checkout) screen flow that `engineering/implementation-plan.md` and `design/UI-SPEC.md`
+describe. Escalated to the human rather than silently accepted, since it's a real
+acceptance-criterion mismatch, not a trivial implementation detail.
+
+**Human decision: accept the direct redirect as a temporary, explicitly documented
+exception.** FAM-08/FAM-09's actual screens are E5-03's scope and don't exist yet — same
+"build only what exists to depend on, defer the rest explicitly" pattern as E1-02's earlier
+scope narrowing. **E5-03 must replace this direct redirect with the real
+`Contactar` → FAM-08 → FAM-09 flow before that story can be marked VERIFIED.** Recorded in
+full in `agent/BACKLOG.md`'s E5-01 entry.
+
+## 2026-09-04 — E5-01 VERIFIED
+
+`createCheckoutSessionAction`/`checkEntitlementAction` implement the Stripe Checkout
+Session creation gate: authenticated `familia`+`activa` session required; email/phone
+verification re-read server-side (defense-in-depth, doesn't trust the correo-hard-gate
+invariant); necesidad ownership and full candidate-matching eligibility re-validated
+server-side; active-entitlement short-circuit before ever calling Stripe. New
+`entitlements`/`payments` tables plus a durable payment-boundary design (idempotency key,
+claim lease, safe pending-URL reuse only when Stripe confirms `open`+unexpired) added after
+Code Review hardening. Entitlement *activation* is explicitly out of scope — only E5-02's
+webhook may ever write `entitlements`/finalize `payments.status`. Uses Stripe test-mode/
+dummy credentials only (see the dedicated decision above), mocked in all automated tests.
+
+Code Review round 1: REVISE (2 Required Changes — the routing exception above, and missing
+regression coverage for `complete`/`expired`/missing-`expiresAt` Stripe recovery
+responses). Developer fixed both (documented the exception per the human decision above;
+added 3 new fail-closed regression tests). Code Review round 2: PASS_WITH_MINOR_ISSUES —
+independently re-verified both fixes, full validation suite (305 tests, lint, typecheck,
+check:secrets, build) and `npm run test:db` (including the new payment-boundary concurrency
+probe) all pass live with no DB contention this round. Two Minor issues left non-blocking,
+consistent with round 1's assessment: the claim lease has no owner token (Stripe idempotency
+and re-read logic mitigate duplicate risk), and `already_entitled` currently ends in a
+terminal success toast rather than continuing anywhere (acceptable — the continuation target
+is E5-04's scope). Functional QA: PASS (real server-side gate testing plus the live DB
+concurrency probe). Visual QA: PASS (pending/disabled/accessible states, toast positioning
+above the mobile action bar, 44px touch targets all confirmed at the source level; full
+FAM-08/FAM-09 visuals correctly deferred to E5-03, not an E5-01 defect).
+
+**E5-01 marked VERIFIED.** Committed locally on branch `nanamex/e4-03-fam06-candidate-detail`
+(3rd commit on that branch, after E4-03/E4-04) — push remains blocked by this session's
+permission settings, same open item as before.
+
+## 2026-09-04 — E5-02 VERIFIED
+
+`POST /api/webhooks/stripe` finalizes payment/entitlement state after Stripe's Checkout
+Session completes or expires. Verifies the Stripe signature before any DB access, then
+calls `finalize_stripe_payment` (SECURITY DEFINER RPC,
+`db/migrations/20260904000016_finalize_stripe_payment.sql`) to atomically transition the
+pending `payments` row and activate/extend the family's `entitlements` row. Idempotent on
+`provider_payment_id` via a single atomic `UPDATE ... WHERE status = 'pendiente'` (no
+separate check-then-act window); repurchase-before-expiry correctly stacks `expires_at` from
+the current expiry, not `now()`, verified via an explicit negative assertion in the DB probe.
+Also writes `payment_succeeded`/`payment_failed` analytics events in the same transaction
+per `analytics.md` §2.
+
+Code Review: PASS, no required changes (agent/reviews/code-E5-02-review.md) — independently
+re-ran lint/typecheck/315 tests/check:secrets/build/`test:db` (twice), confirmed signature
+verification genuinely precedes DB access, the idempotency guard is race-free, and the
+`FOR UPDATE` stacking path plus the payments-side `payments_one_pending_per_familia_idx`
+constraint together close the only theoretical concurrent-first-purchase race.
+
+Functional QA: PASS_WITH_MINOR_ISSUES (agent/qa/e5-02-functional.md) — independently
+re-executed signature-rejection, idempotency, and repurchase-stacking scenarios against a
+live local Postgres instance (run twice), plus the full validation suite. Found one new
+issue Code Review missed: the implemented route path (`/api/stripe/webhook`) didn't match
+the path documented in `architecture.md` (lines 93, 498) and `security.md` (line 96)
+(`/api/webhooks/stripe`) — not a runtime defect today (no real Stripe webhook configured
+yet), but would 404 every delivery if a human later wires Stripe's dashboard to the
+documented path.
+
+**Orchestrator fixed the route-path mismatch directly** (mechanical, non-blocking per
+AGENTS.md's minor-issue handling) rather than deferring it: moved the route to
+`app/api/webhooks/stripe/route.ts` to match the two agreeing docs, updated
+`tests/app/api/stripe-webhook.test.ts` and the doc comment in `lib/stripe/client.ts`, and
+re-ran lint/typecheck/315 tests/check:secrets/build — all clean, `/api/webhooks/stripe` now
+listed as the build's dynamic route. No Visual QA — backend-only route, no UI (config/CONSTRAINTS.md
+"QA Ownership" is web-only/agent-driven QA and this story has no rendered surface).
+
+**E5-02 marked VERIFIED.** Same working tree as E5-01, not yet pushed (open item unchanged
+from E5-01's entry). Next eligible action: E5-03 (FAM-08/09 paywall + checkout screens),
+which must retire E5-01's documented interim direct-to-Stripe redirect.
+
+## 2026-09-04 — E5-03 VERIFIED
+
+Built the real `Contactar` → FAM-08 (paywall) → FAM-09 (checkout) flow via a single
+`PaywallGate` dialog/takeover shell, retiring E5-01's documented interim direct-to-Stripe
+redirect. `ContactButton` now only opens `PaywallGate`, which calls E5-01's existing
+`createCheckoutSessionAction` and redirects to Stripe's hosted Checkout URL only from the
+FAM-09 confirm step (non-dismissible while that request or the final redirect is in
+flight). `CheckoutReturnBanner` handles the round trip back (`?checkout=success/cancel`).
+
+Code Review: PASS_WITH_MINOR_ISSUES (agent/reviews/code-E5-03-review.md) — 3 Important
+issues found: (1) a genuine SSR/hydration-mismatch bug in `CheckoutReturnBanner` from
+reading `window.location` inside a `useState` lazy initializer, (2) the already-entitled
+interim behavior (paywall shown before the "already have access" message) not formally
+recorded as a decision, (3) missing test coverage for the `already_entitled` step. All
+non-blocking per the reviewer but fixed directly by the orchestrator rather than deferred:
+(1) fixed by switching to `next/navigation`'s `useSearchParams`/`useRouter`, matching the
+existing `UnauthorizedBanner` pattern; (2) recorded here (already-entitled families see the
+FAM-08 offer screen before the message, accepted as interim — a future story could pass a
+server-computed flag to skip it); (3) added.
+
+Functional QA: PASS_WITH_MINOR_ISSUES (agent/qa/e5-03-functional.md) — independently
+re-verified the full flow (happy path, non-dismissibility, error handling, already_entitled,
+reset-on-reopen) against real production wiring, confirmed the hydration fix was genuinely
+correct. Found one new issue (BUG-001): the URL-stripping `router.replace` fired immediately
+on mount on this `force-dynamic` page, triggering an RSC re-fetch that could make the
+confirmation banner's on-screen duration unpredictable/too-short. Fixed directly: pinned the
+banner's state in local `useState` (still hydration-safe, derived from `useSearchParams()`)
+and delayed the URL strip via a 4s `setTimeout`, matching the existing `Toast` auto-dismiss
+convention (`durationMs = 4000`).
+
+Visual QA: PASS_WITH_MINOR_ISSUES (agent/qa/e5-03-visual.md) — source-level review (no
+browser tooling available, consistent with prior stories). Found V01 (Medium): the mobile
+full-screen takeover had no `overflow-y-auto`, and with `document.body.style.overflow`
+locked while open, content taller than the viewport (error banner shown, short devices,
+larger accessibility text) could make the primary CTA completely unreachable. Fixed
+directly (dialog shell now scrolls its own content on all breakpoints, not just desktop).
+V02 (Minor): primary CTAs were `w-full` on desktop too, contradicting UI-SPEC's "full-width
+mobile, standard width desktop." Fixed directly (`lg:w-auto lg:self-center lg:px-10`). V03
+(Minor, deferred): FAM-09's success icon has no animation per spec — left as a non-blocking,
+pre-RELEASE_GATE cosmetic item; no motion/animation convention exists elsewhere in this
+codebase yet to reuse.
+
+All fixes re-verified together: `npm test -- --run --no-file-parallelism` (329 tests),
+`npm run lint`, `npm run typecheck`, `npm run check:secrets`, `npm run build` all pass. No
+new DB migrations.
+
+**E5-03 marked VERIFIED.** Same working tree as E5-01/E5-02, not yet pushed. Next eligible
+actions: E5-04 (FAM-10 solicitar entrevista, dependency E5-02) and E5-05 (FAM-13
+entitlement/payment history, dependency E5-02) — both now eligible in parallel.
+
+## 2026-09-04 — E5-05 VERIFIED
+
+E5-05 delivered the FAM-13 account surface with session-scoped contact verification,
+account-wide entitlement status and live remaining days, payment history, responsive navigation,
+and read-only security placeholder. The shared FAM-01 onboarding guard was extended to all
+family destinations so incomplete families cannot bypass onboarding via direct URLs.
+
+Code Review: PASS. Functional QA: PASS. Visual QA: PASS after fixes for the account loading
+skeleton, persistent navigation, retry target, mobile payment-history layout, and onboarding
+guard coverage. Full validation passed with 355 tests, lint, typecheck, secret scan, build, and
+test:db. E5-05 is VERIFIED; E5-04 remains the next eligible story.
+
+## 2026-09-04 — E5-04 VERIFIED
+
+E5-04 delivered and independently verified the paid FAM-10 contact flow. The server-authorized
+transaction creates immutable `contacto`, advances only `nueva -> contactada`, and records
+`candidate_contacted` atomically. Existing contacts remain accessible after entitlement expiry,
+pipeline progression, necesidad closure, and candidate depublication/deactivation; new contacts
+still require current eligibility and an active `contacto_30d` entitlement. Successful Stripe
+returns use a server-backed pending state while webhook finalization is delayed, with stale
+pending boundaries over 30 minutes safely reconciled.
+
+Code Review: PASS_WITH_MINOR_ISSUES, Functional QA: PASS, Visual QA: PASS_WITH_SCOPE_LIMITATION.
+The remaining limitation is the FAM-11 forward destination, which is explicitly E6 scope. Epic
+10 notification delivery is also explicitly deferred and consumes the durable contact/event
+handoff without changing contact success semantics. Validation passed: 388 tests, lint,
+typecheck, secret scan, build, and test:db. E5-04 implementation and integration tests are in
+isolated local commits; unrelated sibling-project deletions and workspace settings remain
+uncommitted.

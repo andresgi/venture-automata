@@ -49,6 +49,14 @@ describe("TrustBadge", () => {
     }
   });
 
+  it("supports the documented 28px detail geometry without changing compact defaults", () => {
+    const { rerender } = render(<TrustBadge status="verificada" />);
+    expect(screen.getByRole("button").className).toContain("h-6");
+    rerender(<TrustBadge status="verificada" size="detail" />);
+    expect(screen.getByRole("button").className).toContain("h-7");
+    expect(screen.getByRole("button").className).not.toContain("h-6");
+  });
+
   it("reveals the plain-language tooltip explanation on click, one per state", () => {
     const explanations: Record<string, string> = {
       no_verificada: "Esta niñera aún no ha subido su identificación.",
@@ -76,5 +84,11 @@ describe("TrustBadge", () => {
 
     fireEvent.mouseLeave(badge);
      expect(screen.getByRole("tooltip", { hidden: true })).toHaveAttribute("hidden");
+  });
+
+  it("allows the tooltip to escape the hero/photo clipping context", () => {
+    render(<TrustBadge status="verificada" size="detail" />);
+    expect(screen.getByRole("tooltip", { hidden: true })).toHaveClass("z-30");
+    expect(screen.getByRole("button").parentElement).toHaveClass("overflow-visible");
   });
 });

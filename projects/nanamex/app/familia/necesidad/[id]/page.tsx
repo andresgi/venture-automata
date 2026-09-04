@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { CaretDown, UsersThree } from "@phosphor-icons/react/ssr";
 import { createServerSupabaseClient } from "@/lib/supabase/auth-server";
 import { createServiceRoleClient } from "@/lib/supabase/server";
+import { getFamiliaOnboardingState } from "@/lib/auth/familia-onboarding";
 import { RetryBanner } from "@/components/familia/retry-banner";
 import { familiaChecklistLabels } from "@/lib/matching/checklist-labels";
 import type { VerificationStatus } from "@/components/shared/trust-badge";
@@ -27,6 +28,7 @@ type PipelineRow = {
   ninera_id: string;
   match_score_snapshot: number;
   match_checklist_snapshot: Record<string, boolean>;
+  es_favorita: boolean;
 };
 type NecesidadRow = {
   id: string;
@@ -150,7 +152,7 @@ function EmptyState() {
 
 type RankedCandidate = CandidateFilterData & { profileCompleteness: number; createdAt: string };
 
-function mergeCandidates(pipeline: PipelineRow[], liveRows: NineraLiveRow[]): RankedCandidate[] {
+function mergeCandidates(necesidadId: string, pipeline: PipelineRow[], liveRows: NineraLiveRow[]): RankedCandidate[] {
   const liveById = new Map(liveRows.map((row) => [row.profile_id, row]));
   return pipeline
     .map((row) => {
@@ -158,6 +160,7 @@ function mergeCandidates(pipeline: PipelineRow[], liveRows: NineraLiveRow[]): Ra
       if (!live) return null;
       const profile = Array.isArray(live?.profiles) ? live?.profiles[0] : live?.profiles;
       return {
+        necesidadId,
         ninera_id: row.ninera_id,
         nombre: profile?.nombre ?? "Niñera",
         fotoUrl: live?.foto_url ?? null,
@@ -167,6 +170,8 @@ function mergeCandidates(pipeline: PipelineRow[], liveRows: NineraLiveRow[]): Ra
         verificationStatus: live?.verification_status ?? "no_verificada",
         score: row.match_score_snapshot,
         checklist: familiaChecklistLabels(row.match_checklist_snapshot),
+        matchFactors: row.match_checklist_snapshot,
+        isFavorite: row.es_favorita,
         zonas: (live.zonas_trabajo ?? []).flatMap((entry) => {
           const zone = Array.isArray(entry.zonas) ? entry.zonas[0] : entry.zonas;
           return zone?.alcaldia_municipio ? [zone.alcaldia_municipio] : [];
@@ -179,7 +184,7 @@ function mergeCandidates(pipeline: PipelineRow[], liveRows: NineraLiveRow[]): Ra
         createdAt: live.created_at ?? "",
       } satisfies CandidateFilterData;
     })
-    .filter((candidate): candidate is RankedCandidate => candidate !== null)
+    .filter((candidate): candidate is NonNullable<typeof candidate> => candidate !== null)
     .sort((a, b) => b.score - a.score || b.profileCompleteness - a.profileCompleteness || a.createdAt.localeCompare(b.createdAt) || a.ninera_id.localeCompare(b.ninera_id));
 }
 
@@ -188,6 +193,9 @@ export default async function MatchesPage({ params }: { params: Promise<{ id: st
     data: { user },
   } = await (await createServerSupabaseClient()).auth.getUser();
   if (!user) redirect("/login");
+  const onboarding = await getFamiliaOnboardingState(user.id);
+  if (!onboarding.isFamilia) redirect("/familia");
+  if (!onboarding.isOnboarded) redirect("/familia/perfil");
 
   const { id } = await params;
   const db = createServiceRoleClient();
@@ -195,7 +203,7 @@ export default async function MatchesPage({ params }: { params: Promise<{ id: st
   const { data: necesidad, error: necesidadError } = await db
     .from("necesidades")
     .select(
-      "id, modalidad, dias_horarios, pago_min, pago_max, zonas(alcaldia_municipio, colonia), estado, pipeline(id, ninera_id, match_score_snapshot, match_checklist_snapshot)",
+      "id, modalidad, dias_horarios, pago_min, pago_max, zonas(alcaldia_municipio, colonia), estado, pipeline(id, ninera_id, match_score_snapshot, match_checklist_snapshot, es_favorita)",
     )
     .eq("id", id)
     .eq("familia_id", user.id)
@@ -242,7 +250,7 @@ export default async function MatchesPage({ params }: { params: Promise<{ id: st
       console.error("MatchesPage: failed to read live niñera verification status", liveError);
       liveStatusError = true;
     } else {
-      candidates = mergeCandidates(pipeline, (liveRows ?? []) as NineraLiveRow[]);
+      candidates = mergeCandidates(row.id, pipeline, (liveRows ?? []) as NineraLiveRow[]);
       if (pipeline.length > 0 && candidates.length === 0) liveStatusError = true;
     }
   }

@@ -348,6 +348,39 @@ decisions with real business consequences (pricing/packaging), made here because
 addendum assigned them here — flagged clearly so the human can override at ARCHITECTURE_
 GATE if a different mechanic is preferred.
 
+### 16.4 Checkout persistence and retry boundary (E5-01)
+
+Checkout initiation first inserts one durable `payments` row in `pendiente`. That row owns a
+unique `idempotency_key`; a partial unique index permits only one pending purchase per family.
+A short `checkout_claimed_at` lease lets only one concurrent request call Stripe. The same key
+is passed to Stripe, and the row id plus family id are sent as Stripe metadata. Stripe's
+Checkout `expires_at` is normalized and persisted in `provider_session_expires_at`; a stored
+URL is reused only after Stripe reports the session `open` and unexpired; known-expired sessions
+are never returned.
+
+If Stripe creates a session but linking its id/URL back to the row fails, the server re-reads the
+row before deciding whether to compensate (it never expires a row already finalized), retries
+the link, and otherwise expires the session. It persists `expired` and rotates the idempotency
+key before allowing a new attempt. If expiration fails, it preserves the provider ID/URL as
+`unknown` and does not rotate the key, so retry re-checks the same session rather than creating
+a second chargeable session. If that final write is unavailable, the request fails closed;
+the original idempotency key is not rotated. Stripe's idempotency record and the session's
+`payment_boundary_id` metadata are the durable provider-side fallback: a later retry recreates
+idempotently, retrieves the returned session, and links/returns it only when Stripe reports
+`open` with a present future expiry. E5-02 must reconcile by `provider_payment_id` or that
+metadata, and must never activate from a URL alone.
+
+**Stale success-return policy (E5-04):** a `pendiente` boundary is considered stale only when
+its local `created_at` is more than 30 minutes old. Recent boundaries remain in the
+server-backed `pending`/finalizing state so a normal delayed webhook is not interrupted. For
+an old boundary, the return handler re-reads Stripe when a provider session ID exists: an
+`open` unexpired session is expired at Stripe before cleanup, `complete` remains finalizing,
+and provider errors fail closed without mutation. Only a Stripe-confirmed `expired` session
+(or a boundary that never reached Stripe) may be marked `fallido`, with its stored URL
+cleared. This grants no entitlement; the client routes the revisited success URL back to the
+candidate paywall/new-contact path so a fresh checkout can be started. The webhook remains
+the sole authority for successful entitlement activation.
+
 ### 16.1 What "Contactar" unlocks
 
 **Decision: one entitlement type in V1 — `contacto_30d` (MX$299), account-wide, uncapped
