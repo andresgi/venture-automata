@@ -8,48 +8,39 @@ const { createCheckoutSessionAction } = vi.hoisted(() => ({
 
 vi.mock("@/actions/entitlements", () => ({ createCheckoutSessionAction }));
 
-const props = { necesidadId: "necesidad-1", nineraId: "ninera-1" };
+const props = {
+  necesidadId: "necesidad-1",
+  nineraId: "ninera-1",
+  candidateNombre: "Ana",
+  candidateFotoUrl: null,
+  verificationStatus: "verificada" as const,
+};
 
 describe("ContactButton", () => {
   beforeEach(() => {
     createCheckoutSessionAction.mockReset();
   });
 
-  it("shows a fixed-size spinner and accessible pending status while the action runs", async () => {
-    let resolveAction!: (value: { status: string; message: string }) => void;
-    createCheckoutSessionAction.mockReturnValue(
-      new Promise((resolve) => {
-        resolveAction = resolve;
-      }),
-    );
-
+  it("opens the FAM-08 paywall gate instead of calling the checkout action directly", () => {
     render(<ContactButton {...props} variant="mobile" className="h-11 w-full" />);
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+
     fireEvent.click(screen.getByRole("button", { name: "Contactar" }));
 
-    const button = await screen.findByRole("button", { name: "Contactar, procesando" });
-    expect(button).toBeDisabled();
-    expect(button).toHaveAttribute("aria-busy", "true");
-    expect(button.querySelector("svg")).toHaveClass("animate-spin");
-    expect(screen.getByRole("status")).toHaveTextContent("Procesando contacto…");
-
-    resolveAction({ status: "error", message: "No se pudo iniciar el pago." });
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+    expect(createCheckoutSessionAction).not.toHaveBeenCalled();
+    expect(screen.getByText("MX$299 · Contacta candidatas durante 30 días")).toBeInTheDocument();
+    expect(screen.getByText("Ana")).toBeInTheDocument();
   });
 
-  it("raises mobile feedback above the sticky action bar and keeps desktop toast placement", async () => {
-    createCheckoutSessionAction.mockResolvedValue({ status: "already_entitled", message: "Ya puedes contactar." });
-
-    const { unmount } = render(<ContactButton {...props} variant="mobile" className="h-11 w-full" />);
+  it("closes the gate via the Cancelar text link without calling the action", () => {
+    render(<ContactButton {...props} />);
     fireEvent.click(screen.getByRole("button", { name: "Contactar" }));
-    const mobileToast = (await screen.findByText("Ya puedes contactar.")).parentElement;
-    expect(mobileToast).not.toBeNull();
-    expect(mobileToast!).toHaveClass("bottom-[calc(68px+1rem+env(safe-area-inset-bottom))]");
-    expect(mobileToast!).toHaveClass("lg:bottom-4");
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
 
-    unmount();
-    render(<ContactButton {...props} className="h-11 w-full" />);
-    fireEvent.click(screen.getByRole("button", { name: "Contactar" }));
-    const desktopToast = (await screen.findByText("Ya puedes contactar.")).parentElement;
-    expect(desktopToast!).toHaveClass("bottom-4");
-    expect(desktopToast!).not.toHaveClass("bottom-[calc(68px+1rem+env(safe-area-inset-bottom))]");
+    fireEvent.click(screen.getByRole("button", { name: "Cancelar" }));
+
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    expect(createCheckoutSessionAction).not.toHaveBeenCalled();
   });
 });

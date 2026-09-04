@@ -1,5 +1,6 @@
 import { FavoriteToggle } from "@/components/familia/favorite-toggle";
 import { ContactButton } from "@/components/familia/contact-button";
+import type { VerificationStatus } from "@/components/shared/trust-badge";
 
 export type CandidateDetailActionsProps = {
   necesidadId: string;
@@ -7,15 +8,26 @@ export type CandidateDetailActionsProps = {
   score: number;
   checklist: Record<string, boolean>;
   initialFavorite: boolean;
+  candidateNombre: string;
+  candidateFotoUrl: string | null;
+  verificationStatus: VerificationStatus;
 };
 
 /**
  * FAM-06 actions footer (design/UI-SPEC.md, sticky on mobile per UX-spec.md FAM-06).
- * "Guardar favorita" is functional (E4-04). "Contactar" now triggers the E5-01 server-side
- * gate + Stripe Checkout Session creation directly (`ContactButton`) -- FAM-08/FAM-09's full
- * paywall/checkout screen visuals remain E5-03's scope, not built here.
+ * "Guardar favorita" is functional (E4-04). "Contactar" opens the real FAM-08/FAM-09
+ * paywall/checkout flow (E5-03, `ContactButton` -> `PaywallGate`).
  */
-export function CandidateDetailActions({ necesidadId, nineraId, score, checklist, initialFavorite }: CandidateDetailActionsProps) {
+export function CandidateDetailActions({
+  necesidadId,
+  nineraId,
+  score,
+  checklist,
+  initialFavorite,
+  candidateNombre,
+  candidateFotoUrl,
+  verificationStatus,
+}: CandidateDetailActionsProps) {
   return (
     <>
       <div className="mt-6 hidden gap-3 lg:flex">
@@ -30,6 +42,8 @@ export function CandidateDetailActions({ necesidadId, nineraId, score, checklist
         <ContactButton
           necesidadId={necesidadId}
           nineraId={nineraId}
+          candidateNombre={candidateNombre}
+          candidateFotoUrl={candidateFotoUrl}
           className="h-11 flex-1 rounded-sm bg-primary-600 text-button text-white"
         />
       </div>
@@ -45,7 +59,10 @@ export function CandidateDetailActions({ necesidadId, nineraId, score, checklist
         <ContactButton
           necesidadId={necesidadId}
           nineraId={nineraId}
-          variant="mobile"
+          candidateNombre={candidateNombre}
+          candidateFotoUrl={candidateFotoUrl}
+          verificationStatus={verificationStatus}
+           variant="mobile"
           className="flex h-11 w-full items-center justify-center gap-2 rounded-sm bg-primary-600 text-button text-white"
         />
       </div>
