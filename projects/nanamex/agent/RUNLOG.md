@@ -614,3 +614,13 @@ cancellation, and interim handoff. Code Review PASS_WITH_MINOR_ISSUES, Functiona
 Visual QA PASS_WITH_SCOPE_LIMITATION. FAM-11 remains E6 scope and Epic 10 notification delivery
 remains deferred. Validation: 388 tests, lint, typecheck, secret scan, production build, and
 test:db all pass. Next recommended action: E6-01.
+
+## 2026-09-04 — Orchestrator — PR #15 merged
+
+Objective: Merge PR #15 (E4-03 through Epic 5) to `main` once CI is green, per the
+2026-09-03 standing overnight authorization.
+Result: `gh pr checks 15` showed all checks passed (Lint/typecheck/test/build; migrations
+apply cleanly; Vercel preview build). Merged via `gh pr merge 15 --squash`
+(commit `f267404`). Local `main` fast-forwarded to match.
+Artifacts changed: agent/STATE.md, agent/DECISIONS.md (this entry).
+Next recommended action: E6-01 — FAM-11 estado de candidatas (pipeline management).

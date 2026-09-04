@@ -927,3 +927,17 @@ handoff without changing contact success semantics. Validation passed: 388 tests
 typecheck, secret scan, build, and test:db. E5-04 implementation and integration tests are in
 isolated local commits; unrelated sibling-project deletions and workspace settings remain
 uncommitted.
+
+## 2026-09-04 — PR #15 merged to main (E4-03 through Epic 5)
+
+Per the 2026-09-03 standing overnight authorization (orchestrator may auto-merge
+BUILD-story PRs once CI + Code Review/QA pass, without pausing for per-PR approval), pushed
+branch `nanamex/e4-03-fam06-candidate-detail` and opened PR #15
+(https://github.com/andresgi/venture-automata/pull/15) bundling E4-03 (FAM-06 candidate
+detail), E4-04 (FAM-07 favoritas), and all of Epic 5 (E5-01 through E5-05). All CI checks
+passed: `Lint, typecheck, test, build`, `Migrations apply cleanly to a fresh Supabase
+instance`, and the Vercel preview build. Squash-merged as `f267404`. Local `main`
+fast-forwarded; feature branch left undeleted (remote and local) as a safety default.
+
+Next eligible action: E6-01 — FAM-11 estado de candidatas (pipeline management), dependency
+E5-04 now VERIFIED and merged.
