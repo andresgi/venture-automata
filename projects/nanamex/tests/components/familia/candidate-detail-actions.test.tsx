@@ -8,6 +8,9 @@ const props = {
   score: 80,
   checklist: { location: true },
   initialFavorite: false,
+  candidateNombre: "Ana",
+  candidateFotoUrl: null,
+  verificationStatus: "verificada" as const,
 };
 
 describe("CandidateDetailActions", () => {
