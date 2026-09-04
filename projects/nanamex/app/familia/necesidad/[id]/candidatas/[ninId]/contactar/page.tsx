@@ -26,7 +26,7 @@ export default async function ContactPage({ params, searchParams }: { params: Pr
   const { id, ninId } = await params;
   const checkoutSuccess = (await searchParams)?.checkout === "success";
   const db = createServiceRoleClient();
-  const { data: need } = await db.from("necesidades").select("id").eq("id", id).eq("familia_id", user.id).eq("estado", "activa").maybeSingle();
+  const { data: need } = await db.from("necesidades").select("id, estado").eq("id", id).eq("familia_id", user.id).maybeSingle();
   if (!need) redirect(`/familia/necesidad/${id}`);
   // Find the owned pipeline and its durable contacto before checking whether the
   // candidate is still discoverable. Existing contact access survives expiration,
@@ -34,6 +34,10 @@ export default async function ContactPage({ params, searchParams }: { params: Pr
   const { data: pipeline } = await db.from("pipeline").select("estado, contacto(pipeline_id)").eq("necesidad_id", id).eq("ninera_id", ninId).maybeSingle();
   const relation = pipeline?.contacto as ContactRelation | ContactRelation[] | null | undefined;
   const contactRow = Array.isArray(relation) ? relation.find(isContactRow) : isContactRow(relation) ? relation : null;
+  // A closed necesidad may still render an established contact, but it can never
+  // open a new-contact flow. The durable contacto relation is checked first so
+  // closure does not revoke already-revealed PII.
+  if (!contactRow && need.estado !== "activa") redirect(`/familia/necesidad/${id}`);
   let candidate: { nombre: string | null } | null = null;
   if (contactRow) {
     const { data } = await db.from("profiles").select("nombre").eq("id", ninId).maybeSingle();

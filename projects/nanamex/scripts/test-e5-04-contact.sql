@@ -59,6 +59,32 @@ do $$ declare result jsonb; state public.pipeline_estado; begin
     end if;
   end loop;
 end $$;
+-- Closure does not revoke an established contact, for either terminal necesidad state.
+do $$ declare result jsonb; state public.necesidad_estado; begin
+  foreach state in array array['cerrada_contratada'::public.necesidad_estado, 'cerrada_cancelada'::public.necesidad_estado] loop
+    update public.necesidades set estado=state where id='00000000-0000-0000-0000-000000000601';
+    select public.confirm_contact('00000000-0000-0000-0000-000000000601','00000000-0000-0000-0000-000000000621','00000000-0000-0000-0000-000000000623',null) into result;
+    if result->>'status' <> 'already_contacted' or result->>'phone' <> '+5215550000623' then
+      raise exception 'closed necesidad existing contact assertion failed for %', state;
+    end if;
+  end loop;
+  update public.necesidades set estado='activa' where id='00000000-0000-0000-0000-000000000601';
+end $$;
+-- A closed necesidad without a durable contacto cannot create a new contact.
+update public.necesidades set estado='cerrada_contratada' where id='00000000-0000-0000-0000-000000000602';
+update public.entitlements set expires_at=now()+interval '30 days' where id='00000000-0000-0000-0000-000000000631';
+do $$ declare failed boolean; begin
+  failed:=false;
+  begin perform public.confirm_contact('00000000-0000-0000-0000-000000000602','00000000-0000-0000-0000-000000000621','00000000-0000-0000-0000-000000000623',null); exception when others then failed:=true; end;
+  if not failed then raise exception 'closed necesidad accepted new contact'; end if;
+end $$;
+update public.necesidades set estado='cerrada_cancelada' where id='00000000-0000-0000-0000-000000000602';
+do $$ declare failed boolean; begin
+  failed:=false;
+  begin perform public.confirm_contact('00000000-0000-0000-0000-000000000602','00000000-0000-0000-0000-000000000621','00000000-0000-0000-0000-000000000623',null); exception when others then failed:=true; end;
+  if not failed then raise exception 'cancelled necesidad accepted new contact'; end if;
+end $$;
+update public.necesidades set estado='activa' where id='00000000-0000-0000-0000-000000000602';
 -- Depublication and account deactivation do not revoke an already revealed contact.
 update public.pipeline set estado='entrevista' where id='00000000-0000-0000-0000-000000000611';
 update public.perfil_ninera set publicado=false where profile_id='00000000-0000-0000-0000-000000000623';

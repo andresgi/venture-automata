@@ -42,7 +42,7 @@ begin
   from public.pipeline pl
   join public.necesidades n on n.id = pl.necesidad_id
   where pl.necesidad_id = p_necesidad_id and pl.ninera_id = p_ninera_id
-    and n.familia_id = p_familia_id and n.estado = 'activa'
+    and n.familia_id = p_familia_id
   for update;
   if not found then raise exception 'contact_pair_not_allowed'; end if;
 
@@ -57,6 +57,16 @@ begin
   end if;
 
   if v_pipeline.estado <> 'nueva' then
+    raise exception 'contact_pair_not_allowed';
+  end if;
+
+  -- New contacts are only possible while the necesidad is active. This check is
+  -- deliberately after the durable-contact check above so closure does not revoke
+  -- established access or make an idempotent retry fail.
+  if not exists (
+    select 1 from public.necesidades
+    where id = p_necesidad_id and familia_id = p_familia_id and estado = 'activa'
+  ) then
     raise exception 'contact_pair_not_allowed';
   end if;
 

@@ -18,6 +18,7 @@ vi.mock("@/components/familia/contact-request-form", () => ({
 
 let entitlement: unknown = { id: "entitlement-1" };
 let pipeline: unknown = { estado: "contactada", contacto: { pipeline_id: "pipeline-1" } };
+let necesidadEstado = "activa";
 let candidateAvailable = true;
 const reads: string[] = [];
 const filters: Array<[string, string, unknown]> = [];
@@ -26,7 +27,7 @@ function query(table: string) {
     select: vi.fn(() => chain), eq: vi.fn((field: string, value: unknown) => { filters.push([table, field, value]); return chain; }), gt: vi.fn(() => chain), order: vi.fn(() => chain), limit: vi.fn(() => chain),
     maybeSingle: vi.fn(async () => {
       reads.push(table);
-      if (table === "necesidades") return { data: { id: "need-1" }, error: null };
+      if (table === "necesidades") return { data: { id: "need-1", estado: necesidadEstado }, error: null };
       if (table === "entitlements") return { data: entitlement, error: null };
       if (table === "pipeline") return { data: pipeline, error: null };
       if (table === "profiles") {
@@ -47,7 +48,7 @@ const params = Promise.resolve({ id: "need-1", ninId: "ninera-1" });
 beforeEach(() => {
   vi.clearAllMocks(); reads.length = 0; filters.length = 0; candidateAvailable = true;
   onboarding.isFamilia = true; onboarding.isOnboarded = true; onboarding.profile.email_verified = true; onboarding.profile.phone_verified = true;
-  entitlement = { id: "entitlement-1" }; pipeline = { estado: "contactada", contacto: { pipeline_id: "pipeline-1" } };
+  entitlement = { id: "entitlement-1" }; pipeline = { estado: "contactada", contacto: { pipeline_id: "pipeline-1" } }; necesidadEstado = "activa";
   checkoutState = { status: "pending" };
 });
 
@@ -98,6 +99,21 @@ describe("FAM-10 route authorization and disclosure boundary", () => {
     const page = await ContactPage({ params });
     expect(page.props.children[5].props.initialPhone).toBe("+5215550001");
     expect(reads).not.toContain("entitlements");
+  });
+
+  it.each(["cerrada_contratada", "cerrada_cancelada"])("keeps an established contact viewable after necesidad is %s", async (estado) => {
+    necesidadEstado = estado;
+    entitlement = null;
+    const page = await ContactPage({ params });
+    expect(page.props.children[5].props.initialPhone).toBe("+5215550001");
+    expect(page.props.children[5].props.initialContactEstablished).toBe(true);
+    expect(reads).not.toContain("entitlements");
+  });
+
+  it.each(["cerrada_contratada", "cerrada_cancelada"])("does not open a new contact flow for necesidad %s", async (estado) => {
+    necesidadEstado = estado;
+    pipeline = { estado: "nueva", contacto: [] };
+    await expect(ContactPage({ params })).rejects.toThrow("REDIRECT:/familia/necesidad/need-1");
   });
 
   it("keeps an established contact viewable when the candidate is no longer discoverable", async () => {

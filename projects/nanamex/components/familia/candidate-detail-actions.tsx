@@ -46,6 +46,7 @@ export function CandidateDetailActions({
           nineraId={nineraId}
           candidateNombre={candidateNombre}
           candidateFotoUrl={candidateFotoUrl}
+          verificationStatus={verificationStatus}
           className="h-11 flex-1 rounded-sm bg-primary-600 text-button text-white"
         />
       </div>
@@ -63,10 +64,9 @@ export function CandidateDetailActions({
           nineraId={nineraId}
           candidateNombre={candidateNombre}
           candidateFotoUrl={candidateFotoUrl}
-           verificationStatus={verificationStatus}
-           initialOpen={initialContactOpen}
-           variant="mobile"
-           initialOpen={initialContactOpen}
+          verificationStatus={verificationStatus}
+          variant="mobile"
+          initialOpen={initialContactOpen}
           className="flex h-11 w-full items-center justify-center gap-2 rounded-sm bg-primary-600 text-button text-white"
         />
       </div>
