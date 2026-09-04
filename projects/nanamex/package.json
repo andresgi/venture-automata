@@ -10,7 +10,7 @@
     "typecheck": "next typegen && tsc --noEmit",
     "test": "vitest run",
     "check:secrets": "node scripts/check-no-public-secrets.mjs"
-     ,"test:db": "supabase db reset --local && node scripts/test-necesidad-rpc.mjs && node scripts/test-e4-03-profile-view.mjs"
+     ,"test:db": "supabase db reset --local && node scripts/test-necesidad-rpc.mjs && node scripts/test-e4-03-profile-view.mjs && node scripts/test-e4-04-favorites.mjs"
   },
   "dependencies": {
     "@phosphor-icons/react": "^2.1.10",

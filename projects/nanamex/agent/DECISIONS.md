@@ -680,3 +680,47 @@ except any deferred favorite/contact/report scope owned by E4-04/E5/E9. Per the 
 overnight standing authorization, proceeding to commit/PR/merge without a per-story pause,
 excluding the unrelated test-invoice-generator/.claude/settings.json changes from the diff,
 then continuing to the next eligible backlog item.
+
+**Note on push:** the `git push` step of this authorization was blocked by this session's
+permission settings (denied twice, not a transient failure) — E4-03 is committed locally on
+branch `nanamex/e4-03-fam06-candidate-detail` but not yet pushed/opened as a PR. Continued
+with local BUILD work (E4-04) on top of that branch rather than retrying the blocked push
+indefinitely; push/PR/merge for both E4-03 and E4-04 remains outstanding pending either a
+permission change or the human running it themselves.
+
+## 2026-09-03 — E4-04 VERIFIED
+
+FAM-07 "Favoritas" — free/unlimited favoriting (UX-spec Decision 4) via a new
+`set_candidate_favorite` SECURITY DEFINER RPC mirroring E4-03's trust-boundary pattern, plus
+a FAM-07 listing screen grouped by necesidad. Went through all 3 review cycles AGENTS.md
+permits, converging cleanly rather than stalling:
+
+- **Round 1** — Code Review REVISE, Functional QA REVISION_REQUIRED, Visual QA
+  REVISION_REQUIRED, all three independently catching the same defect: `FavoriteToggle`'s
+  failure-revert path showed only an `sr-only` (screen-reader-only) message, no visible
+  feedback to sighted users, despite `UI-SYSTEM.md` §5.6 explicitly naming "favorited" as a
+  toast use case. Code Review separately flagged that FAM-07's query filtered to
+  `estado = 'activa'` necesidades only, contradicting the "across all necesidades" spec.
+- **Fix round 1**: built a new shared `Toast` component per §5.6, wired into
+  `FavoriteToggle` for visible success/failure feedback plus a `try/catch` around the action
+  call; dropped the `estado = 'activa'` filter so closed-necesidad favorites still show
+  (de-emphasized, with favorite/unfavorite genuinely disabled — not just dimmed — since the
+  RPC's ownership check requires an active necesidad in both directions); documented the
+  closed-necesidad favorite/unfavorite interaction as a tracked E6 follow-up.
+- **Round 2** — Code Review REVISE, Functional QA and Visual QA both REVISION_REQUIRED
+  again, all three independently catching a *new* bug introduced by the round-1 fix: the
+  new `Toast` component used a non-existent Tailwind class (`bg-raised` instead of
+  `bg-bg-raised`), which Tailwind v4 silently drops rather than erroring at build time — the
+  toast rendered with a shadow but no background fill, undermining the very fix it existed
+  to deliver. Visual QA also caught two minor items (opacity double-compounding on
+  closed-necesidad cards, a disabled-button alignment inconsistency).
+- **Fix round 2**: one-line class fix plus the two minor items.
+- **Round 3 (final cycle)** — Code Review PASS, Functional QA VERIFIED, Visual QA VERIFIED.
+  `npm run test:db` ran live and clean this round with no environment contention (rounds 1-2
+  had agents competing for the same local Supabase/Docker instance when reviewed in
+  parallel — noted for future runs: stagger or serialize DB-touching QA agents rather than
+  running all three in parallel when `test:db` is involved).
+
+**E4-04 marked VERIFIED.** This completes Epic 4 in full. Per the standing overnight
+authorization, this and E4-03 remain committed locally pending the blocked-push issue noted
+above — proceeding to the next eligible backlog item (E5-01) rather than stopping.

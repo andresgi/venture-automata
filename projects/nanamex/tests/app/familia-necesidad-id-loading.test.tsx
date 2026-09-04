@@ -36,9 +36,13 @@ describe("CandidateProfileLoading (FAM-06)", () => {
     expect(screen.getByTestId("candidate-detail-identity-overlay-skeleton")).toHaveClass("lg:hidden");
   });
 
-  it("includes the mobile sticky action-bar composition while loading", () => {
+  it("includes the mobile sticky action-bar skeleton while loading", () => {
+    // E4-04 made `CandidateDetailActions`'s props (necesidadId/score/checklist/favorite
+    // state) required, since they're only known once real data loads -- this loading
+    // skeleton renders plain placeholder blocks instead of the real actions component.
     render(<CandidateProfileLoading />);
-    expect(screen.getByTestId("candidate-mobile-actions")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Contactar (próximamente)" })).toBeDisabled();
+    const actionsBar = screen.getByTestId("candidate-mobile-actions");
+    expect(actionsBar).toBeInTheDocument();
+    expect(actionsBar.querySelectorAll(".animate-pulse")).toHaveLength(2);
   });
 });

@@ -27,6 +27,7 @@ type PipelineRow = {
   ninera_id: string;
   match_score_snapshot: number;
   match_checklist_snapshot: Record<string, boolean>;
+  es_favorita: boolean;
 };
 type NecesidadRow = {
   id: string;
@@ -168,6 +169,8 @@ function mergeCandidates(necesidadId: string, pipeline: PipelineRow[], liveRows:
         verificationStatus: live?.verification_status ?? "no_verificada",
         score: row.match_score_snapshot,
         checklist: familiaChecklistLabels(row.match_checklist_snapshot),
+        matchFactors: row.match_checklist_snapshot,
+        isFavorite: row.es_favorita,
         zonas: (live.zonas_trabajo ?? []).flatMap((entry) => {
           const zone = Array.isArray(entry.zonas) ? entry.zonas[0] : entry.zonas;
           return zone?.alcaldia_municipio ? [zone.alcaldia_municipio] : [];
@@ -196,7 +199,7 @@ export default async function MatchesPage({ params }: { params: Promise<{ id: st
   const { data: necesidad, error: necesidadError } = await db
     .from("necesidades")
     .select(
-      "id, modalidad, dias_horarios, pago_min, pago_max, zonas(alcaldia_municipio, colonia), estado, pipeline(id, ninera_id, match_score_snapshot, match_checklist_snapshot)",
+      "id, modalidad, dias_horarios, pago_min, pago_max, zonas(alcaldia_municipio, colonia), estado, pipeline(id, ninera_id, match_score_snapshot, match_checklist_snapshot, es_favorita)",
     )
     .eq("id", id)
     .eq("familia_id", user.id)

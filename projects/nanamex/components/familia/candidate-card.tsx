@@ -1,6 +1,7 @@
 import { Heart } from "@phosphor-icons/react/ssr";
 import { TrustBadge, type VerificationStatus } from "@/components/shared/trust-badge";
 import { MatchScoreCompact } from "@/components/shared/match-score";
+import { FavoriteToggle } from "@/components/familia/favorite-toggle";
 import Link from "next/link";
 
 export type CandidateCardData = {
@@ -13,6 +14,17 @@ export type CandidateCardData = {
   checklist: string[];
   profileCompleteness?: number;
   createdAt?: string;
+  /** Raw `pipeline.match_checklist_snapshot` factors (not the display labels in
+   * `checklist`) -- needed to freeze a new pipeline row correctly if favoriting is the
+   * first engagement with this candidate (architecture.md §17/§20). */
+  matchFactors?: Record<string, boolean>;
+  /** Current `pipeline.es_favorita` value, if a pipeline row already exists (E4-04). */
+  isFavorite?: boolean;
+  /** Human-readable reason shown when `necesidadId` is omitted and the heart/"Ver perfil"
+   * fall back to their disabled placeholders (e.g. "Necesidad cerrada" for FAM-07's closed-
+   * necesidad groups). Defaults to "próximamente" for the original hypothetical-future-
+   * caller case. */
+  disabledReason?: string;
 };
 
 /**
@@ -51,16 +63,15 @@ function CandidateAvatar({ nombre, fotoUrl }: { nombre: string; fotoUrl: string 
  * FAM-04 candidate card (design/UI-SYSTEM.md §5.3, design/UI-SPEC.md FAM-04). Reused as-is
  * by FAM-07 favoritas per its own spec ("Same card component as FAM-04").
  *
- * Scope note -- three footer/identity affordances are rendered per the visual spec but are
- * deliberately non-functional in this story, each belonging to a later epic:
- * - "Guardar favorita" (heart toggle): E4-04's scope, no favorites mechanism exists yet.
+ * Scope note -- footer/identity affordances:
+ * - "Guardar favorita" (heart toggle): functional (E4-04) when the parent list supplies a
+ *   `necesidadId`; falls back to a disabled placeholder otherwise (e.g. a hypothetical
+ *   future caller with no necesidad context), same as "Ver perfil" already does below.
  * - "Ver perfil": links to FAM-06 when the parent list supplies its necesidad id.
  * - "Filtrar" is NOT part of this card (it's a page-level entry point) -- see the page file.
- * All three render in their spec-described visual position (disabled/40% opacity, per
- * UI-SYSTEM §5.1's disabled-button convention) so Visual QA can confirm layout/spacing
- * against UI-SPEC without a functional destination existing yet.
  */
 export function CandidateCard({ candidate }: { candidate: CandidateCardData }) {
+  const disabledReason = candidate.disabledReason ?? "próximamente";
   return (
     <article className="min-h-[180px] rounded-md border border-border bg-bg-raised p-4">
       <div className="flex items-center gap-3">
@@ -74,21 +85,36 @@ export function CandidateCard({ candidate }: { candidate: CandidateCardData }) {
         <MatchScoreCompact score={candidate.score} checklist={candidate.checklist} />
       </div>
       <div className="mt-4 flex items-center justify-between border-t border-border pt-3">
-        <button
-          type="button"
-          disabled
-          title="Guardar favorita (próximamente)"
-          className="pointer-events-none flex h-11 w-11 items-center justify-center rounded-sm text-ink-600 opacity-40"
-        >
-          <Heart size={20} weight="regular" aria-hidden="true" />
-          <span className="sr-only">Guardar favorita (próximamente)</span>
-        </button>
+        {candidate.necesidadId ? (
+          <FavoriteToggle
+            necesidadId={candidate.necesidadId}
+            nineraId={candidate.ninera_id}
+            score={candidate.score}
+            checklist={candidate.matchFactors ?? {}}
+            initialFavorite={candidate.isFavorite ?? false}
+          />
+        ) : (
+          <button
+            type="button"
+            disabled
+            title={`Guardar favorita (${disabledReason})`}
+            className="pointer-events-none flex h-11 w-11 items-center justify-center rounded-sm text-ink-600 opacity-40"
+          >
+            <Heart size={20} weight="regular" aria-hidden="true" />
+            <span className="sr-only">{`Guardar favorita (${disabledReason})`}</span>
+          </button>
+        )}
         {candidate.necesidadId ? (
           <Link href={`/familia/necesidad/${candidate.necesidadId}/candidatas/${candidate.ninera_id}`} className="min-h-11 inline-flex items-center text-button text-primary-600">
             Ver perfil
           </Link>
         ) : (
-          <button type="button" disabled title="Ver perfil (próximamente)" className="pointer-events-none text-button text-primary-600 opacity-40">
+          <button
+            type="button"
+            disabled
+            title={`Ver perfil (${disabledReason})`}
+            className="pointer-events-none min-h-11 inline-flex items-center text-button text-primary-600 opacity-40"
+          >
             Ver perfil
           </button>
         )}

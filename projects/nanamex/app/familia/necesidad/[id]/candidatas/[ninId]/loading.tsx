@@ -1,4 +1,23 @@
-import { CandidateDetailActions } from "@/components/familia/candidate-detail-actions";
+/**
+ * Skeleton placeholder for `CandidateDetailActions` -- rendered without the real component
+ * since its favorite state/score/checklist are only known once the page's data resolves
+ * (E4-04 made those required props, so this route's loading skeleton can no longer import
+ * the real component with fake data).
+ */
+function ActionsSkeleton() {
+  return (
+    <>
+      <div className="mt-6 hidden gap-3 lg:flex">
+        <div className="h-11 w-11 animate-pulse rounded-sm bg-border" />
+        <div className="h-11 flex-1 animate-pulse rounded-sm bg-border" />
+      </div>
+      <div className="fixed inset-x-0 bottom-0 z-20 flex items-center gap-3 border-t border-border bg-bg-raised px-4 py-3 shadow-md lg:hidden" data-testid="candidate-mobile-actions">
+        <div className="h-11 w-11 shrink-0 animate-pulse rounded-sm bg-border" />
+        <div className="h-11 flex-1 animate-pulse rounded-sm bg-border" />
+      </div>
+    </>
+  );
+}
 
 export default function CandidateProfileLoading() {
   return (
@@ -14,7 +33,7 @@ export default function CandidateProfileLoading() {
             </div>
           </div>
           <div className="hidden lg:block"><div className="mt-4 h-8 w-48 animate-pulse rounded-sm bg-border" /><div className="mt-2 h-7 w-40 animate-pulse rounded-full bg-border" /></div>
-          <CandidateDetailActions />
+          <ActionsSkeleton />
         </aside>
         <div className="flex flex-col gap-7">
           <section><div className="h-12 w-24 animate-pulse rounded-sm bg-border" /><div className="mt-2 h-4 w-48 animate-pulse rounded-sm bg-border" /><div className="mt-4 flex flex-col gap-2"><div className="h-4 w-56 animate-pulse rounded-sm bg-border" /><div className="h-4 w-64 animate-pulse rounded-sm bg-border" /><div className="h-4 w-48 animate-pulse rounded-sm bg-border" /></div></section>

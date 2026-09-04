@@ -65,7 +65,7 @@ describe("CandidateCard", () => {
     );
   });
 
-  it("renders Guardar favorita and Ver perfil as disabled (E4-04/E4-03 not built yet)", () => {
+  it("renders Guardar favorita and Ver perfil as disabled when no necesidadId is supplied", () => {
     render(
       <CandidateCard
         candidate={{
@@ -81,5 +81,26 @@ describe("CandidateCard", () => {
 
     expect(screen.getByRole("button", { name: /Guardar favorita/ })).toBeDisabled();
     expect(screen.getByRole("button", { name: "Ver perfil" })).toBeDisabled();
+  });
+
+  it("renders a functional favorite toggle when necesidadId is supplied", () => {
+    render(
+      <CandidateCard
+        candidate={{
+          necesidadId: "necesidad-42",
+          ninera_id: "ninera-7",
+          nombre: "Luz Méndez",
+          fotoUrl: null,
+          verificationStatus: "verificada",
+          score: 80,
+          checklist: [],
+          isFavorite: true,
+        }}
+      />,
+    );
+
+    const toggle = screen.getByRole("button", { name: "Quitar de favoritas" });
+    expect(toggle).not.toBeDisabled();
+    expect(toggle).toHaveAttribute("aria-pressed", "true");
   });
 });

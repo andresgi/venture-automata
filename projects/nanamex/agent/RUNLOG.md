@@ -478,3 +478,34 @@ scrutiny, non-blocking). E4-03 marked VERIFIED.
 Artifacts: agent/reviews/code-E4-03-review.md (round 2 appended), agent/qa/e4-03-functional.md
 (round 2 appended), agent/qa/e4-03-visual.md (round 2 appended).
 Next recommended action: E4-04 — FAM-07 favoritas.
+
+---
+
+## 2026-09-03 — E4-04 Developer + Code Reviewer + Functional QA + Visual QA (3 rounds)
+
+Objective: Implement and independently verify E4-04 — FAM-07 favoritas.
+Result: Developer built `set_candidate_favorite` RPC (mirrors E4-03's trust-boundary
+pattern), FavoriteToggle UI on FAM-04/FAM-06, and a new FAM-07 listing page grouped by
+necesidad. Round 1: Code Review REVISE, Functional QA and Visual QA REVISION_REQUIRED, all
+three independently flagging FavoriteToggle's silent (sr-only-only) failure feedback; Code
+Review also flagged FAM-07's `estado = 'activa'` query scoping vs. the "across all
+necesidades" spec. Fix round 1: added a shared Toast component, try/catch around the action
+call, dropped the estado filter (closed-necesidad favorites now show, de-emphasized, with
+mutation genuinely disabled). Round 2: all three reviewers independently caught a new bug
+the fix introduced — Toast used a non-existent Tailwind class (`bg-raised` vs.
+`bg-bg-raised`), rendering with no background; plus two Visual QA minor items. Fix round 2:
+one-line class fix + two minor fixes. Round 3 (final allowed cycle): Code Review PASS,
+Functional QA VERIFIED, Visual QA VERIFIED; `npm run test:db` ran live and clean. E4-04
+marked VERIFIED — this completes Epic 4.
+Validation: 272 tests, lint, typecheck, secret scan, production build, and test:db (live,
+round 3) all pass.
+Artifacts: db/migrations/20260903000013_candidate_favorites.sql, actions/favorites.ts,
+components/{familia/favorite-toggle,shared/toast}.tsx, components/familia/{candidate-card,
+candidate-detail-actions}.tsx, app/familia/{favoritas/page,page}.tsx,
+app/familia/necesidad/[id]/{page,candidatas/[ninId]/{page,loading}}.tsx,
+scripts/test-e4-04-favorites.{sql,mjs}, agent/reviews/code-E4-04-review.md (3 rounds),
+agent/qa/e4-04-{functional,visual}.md (3 rounds each).
+Note: committed locally on branch nanamex/e4-03-fam06-candidate-detail; `git push` is
+currently blocked by this session's permission settings (see agent/DECISIONS.md) — push/PR
+for E4-03+E4-04 remains outstanding.
+Next recommended action: E5-01 — Stripe integration, Checkout Session creation (Epic 5).

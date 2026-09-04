@@ -495,6 +495,68 @@ Validation: `npm test -- --run --no-file-parallelism` (245 tests), `npm run lint
 `projects/test-invoice-generator/*` deletions and root `.claude/settings.json` sit in the
 working tree from outside this story — exclude them from the E4-03 commit/PR.
 
+### E4-04 — FAM-07 favoritas
+
+Status: VERIFIED (2026-09-03; round 1 — Code Review REVISE, Functional QA
+REVISION_REQUIRED, Visual QA REVISION_REQUIRED, all three independently flagging the same
+gap: `FavoriteToggle` gave sighted users no visible feedback on success or failure. Round 2
+fixed that plus the `estado`-scoping gap, but introduced a new bug — the new `Toast`
+component used a non-existent Tailwind class (`bg-raised` instead of `bg-bg-raised`),
+independently caught by all three reviewers again, rendering the toast with no background
+fill; two Visual QA minor items (opacity double-compounding, disabled-button alignment)
+also fixed in the same pass. Round 3 (final allowed cycle per AGENTS.md) — Code Review PASS,
+Functional QA VERIFIED, Visual QA VERIFIED, `npm run test:db` ran live and clean this round
+(no environment contention). See agent/reviews/code-E4-04-review.md and
+agent/qa/e4-04-functional.md / e4-04-visual.md for all three rounds.)
+
+Dependencies: E4-03.
+
+Delivered: free/unlimited favoriting (Decision 4) via a server-derived-identity RPC
+(`set_candidate_favorite`) that re-validates ownership and candidate eligibility and never
+re-freezes an existing pipeline snapshot; FAM-07 favoritas listing grouped by necesidad,
+reusing FAM-04's `CandidateCard`.
+
+**Round 2 fixes (this pass):**
+- Added a shared `Toast` component (`components/shared/toast.tsx`) implementing
+  UI-SYSTEM.md §5.6's "Toast (favorited, reported, saved)" spec (bottom-anchored mobile /
+  bottom-left desktop, icon + message, `bg-raised`/`elevation-2`, auto-dismiss 4s) and wired
+  it into `FavoriteToggle` for both a success confirmation and a visible (non-`sr-only`)
+  failure message — the `sr-only role="alert"` text alone was the blocking finding all three
+  reviewers raised independently.
+- Wrapped `FavoriteToggle`'s `toggleFavoriteAction` call in `try/catch` so a thrown error
+  (not just a handled `{ ok: false }` result) also reverts the optimistic state and shows
+  the same visible error toast.
+- Resolved the `estado = 'activa'`-only scoping gap on `FavoritasPage`: the query no longer
+  filters necesidades by `estado`, so favorites saved under a closed necesidad
+  (`cerrada_contratada`/`cerrada_cancelada`) remain visible ("across all necesidades" per
+  screen-inventory.md), instead of silently disappearing. Closed-necesidad groups are
+  visually de-emphasized (muted "Necesidad cerrada" label, dimmed cards) and their
+  candidates render with the heart/"Ver perfil" affordances disabled rather than wired,
+  because both FAM-04's necesidad detail page and FAM-06's candidate detail page redirect
+  away from any non-`activa` necesidad today, and `set_candidate_favorite`'s ownership check
+  requires `estado = 'activa'` unconditionally (both directions) — so an active toggle/link
+  there would silently fail or dead-end rather than work. This reuses `CandidateCard`'s
+  existing disabled-placeholder fallback (previously unreachable dead code per Code Review's
+  Minor Issue #1), now with a contextual `disabledReason` ("necesidad cerrada" vs. the
+  original "próximamente") instead of adding new UI.
+- Strengthened `tests/db/candidate-favorites-migration.test.ts`'s assertions to check
+  structural properties of the RPC body (ownership check precedes the favorite/unfavorite
+  branch, `on conflict` update clause excludes snapshot columns) rather than only matching
+  literal substrings.
+
+**Known limitation, tracked for E6:** favoriting/unfavoriting a candidate under a closed
+necesidad is not itself possible from the UI (by design, per the above), and no automated
+test exercises the RPC's behavior against a real closed-necesidad row yet, since no code
+path in this repo can currently transition a necesidad to `cerrada_*` — that ships with E6
+necesidad closure. Once E6 lands, re-verify this UI still degrades correctly and consider
+whether `set_candidate_favorite`'s unfavorite direction should be allowed against a closed
+necesidad (to let a family retroactively un-favorite someone from a closed search) — that's
+a product decision for E6, not addressed here.
+
+Validation: `npm test -- --run --no-file-parallelism` (272 tests), `npm run lint`,
+`npm run typecheck`, `npm run check:secrets`, `npm run build`, and `npm run test:db`
+(including the new E4-04 probe, run live/clean in round 3) all pass.
+
 ## Change Requests
 
 Ad-hoc, non-PRD asks made directly in chat (see AGENTS.md, "Change Requests"). Use `CR-NNN`

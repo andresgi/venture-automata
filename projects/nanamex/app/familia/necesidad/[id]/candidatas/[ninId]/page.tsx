@@ -14,7 +14,7 @@ import { scoreMatch, type MatchNecesidad, type MatchNinera } from "@/lib/matchin
 export const dynamic = "force-dynamic";
 
 type Params = { id: string; ninId: string };
-type Pipeline = { ninera_id: string; match_score_snapshot: number; match_checklist_snapshot: Record<string, boolean> };
+type Pipeline = { ninera_id: string; match_score_snapshot: number; match_checklist_snapshot: Record<string, boolean>; es_favorita: boolean };
 type Row = {
   foto_url: string | null;
   anos_experiencia: number;
@@ -64,7 +64,7 @@ export default async function CandidateProfilePage({ params }: { params: Promise
 
   const { data: necesidad, error: necesidadError } = await db
     .from("necesidades")
-    .select("id, zona_id, modalidad, dias_horarios, pago_min, pago_max, necesidad_children(rango_edad), zonas(alcaldia_municipio), pipeline(ninera_id, match_score_snapshot, match_checklist_snapshot)")
+    .select("id, zona_id, modalidad, dias_horarios, pago_min, pago_max, necesidad_children(rango_edad), zonas(alcaldia_municipio), pipeline(ninera_id, match_score_snapshot, match_checklist_snapshot, es_favorita)")
     .eq("id", id).eq("familia_id", user.id).eq("estado", "activa").maybeSingle();
   if (necesidadError || !necesidad) redirect(`/familia/necesidad/${id}`);
 
@@ -129,7 +129,13 @@ export default async function CandidateProfilePage({ params }: { params: Promise
              <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-4 pt-16 lg:hidden"><h1 className="text-h1 text-white">{nombre}</h1><div className="mt-2"><TrustBadge status={row.verification_status} size="detail" /></div></div>
            </div>
           <div className="hidden lg:block"><h1 className="mt-4 text-h1">{nombre}</h1><div className="mt-2"><TrustBadge status={row.verification_status} size="detail" /></div></div>
-          <CandidateDetailActions />
+          <CandidateDetailActions
+            necesidadId={id}
+            nineraId={ninId}
+            score={snapshot.match_score_snapshot}
+            checklist={snapshot.match_checklist_snapshot}
+            initialFavorite={saved?.es_favorita ?? false}
+          />
         </aside>
         <div className="flex flex-col gap-7">
           <section><h2 className="sr-only">Match Score</h2><p className="text-numeral-lg text-primary-600">{snapshot.match_score_snapshot}%</p><p className="text-body text-ink-600">compatible con tu necesidad</p><ul className="mt-3 flex flex-col gap-2">{familiaChecklistLabels(snapshot.match_checklist_snapshot, 5).map((label) => <li key={label} className="flex gap-2 text-body text-ink-600"><Check size={18} aria-hidden="true" />{label}</li>)}</ul></section>

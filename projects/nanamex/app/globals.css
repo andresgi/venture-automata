@@ -61,6 +61,12 @@
   --radius-lg: 20px;
 
   --font-sans: var(--font-inter);
+
+  /*
+   * Elevation -- UI-SYSTEM §5.6/§5.9. Only `elevation-2` (toasts) is wired so far --
+   * `elevation-3` (modals/dialogs) lands with the first story that needs one.
+   */
+  --shadow-elevation-2: 0 8px 24px rgba(36, 31, 25, 0.12);
 }
 
 :root {
