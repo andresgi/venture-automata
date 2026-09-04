@@ -624,3 +624,18 @@ apply cleanly; Vercel preview build). Merged via `gh pr merge 15 --squash`
 (commit `f267404`). Local `main` fast-forwarded to match.
 Artifacts changed: agent/STATE.md, agent/DECISIONS.md (this entry).
 Next recommended action: E6-01 — FAM-11 estado de candidatas (pipeline management).
+
+## 2026-09-04 — Developer + Code Reviewer + Functional QA + Visual QA — E6-01
+
+Objective: Implement and verify E6-01 (FAM-11 estado de candidatas), enforcing that a
+manual `nueva -> contactada` transition remains permanently unreachable outside E5-04's
+paid flow.
+Result: `advance_pipeline_state` RPC + FAM-11 kanban/segmented board built. Code Review
+PASS, Functional QA PASS, Visual QA PASS_WITH_MINOR_ISSUES (2 mobile findings, both fixed
+directly by the orchestrator: touch-target height, action-row alignment). Full validation
+suite (412 tests, lint, typecheck, check:secrets, build, test:db including a new live-DB
+probe) re-run clean after fixes. E6-01 marked VERIFIED (agent/BACKLOG.md, agent/STATE.md,
+agent/DECISIONS.md updated). Work moved from `main`'s working tree onto a proper feature
+branch (`nanamex/e6-01-fam11-pipeline`) before committing.
+Next recommended action: E7-01 (NIN-01/02 onboarding wizard) — E6-02 deliberately deferred,
+see agent/DECISIONS.md "E6-02 deferred in favor of Epic 7."

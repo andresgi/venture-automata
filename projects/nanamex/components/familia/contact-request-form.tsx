@@ -37,6 +37,7 @@ export function ContactRequestForm({ necesidadId, nineraId, initialPhone, initia
       </div>
       <div className="flex flex-col gap-3 sm:flex-row">
         <Link href={`/familia/necesidad/${necesidadId}`} className="inline-flex min-h-11 items-center justify-center rounded-sm bg-primary-600 px-5 text-button text-white">Seguir buscando candidatas</Link>
+        <Link href={`/familia/necesidad/${necesidadId}/pipeline`} className="inline-flex min-h-11 items-center justify-center rounded-sm border border-border-strong px-5 text-button text-primary-600">Ver pipeline</Link>
         <Link href={cancelHref} className="inline-flex min-h-11 items-center justify-center rounded-sm border border-border-strong px-5 text-button text-primary-600">Cancelar</Link>
       </div>
     </div>

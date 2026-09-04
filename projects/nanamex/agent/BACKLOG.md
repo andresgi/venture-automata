@@ -747,6 +747,54 @@ pipeline UI or Epic 10 notification delivery.
 Validation: `npm test -- --run --no-file-parallelism` (388 tests), `npm run lint`,
 `npm run typecheck`, `npm run check:secrets`, `npm run build`, and `npm run test:db` all pass.
 
+## Epic 6 — Pipeline Management
+
+### E6-01 — FAM-11 estado de candidatas (kanban/segmented views)
+
+Status: VERIFIED (2026-09-04; Code Review PASS, no required changes — see
+agent/reviews/code-E6-01-review.md. Functional QA PASS — see agent/qa/e6-01-functional.md.
+Visual QA PASS_WITH_MINOR_ISSUES — 2 minor mobile touch-target/layout findings, both fixed
+directly, see agent/qa/e6-01-visual.md.)
+
+Dependencies: E5-04 (VERIFIED).
+
+Delivered: `advance_pipeline_state` RPC
+(`db/migrations/20260904000018_pipeline_state_transitions.sql`, SECURITY DEFINER,
+`service_role`-only) enforcing the story's central security requirement — a manual
+`nueva -> contactada` transition is structurally unreachable, enforced independently at
+three layers: the RPC's first statement hard-rejects `contactada`/`nueva` as targets before
+any row lookup; `actions/pipeline.ts`'s Zod schema excludes both from its input domain
+entirely; and the UI (`components/familia/pipeline-board.tsx`) renders no advance control
+for `nueva` at all. That transition remains exclusively E5-04's `confirm_contact` flow.
+Forward transitions are strictly ordered (`contactada->entrevista->contratada`, no
+skipping/backward), verified live against Postgres. `Descartar` is available from any
+non-terminal state and idempotent. Ownership is enforced server-side
+(`familia_id` derived from session, never client input).
+
+FAM-11 page (`app/familia/necesidad/[id]/pipeline/page.tsx`): desktop 5-column kanban
+(220px columns, horizontal scroll not shrink, no per-column color-coding, `h2`+`ink-400`
+headers), mobile horizontally-scrollable segmented control with denser stacked rows,
+empty state pointing back to FAM-04, success toast on manual advance (reuses the existing
+`Toast` component from E4-04). `app/familia/page.tsx` gained a "Ver pipeline" link on active
+necesidad cards, and `components/familia/contact-request-form.tsx` gained a FAM-11 exit
+link after a successful FAM-10 contact — closing a navigation gap E5-04's Visual QA had
+flagged (no FAM-10 -> FAM-11 handoff existed until now).
+
+**Documented interim behavior (accepted, not a defect):** per UX-spec.md, "every subsequent
+state change notifies the niñera" — Epic 10 (Resend/Twilio notification infrastructure)
+does not exist yet, same as E5-04's precedent (see agent/DECISIONS.md "E5-04 notification
+handoff narrowed"). This story writes the durable `pipeline_state_advanced` analytics event
+in the same atomic transaction as the state change, but does not attempt notification
+delivery or invent a queue. E10 must consume this handoff.
+
+**Out of scope (explicitly, not silently skipped):** E6-02 (NIN-09 read-only mirror) is a
+separate story. Closing the parent necesidad on `contratada` is not implemented — not in
+this story's acceptance criteria.
+
+Validation: `npm test -- --run --no-file-parallelism` (412 tests), `npm run lint`,
+`npm run typecheck`, `npm run check:secrets`, `npm run build`, and `npm run test:db`
+(including the new `test-e6-01-pipeline` probe) all pass.
+
 ## Change Requests
 
 Ad-hoc, non-PRD asks made directly in chat (see AGENTS.md, "Change Requests"). Use `CR-NNN`

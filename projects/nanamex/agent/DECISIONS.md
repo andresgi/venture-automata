@@ -941,3 +941,61 @@ fast-forwarded; feature branch left undeleted (remote and local) as a safety def
 
 Next eligible action: E6-01 — FAM-11 estado de candidatas (pipeline management), dependency
 E5-04 now VERIFIED and merged.
+
+## 2026-09-04 — E6-01 VERIFIED
+
+Built the `advance_pipeline_state` RPC (SECURITY DEFINER, `db/migrations/
+20260904000018_pipeline_state_transitions.sql`) and FAM-11 pipeline board, satisfying the
+story's central security requirement: a manual `nueva -> contactada` transition is
+structurally unreachable, enforced independently at three layers (RPC hard-rejects both as
+targets before any lookup and is `service_role`-only; the action layer's Zod schema
+excludes both from its input domain; the UI renders no advance control for `nueva`). That
+transition remains exclusively E5-04's `confirm_contact` flow. Forward transitions are
+strictly ordered (`contactada->entrevista->contratada`); `Descartar` works from any
+non-terminal state and is idempotent; ownership is server-derived, never client input.
+
+Code Review: PASS, no required changes (agent/reviews/code-E6-01-review.md) — independently
+re-verified all three enforcement layers by reading the actual SQL/Zod/UI code, not just
+the developer's report, plus a live-database probe.
+
+Functional QA: PASS (agent/qa/e6-01-functional.md) — independently re-derived the same
+three-layer guarantee from scratch, confirmed forward-ordering/discard/ownership against a
+live Postgres probe, verified empty state, toast copy, and the FAM-06 "Ver perfil" link.
+
+Visual QA: PASS_WITH_MINOR_ISSUES (agent/qa/e6-01-visual.md) — 2 minor mobile findings:
+segmented-control tabs below the 44px touch-target convention, and the mobile stacked row's
+action block misaligned inside its `items-center` flex parent (reused the desktop
+`mt-3` spacing verbatim). Both fixed directly by the orchestrator: tabs now use
+`min-h-11`; `PipelineActions` takes a `className` prop so the mobile row's actions render
+on their own bordered line instead of inheriting the desktop card's margin. Re-verified
+lint/typecheck/412 tests/check:secrets/build clean.
+
+**Notification handoff narrowed, same pattern as E5-04:** per UX-spec.md, every pipeline
+state change should notify the niñera; Epic 10 (Resend/Twilio) doesn't exist yet, so this
+story only writes the durable `pipeline_state_advanced` analytics event in the same
+transaction as the state change — no delivery attempted.
+
+**E6-01 marked VERIFIED.** Work was originally done directly on `main`'s working tree
+(continuing from the PR #15 merge); moved onto a proper feature branch
+(`nanamex/e6-01-fam11-pipeline`) before committing, per this project's established
+per-story branch convention (same pattern as the "E2-02 continuity" entry).
+
+## 2026-09-04 — E6-02 deferred in favor of Epic 7
+
+E6-02 (NIN-09 mis solicitudes, read-only pipeline mirror for the niñera role) is technically
+eligible — its stated dependency (E6-01) is now VERIFIED. Escalating anyway: per
+design/UX-spec.md, NIN-09's only action is "Ver detalle → NIN-06," and NIN-06 (vacante
+detail + mostrar interés) doesn't exist — no niñera-side profile, dashboard, or browsing
+screens are built at all yet (Epic 7 hasn't started). Building NIN-09 now would produce a
+read-only list with a dead-end link and no surrounding niñera UI context to sit inside of,
+the same category of premature-ahead-of-dependency risk this project has consistently
+avoided (E1-02, E5-01, E5-03, E5-04 precedent) rather than a case where narrow scoping
+would help — there's no smaller version of "mirror a pipeline for a role with no other UI"
+that's actually useful to ship.
+
+**Orchestrator decision: defer E6-02, start Epic 7 instead.** E7-01 (NIN-01/02 onboarding
+wizard) depends only on E0-04 (VERIFIED) and has no such gap. Epic 7 is what actually
+unblocks E6-02, E7-05/06 (niñera opportunity browsing), and the niñera side of the
+marketplace generally — building it first makes E6-02 a real, connected screen instead of
+an orphaned one. Not a scope change to either story's acceptance criteria, just an
+ordering decision within what's already eligible.

@@ -159,6 +159,7 @@ describe("FamiliaHomePage (FAM-02 dashboard, FAM-01 gate)", () => {
     // non-zero counts included, singular/plural applied per count.
     expect(screen.getByText("2 nuevas · 1 en entrevista · 1 descartada")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Ver candidatas" })).toHaveAttribute("href", "/familia/necesidad/activa-1");
+    expect(screen.getByRole("link", { name: "Ver pipeline" })).toHaveAttribute("href", "/familia/necesidad/activa-1/pipeline");
 
     expect(screen.getByText("Zona sin especificar")).toBeInTheDocument();
     expect(screen.getByText("Ocasional")).toBeInTheDocument();

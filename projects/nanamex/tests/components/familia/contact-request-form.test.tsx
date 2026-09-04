@@ -20,4 +20,9 @@ describe("ContactRequestForm", () => {
     expect(screen.getByRole("link", { name: "Cancelar" })).toHaveAttribute("href", "/familia/necesidad/need-1/candidatas/ninera-1");
     fireEvent.click(screen.getByRole("link", { name: "Cancelar" }));
   });
+
+  it("offers a FAM-11 pipeline exit path after a successful confirmation", () => {
+    render(<ContactRequestForm necesidadId="need-1" nineraId="ninera-1" initialPhone="+5215550001" initialContactEstablished cancelHref="/familia/necesidad/need-1/candidatas/ninera-1" />);
+    expect(screen.getByRole("link", { name: "Ver pipeline" })).toHaveAttribute("href", "/familia/necesidad/need-1/pipeline");
+  });
 });

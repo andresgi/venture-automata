@@ -99,11 +99,21 @@ Vercel preview build) before merge, per the standing overnight authorization bel
 `nanamex/e4-03-fam06-candidate-detail` was left undeleted (remote and local) as a safety
 default, not explicitly requested.
 
+**Epic 6 (Pipeline Management) — in progress**: E6-01 (FAM-11 estado de candidatas,
+`advance_pipeline_state` RPC structurally preventing any manual `nueva -> contactada`
+transition, kanban/segmented views) VERIFIED. Branch `nanamex/e6-01-fam11-pipeline`, not
+yet pushed/merged.
+
 ## Next Eligible Action
 
-E6-01: FAM-11 estado de candidatas (pipeline management), dependency E5-04 now VERIFIED.
-Adds family pipeline views and manual transitions from `contactada` onward, plus discard from
-any state. The `nueva -> contactada` transition remains exclusively owned by E5-04.
+E7-01: NIN-01/02 onboarding wizard (dependency E0-04, VERIFIED). E6-02 (NIN-09 mis
+solicitudes) is technically eligible per its stated dependency (E6-01, now VERIFIED), but
+was deliberately deferred — see agent/DECISIONS.md 2026-09-04 "E6-02 deferred in favor of
+Epic 7." Its "Ver detalle" exit path points to NIN-06, which doesn't exist yet (no niñera
+profile/browsing screens are built at all — Epic 7 hasn't started), so building it now
+would produce an orphaned link with no real niñera-side context around it. Epic 7 has no
+such gap and is what actually unblocks E6-02, E7-05/06, and the niñera side of the
+marketplace generally.
 
 ## Human Blocker
 
