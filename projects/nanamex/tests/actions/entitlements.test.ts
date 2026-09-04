@@ -14,7 +14,7 @@ function table(config: TableConfig) {
   let inserted = false;
   let updated = false;
   const query: any = {
-    select: vi.fn(() => query), eq: vi.fn(() => query), is: vi.fn(() => query), or: vi.fn(() => query), gt: vi.fn(() => query), order: vi.fn(() => query),
+    select: vi.fn(() => query), eq: vi.fn(() => query), is: vi.fn(() => query), in: vi.fn(() => query), or: vi.fn(() => query), gt: vi.fn(() => query), lt: vi.fn(() => query), order: vi.fn(() => query),
     limit: vi.fn(() => query), contains: vi.fn(() => query),
     maybeSingle: vi.fn(async () => config.select ?? { data: null, error: null }),
      single: vi.fn(async () => updated ? (config.updateSequence?.shift() ?? config.update ?? { data: { id: "payment-1" }, error: null }) : inserted ? (config.insert ?? { data: null, error: null }) : (config.select ?? { data: null, error: null })),
@@ -25,7 +25,7 @@ function table(config: TableConfig) {
 }
 let tables: Record<string, any>;
 vi.mock("@/lib/supabase/server", () => ({ createServiceRoleClient: vi.fn(() => ({ from: (name: string) => tables[name] })) }));
-const { createCheckoutSessionAction } = await import("@/actions/entitlements");
+const { createCheckoutSessionAction, getCheckoutReturnStateAction } = await import("@/actions/entitlements");
 
 const input = { necesidadId: "11111111-1111-4111-8111-111111111111", nineraId: "22222222-2222-4222-8222-222222222222" };
 const profile = { data: { role: "familia", account_status: "activa", email_verified: true, phone_verified: true }, error: null };
@@ -107,6 +107,32 @@ describe("createCheckoutSessionAction", () => {
   it("reuses a pending open checkout URL rather than creating another session", async () => { setup({ payments: { select: { data: { id: "payment-1", idempotency_key: "idem-1", provider_payment_id: "cs_existing", checkout_url: "https://existing" }, error: null } } }); expect(await createCheckoutSessionAction(input)).toEqual({ status: "checkout_created", checkoutUrl: "https://existing" }); expect(createStripe).not.toHaveBeenCalled(); });
   it("does not return a provider-expired pending URL", async () => { getStripeSession.mockResolvedValueOnce({ state: "expired", expiresAt: new Date(Date.now() - 1000).toISOString() }).mockResolvedValueOnce({ state: "open", expiresAt: new Date(Date.now() + 3600000).toISOString() }); setup({ payments: { select: { data: { id: "payment-1", idempotency_key: "idem-1", provider_payment_id: "cs_old", checkout_url: "https://old" }, error: null } } }); expect((await createCheckoutSessionAction(input)).status).toBe("checkout_created"); expect(createStripe).toHaveBeenCalled(); });
   it("does not reuse an open pending URL when Stripe omits expiry", async () => { getStripeSession.mockResolvedValueOnce({ state: "open", expiresAt: null }).mockResolvedValueOnce({ state: "open", expiresAt: new Date(Date.now() + 3600000).toISOString() }); setup({ payments: { select: { data: { id: "payment-1", idempotency_key: "idem-1", provider_payment_id: "cs_old", checkout_url: "https://old" }, error: null } } }); expect((await createCheckoutSessionAction(input)).status).toBe("checkout_created"); expect(createStripe).toHaveBeenCalled(); });
+
+  it("keeps a recent pending success return in the finalizing state", async () => {
+    setup({ payments: { select: { data: { id: "payment-1", status: "pendiente", created_at: new Date(Date.now() - 5 * 60 * 1000).toISOString(), provider_payment_id: null }, error: null } } });
+    await expect(getCheckoutReturnStateAction()).resolves.toEqual({ status: "pending" });
+    expect(tables.payments.update).not.toHaveBeenCalled();
+  });
+
+  it("clears a stale pending boundary without granting access", async () => {
+    setup({ payments: { select: { data: { id: "payment-1", status: "pendiente", created_at: new Date(Date.now() - 31 * 60 * 1000).toISOString(), provider_payment_id: null }, error: null }, update: { data: { id: "payment-1" }, error: null } } });
+    await expect(getCheckoutReturnStateAction()).resolves.toEqual({ status: "stale" });
+    expect(tables.payments.update).toHaveBeenCalledWith(expect.objectContaining({ status: "fallido", provider_session_status: "expired", checkout_url: null }));
+  });
+
+  it("clears a stale boundary only after Stripe confirms expiry", async () => {
+    getStripeSession.mockResolvedValueOnce({ state: "expired", expiresAt: new Date(Date.now() - 1000).toISOString() });
+    setup({ payments: { select: { data: { id: "payment-1", status: "pendiente", created_at: new Date(Date.now() - 31 * 60 * 1000).toISOString(), provider_payment_id: "cs_old" }, error: null }, update: { data: { id: "payment-1" }, error: null } } });
+    await expect(getCheckoutReturnStateAction()).resolves.toEqual({ status: "stale" });
+    expect(getStripeSession).toHaveBeenCalledWith("cs_old");
+  });
+
+  it("expires an old still-open Stripe session before clearing its boundary", async () => {
+    getStripeSession.mockResolvedValueOnce({ state: "open", expiresAt: new Date(Date.now() + 3600000).toISOString() });
+    setup({ payments: { select: { data: { id: "payment-1", status: "pendiente", created_at: new Date(Date.now() - 31 * 60 * 1000).toISOString(), provider_payment_id: "cs_old" }, error: null }, update: { data: { id: "payment-1" }, error: null } } });
+    await expect(getCheckoutReturnStateAction()).resolves.toEqual({ status: "stale" });
+    expect(expireStripe).toHaveBeenCalledWith("cs_old");
+  });
 
   // Code Review (agent/reviews/code-E5-01-review.md) Important Issue #2: the post-create
   // re-verification branch (an existing boundary retry receiving a session via Stripe's own

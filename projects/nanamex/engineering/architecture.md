@@ -370,6 +370,17 @@ idempotently, retrieves the returned session, and links/returns it only when Str
 `open` with a present future expiry. E5-02 must reconcile by `provider_payment_id` or that
 metadata, and must never activate from a URL alone.
 
+**Stale success-return policy (E5-04):** a `pendiente` boundary is considered stale only when
+its local `created_at` is more than 30 minutes old. Recent boundaries remain in the
+server-backed `pending`/finalizing state so a normal delayed webhook is not interrupted. For
+an old boundary, the return handler re-reads Stripe when a provider session ID exists: an
+`open` unexpired session is expired at Stripe before cleanup, `complete` remains finalizing,
+and provider errors fail closed without mutation. Only a Stripe-confirmed `expired` session
+(or a boundary that never reached Stripe) may be marked `fallido`, with its stored URL
+cleared. This grants no entitlement; the client routes the revisited success URL back to the
+candidate paywall/new-contact path so a fresh checkout can be started. The webhook remains
+the sole authority for successful entitlement activation.
+
 ### 16.1 What "Contactar" unlocks
 
 **Decision: one entitlement type in V1 — `contacto_30d` (MX$299), account-wide, uncapped

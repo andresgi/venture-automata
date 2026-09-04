@@ -11,6 +11,7 @@ export type CandidateDetailActionsProps = {
   candidateNombre: string;
   candidateFotoUrl: string | null;
   verificationStatus: VerificationStatus;
+  initialContactOpen?: boolean;
 };
 
 /**
@@ -27,6 +28,7 @@ export function CandidateDetailActions({
   candidateNombre,
   candidateFotoUrl,
   verificationStatus,
+  initialContactOpen = false,
 }: CandidateDetailActionsProps) {
   return (
     <>
@@ -61,8 +63,10 @@ export function CandidateDetailActions({
           nineraId={nineraId}
           candidateNombre={candidateNombre}
           candidateFotoUrl={candidateFotoUrl}
-          verificationStatus={verificationStatus}
+           verificationStatus={verificationStatus}
+           initialOpen={initialContactOpen}
            variant="mobile"
+           initialOpen={initialContactOpen}
           className="flex h-11 w-full items-center justify-center gap-2 rounded-sm bg-primary-600 text-button text-white"
         />
       </div>

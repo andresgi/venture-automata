@@ -272,9 +272,10 @@ history, `FAM-13`).
 | `created_at` | timestamptz | |
 
 **Ownership:** system. **Lifecycle:** created on checkout initiation (`pendiente`),
-finalized by the Stripe webhook (`exitoso`/`fallido`) — the webhook handler is the only
-writer of `status`, keyed by `provider_payment_id` for idempotency (a redelivered webhook
-must not create a second entitlement).
+ finalized by the Stripe webhook (`exitoso`/`fallido`), or marked `fallido` by the
+ server-side stale-return cleanup only after a never-created or Stripe-confirmed-expired
+ boundary. The webhook remains the only path that can mark a payment successful or create an
+ entitlement; stale cleanup is guarded by `status = 'pendiente'` and never grants access.
 
 ---
 

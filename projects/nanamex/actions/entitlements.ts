@@ -24,6 +24,25 @@ const GENERIC_ERROR_MESSAGE = "No se pudo iniciar el pago. Intenta de nuevo.";
 const UNVERIFIED_MESSAGE = "Confirma tu correo y tu teléfono para poder contactar candidatas.";
 const PENDING_MESSAGE = "Ya hay un pago en proceso. Intenta de nuevo en unos segundos.";
 
+const contactInputSchema = z.object({
+  necesidadId: z.uuid(),
+  nineraId: z.uuid(),
+  mensaje: z.string().trim().max(1000, "El mensaje es demasiado largo.").optional(),
+});
+export type ConfirmContactInput = z.infer<typeof contactInputSchema>;
+export type ConfirmContactResult =
+  | { status: "contacted" | "already_contacted"; phone: string | null; mensaje: string | null }
+  | { status: "error" | "entitlement_required"; message: string };
+
+export type CheckoutReturnState =
+  | { status: "ready" }
+  | { status: "pending" }
+  | { status: "stale" }
+  | { status: "unverified" }
+  | { status: "error" };
+
+const STALE_PAYMENT_BOUNDARY_MS = 30 * 60 * 1000;
+
 type EntitlementResult =
   | { kind: "active"; expiresAt: string }
   | { kind: "none" }
@@ -71,6 +90,77 @@ async function getEntitlement(db: ReturnType<typeof createServiceRoleClient>, fa
     return { kind: "error" };
   }
   return data ? { kind: "active", expiresAt: data.expires_at as string } : { kind: "none" };
+}
+
+/**
+ * Reconciles a Stripe return against our own payment boundary. The checkout query
+ * parameter is only a navigation hint; it is never treated as payment evidence.
+ */
+export async function getCheckoutReturnStateAction(): Promise<CheckoutReturnState> {
+  const userId = await getSessionUserId();
+  if (!userId) return { status: "error" };
+  const db = createServiceRoleClient();
+  const entitlement = await getEntitlement(db, userId);
+  if (entitlement.kind === "error") return { status: "error" };
+  if (entitlement.kind === "active") return { status: "ready" };
+
+  const { data: payment, error } = await db.from("payments")
+    .select("id, status, created_at, provider_payment_id, provider_session_status").eq("familia_id", userId)
+    .in("status", ["pendiente", "exitoso"])
+    .order("created_at", { ascending: false }).limit(1).maybeSingle();
+  if (error) {
+    console.error("checkout return payment query failed", { code: error.code });
+    return { status: "error" };
+  }
+  if (!payment) return { status: "unverified" };
+  if (payment.status === "exitoso") return { status: "pending" };
+
+  // A recent boundary may still be creating a Checkout Session or waiting for Stripe's
+  // webhook. Never turn that normal race into a new payment attempt. The age check is only
+  // a recovery guard for revisited success URLs, not payment evidence.
+  const createdAt = Date.parse(payment.created_at as string);
+  if (!Number.isFinite(createdAt) || Date.now() - createdAt <= STALE_PAYMENT_BOUNDARY_MS) {
+    return { status: "pending" };
+  }
+
+  // Stripe remains the source of truth for a provider-backed boundary. A completed session
+  // is deliberately left pending/finalizing: marking it failed could discard a legitimate
+  // payment whose webhook is delayed. Likewise, provider outages fail closed and do not
+  // mutate local state. Only a provider-confirmed terminal session (or a boundary that
+  // never reached Stripe) is safe to clear without granting access.
+  if (payment.provider_payment_id) {
+    try {
+      const remote = await getStripeCheckoutSession(payment.provider_payment_id as string);
+      let providerExpired = remote.state === "expired";
+      if (remote.state === "open" && remote.expiresAt && remote.expiresAt > new Date().toISOString()) {
+        // The local boundary is stale even though Stripe still has a chargeable session.
+        // Close that session before clearing our retry boundary so this cleanup cannot leave
+        // an old pending URL active or create an orphaned chargeable checkout.
+        try {
+          await expireStripeCheckoutSession(payment.provider_payment_id as string);
+          providerExpired = true;
+        } catch {
+          return { status: "error" };
+        }
+      }
+      if (remote.state === "complete") return { status: "pending" };
+      if (!providerExpired) return { status: "error" };
+    } catch {
+      return { status: "error" };
+    }
+  }
+
+  const stale = await db.from("payments").update({
+    status: "fallido",
+    provider_session_status: "expired",
+    checkout_url: null,
+    checkout_claimed_at: null,
+  }).eq("id", payment.id).eq("status", "pendiente").select("id").maybeSingle();
+  if (stale.error) {
+    console.error("stale checkout boundary cleanup failed", { code: stale.error.code });
+    return { status: "error" };
+  }
+  return { status: "stale" };
 }
 
 /** Internal/session-derived only. Deliberately not exported: no arbitrary-family oracle. */
@@ -235,4 +325,34 @@ export async function createCheckoutSessionAction(input: CreateCheckoutSessionIn
     return { status: "error", message: GENERIC_ERROR_MESSAGE };
   }
   return { status: "checkout_created", checkoutUrl: session.url };
+}
+
+/** FAM-10's only Nueva -> Contactada transition. All writes and entitlement checks
+ * happen in one SECURITY DEFINER transaction; Epic 10 notification delivery is not
+ * called because its infrastructure is intentionally deferred. */
+export async function confirmContactAction(input: ConfirmContactInput): Promise<ConfirmContactResult> {
+  const parsed = contactInputSchema.safeParse(input);
+  if (!parsed.success) return { status: "error", message: "Revisa el mensaje e intenta de nuevo." };
+  const userId = await getSessionUserId();
+  if (!userId) return { status: "error", message: "Tu sesión expiró. Inicia sesión de nuevo." };
+  const db = createServiceRoleClient();
+  const { data, error } = await db.rpc("confirm_contact", {
+    p_necesidad_id: parsed.data.necesidadId,
+    p_familia_id: userId,
+    p_ninera_id: parsed.data.nineraId,
+    p_mensaje: parsed.data.mensaje || null,
+  });
+  if (error) {
+    if (error.message.includes("contact_entitlement_required")) {
+      return { status: "entitlement_required", message: "Necesitas un acceso activo para contactar candidatas." };
+    }
+    if (error.message.includes("invalid_contact_message")) return { status: "error", message: "El mensaje es demasiado largo." };
+    console.error("confirm contact failed", { code: error.code });
+    return { status: "error", message: "No se pudo registrar la solicitud. Intenta de nuevo." };
+  }
+  const result = data as { status?: "contacted" | "already_contacted"; phone?: string | null; mensaje?: string | null };
+  if (result.status !== "contacted" && result.status !== "already_contacted") {
+    return { status: "error", message: "No se pudo registrar la solicitud. Intenta de nuevo." };
+  }
+  return { status: result.status, phone: result.phone ?? null, mensaje: result.mensaje ?? null };
 }

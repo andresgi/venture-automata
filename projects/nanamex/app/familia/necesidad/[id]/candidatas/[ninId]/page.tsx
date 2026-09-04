@@ -3,11 +3,13 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ArrowLeft, Check } from "@phosphor-icons/react/ssr";
 import { CandidateDetailActions } from "@/components/familia/candidate-detail-actions";
+import { CheckoutReturnBanner } from "@/components/familia/checkout-return-banner";
 import { RetryBanner } from "@/components/familia/retry-banner";
 import { ReferenceList, type Reference } from "@/components/familia/reference-list";
 import { TrustBadge, type VerificationStatus } from "@/components/shared/trust-badge";
 import { createServerSupabaseClient } from "@/lib/supabase/auth-server";
 import { createServiceRoleClient } from "@/lib/supabase/server";
+import { getFamiliaOnboardingState } from "@/lib/auth/familia-onboarding";
 import { familiaChecklistLabels } from "@/lib/matching/checklist-labels";
 import { scoreMatch, type MatchNecesidad, type MatchNinera } from "@/lib/matching/match-score";
 
@@ -54,10 +56,14 @@ function DetailSection({ title, children }: { title: string; children: React.Rea
   );
 }
 
-export default async function CandidateProfilePage({ params }: { params: Promise<Params> }) {
+export default async function CandidateProfilePage({ params, searchParams }: { params: Promise<Params>; searchParams?: Promise<{ contactar?: string }> }) {
   const { data: { user } } = await (await createServerSupabaseClient()).auth.getUser();
   if (!user) redirect("/login");
+  const onboarding = await getFamiliaOnboardingState(user.id);
+  if (!onboarding.isFamilia) redirect("/familia");
+  if (!onboarding.isOnboarded) redirect("/familia/perfil");
   const { id, ninId } = await params;
+  const shouldOpenContact = (await searchParams)?.contactar === "1";
   const db = createServiceRoleClient();
   const { data: viewerProfile } = await db.from("profiles").select("role").eq("id", user.id).maybeSingle();
   if (!viewerProfile || viewerProfile.role !== "familia") redirect("/familia");
@@ -120,7 +126,8 @@ export default async function CandidateProfilePage({ params }: { params: Promise
   return (
     <main className="mx-auto min-h-screen w-full max-w-[1120px] bg-bg px-4 py-6 pb-28 text-ink-900 sm:px-6 lg:py-12 lg:pb-12">
       <Link href={`/familia/necesidad/${id}`} className="inline-flex min-h-11 items-center gap-2 text-button text-primary-600"><ArrowLeft size={18} />Volver al listado</Link>
-      <div className="mt-6 grid gap-8 lg:grid-cols-[360px_1fr]">
+             <div className="mt-4"><CheckoutReturnBanner necesidadId={id} nineraId={ninId} autoNavigateTo={`/familia/necesidad/${id}/candidatas/${ninId}/contactar`} /></div>
+      <div className="mt-2 grid gap-8 lg:grid-cols-[360px_1fr]">
         <aside className="lg:sticky lg:top-8 lg:self-start">
             <div className="relative -mx-4 overflow-visible rounded-b-lg bg-border sm:-mx-6 lg:mx-0 lg:rounded-lg">
               <div className="overflow-hidden rounded-b-lg lg:rounded-lg">
@@ -135,6 +142,10 @@ export default async function CandidateProfilePage({ params }: { params: Promise
             score={snapshot.match_score_snapshot}
             checklist={snapshot.match_checklist_snapshot}
             initialFavorite={saved?.es_favorita ?? false}
+            candidateNombre={nombre}
+            candidateFotoUrl={row.foto_url}
+             verificationStatus={row.verification_status}
+             initialContactOpen={shouldOpenContact}
           />
         </aside>
         <div className="flex flex-col gap-7">
