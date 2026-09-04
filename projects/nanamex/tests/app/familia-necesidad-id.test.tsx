@@ -16,12 +16,23 @@ vi.mock("@/lib/supabase/auth-server", () => ({
   })),
 }));
 
+let onboarded = true;
+vi.mock("@/lib/auth/familia-onboarding", () => ({
+  getFamiliaOnboardingState: vi.fn(async () => ({
+    isFamilia: true,
+    isOnboarded: onboarded,
+    profile: { role: "familia", account_status: "activa", email_verified: true, phone_verified: true },
+  })),
+}));
+
 let mockNecesidadResult: { data: unknown; error: unknown } = { data: null, error: null };
 let mockNineraLiveResult: { data: unknown; error: unknown } = { data: [], error: null };
+const databaseReads: string[] = [];
 
 vi.mock("@/lib/supabase/server", () => ({
-  createServiceRoleClient: vi.fn(() => ({
+    createServiceRoleClient: vi.fn(() => ({
     from: vi.fn((table: string) => {
+      databaseReads.push(table);
       if (table === "necesidades") {
         return {
           select: vi.fn(() => ({
@@ -75,14 +86,22 @@ beforeEach(() => {
     throw new Error(`REDIRECT:${path}`);
   });
   mockUser = { id: "family-1" };
+  onboarded = true;
   mockNecesidadResult = { data: null, error: null };
   mockNineraLiveResult = { data: [], error: null };
+  databaseReads.length = 0;
 });
 
 describe("MatchesPage (FAM-04)", () => {
   it("redirects to /login when there is no session", async () => {
     mockUser = null;
     await expect(MatchesPage({ params: params() })).rejects.toThrow("REDIRECT:/login");
+  });
+
+  it("redirects incomplete families before reading the necesidad", async () => {
+    onboarded = false;
+    await expect(MatchesPage({ params: params() })).rejects.toThrow("REDIRECT:/familia/perfil");
+    expect(databaseReads).toEqual([]);
   });
 
   it("redirects to /familia/necesidad when the necesidad does not exist or isn't this family's", async () => {

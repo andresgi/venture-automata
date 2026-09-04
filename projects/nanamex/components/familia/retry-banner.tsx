@@ -24,7 +24,7 @@ export function RetryBanner({ message }: { message: string }) {
       <button
         type="button"
         onClick={() => router.refresh()}
-        className="shrink-0 text-button text-danger-600 underline underline-offset-2"
+        className="inline-flex min-h-11 shrink-0 items-center px-2 text-button text-danger-600 underline underline-offset-2"
       >
         Reintentar
       </button>

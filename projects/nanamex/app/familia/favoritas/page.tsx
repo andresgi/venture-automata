@@ -7,6 +7,7 @@ import { RetryBanner } from "@/components/familia/retry-banner";
 import { CandidateCard, type CandidateCardData } from "@/components/familia/candidate-card";
 import { familiaChecklistLabels } from "@/lib/matching/checklist-labels";
 import type { VerificationStatus } from "@/components/shared/trust-badge";
+import { getFamiliaOnboardingState } from "@/lib/auth/familia-onboarding";
 
 // FAM-07 "Favoritas" (design/screen-inventory.md, design/UI-SPEC.md FAM-07): saved niñeras
 // across all of this family's necesidades, using the same card component as FAM-04, grouped
@@ -135,9 +136,11 @@ export default async function FavoritasPage() {
   } = await (await createServerSupabaseClient()).auth.getUser();
   if (!user) redirect("/login");
 
+  const onboarding = await getFamiliaOnboardingState(user.id);
+  if (!onboarding.isFamilia) redirect("/familia");
+  if (!onboarding.isOnboarded) redirect("/familia/perfil");
+
   const db = createServiceRoleClient();
-  const { data: viewerProfile } = await db.from("profiles").select("role").eq("id", user.id).maybeSingle();
-  if (!viewerProfile || viewerProfile.role !== "familia") redirect("/familia");
 
   // Intentionally not scoped to `estado = 'activa'` -- screen-inventory.md's FAM-07 entry
   // covers saved niñeras across all of the family's necesidades, including closed ones

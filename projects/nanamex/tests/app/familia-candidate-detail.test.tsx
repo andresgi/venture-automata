@@ -14,8 +14,18 @@ vi.mock("@/lib/supabase/auth-server", () => ({
   })),
 }));
 
+let onboarded = true;
+vi.mock("@/lib/auth/familia-onboarding", () => ({
+  getFamiliaOnboardingState: vi.fn(async () => ({
+    isFamilia: true,
+    isOnboarded: onboarded,
+    profile: { role: "familia", account_status: "activa", email_verified: true, phone_verified: true },
+  })),
+}));
+
 let candidateResult: { data: unknown; error: unknown } = { data: null, error: null };
 let rpcResult: { error: unknown } = { error: null };
+const databaseReads: string[] = [];
 
 function queryResult(table: string, selection: string) {
   if (table === "profiles") return { data: { role: "familia" }, error: null };
@@ -33,7 +43,9 @@ function queryResult(table: string, selection: string) {
 
 vi.mock("@/lib/supabase/server", () => ({
   createServiceRoleClient: vi.fn(() => ({
-    from: vi.fn((table: string) => ({
+    from: vi.fn((table: string) => {
+      databaseReads.push(table);
+      return ({
       select: vi.fn((selection: string) => {
         const result = queryResult(table, selection);
         const chain: Record<string, unknown> = {};
@@ -41,7 +53,8 @@ vi.mock("@/lib/supabase/server", () => ({
         chain.maybeSingle = vi.fn(async () => result);
         return chain;
       }),
-    })),
+      });
+    }),
     rpc: vi.fn(async () => rpcResult),
   })),
 }));
@@ -53,11 +66,19 @@ const params = Promise.resolve({ id: "need-1", ninId: "ninera-1" });
 beforeEach(() => {
   vi.clearAllMocks();
   authUser = { id: "family-1" };
+  onboarded = true;
+  databaseReads.length = 0;
   candidateResult = { data: null, error: null };
   rpcResult = { error: null };
 });
 
 describe("CandidateProfilePage FAM-06 state distinction", () => {
+  it("redirects incomplete families before reading necesidad or candidate data", async () => {
+    onboarded = false;
+    await expect(CandidateProfilePage({ params })).rejects.toThrow("REDIRECT:/familia/perfil");
+    expect(databaseReads).toEqual([]);
+  });
+
   it("renders unavailable only when the candidate record is absent", async () => {
     render(await CandidateProfilePage({ params }));
     expect(screen.getByRole("heading", { name: "Esta candidata ya no está disponible" })).toBeInTheDocument();

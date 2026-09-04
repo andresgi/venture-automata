@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { CaretDown, UsersThree } from "@phosphor-icons/react/ssr";
 import { createServerSupabaseClient } from "@/lib/supabase/auth-server";
 import { createServiceRoleClient } from "@/lib/supabase/server";
+import { getFamiliaOnboardingState } from "@/lib/auth/familia-onboarding";
 import { RetryBanner } from "@/components/familia/retry-banner";
 import { familiaChecklistLabels } from "@/lib/matching/checklist-labels";
 import type { VerificationStatus } from "@/components/shared/trust-badge";
@@ -192,6 +193,9 @@ export default async function MatchesPage({ params }: { params: Promise<{ id: st
     data: { user },
   } = await (await createServerSupabaseClient()).auth.getUser();
   if (!user) redirect("/login");
+  const onboarding = await getFamiliaOnboardingState(user.id);
+  if (!onboarding.isFamilia) redirect("/familia");
+  if (!onboarding.isOnboarded) redirect("/familia/perfil");
 
   const { id } = await params;
   const db = createServiceRoleClient();

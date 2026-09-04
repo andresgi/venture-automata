@@ -144,13 +144,6 @@ function DashboardHeader() {
       <h1 className="text-h1">Mis necesidades</h1>
       <div className="flex flex-wrap items-center gap-4">
         <Link
-          href="/familia/favoritas"
-          className="inline-flex min-h-11 w-fit items-center gap-2 text-button text-primary-600"
-        >
-          <Heart size={18} aria-hidden="true" />
-          Favoritas
-        </Link>
-        <Link
           href="/familia/necesidad"
           className="inline-flex min-h-11 w-fit items-center justify-center rounded-sm bg-primary-600 px-5 py-3 text-button text-white"
         >

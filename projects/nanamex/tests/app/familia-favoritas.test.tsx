@@ -7,11 +7,13 @@ const redirectMock = vi.fn((path: string) => {
 vi.mock("next/navigation", () => ({ redirect: redirectMock, useRouter: vi.fn(() => ({ refresh: vi.fn() })) }));
 
 let authUser: { id: string } | null = { id: "family-1" };
+let onboarded = true;
 vi.mock("@/lib/supabase/auth-server", () => ({
   createServerSupabaseClient: vi.fn(async () => ({
     auth: { getUser: vi.fn(async () => ({ data: { user: authUser } })) },
   })),
 }));
+vi.mock("@/lib/auth/familia-onboarding", () => ({ getFamiliaOnboardingState: vi.fn(async () => ({ isFamilia: profileRole === "familia", isOnboarded: onboarded, profile: null })) }));
 
 let profileRole: string | null = "familia";
 let necesidadesResult: { data: unknown; error: unknown } = { data: [], error: null };
@@ -50,6 +52,7 @@ beforeEach(() => {
   vi.clearAllMocks();
   authUser = { id: "family-1" };
   profileRole = "familia";
+  onboarded = true;
   necesidadesResult = { data: [], error: null };
   candidatesResult = { data: [], error: null };
 });
@@ -63,6 +66,11 @@ describe("FavoritasPage (FAM-07)", () => {
   it("redirects non-familia roles to /familia", async () => {
     profileRole = "ninera";
     await expect(FavoritasPage()).rejects.toThrow("REDIRECT:/familia");
+  });
+
+  it("redirects a family without perfil_familiar to onboarding", async () => {
+    onboarded = false;
+    await expect(FavoritasPage()).rejects.toThrow("REDIRECT:/familia/perfil");
   });
 
   it("renders the empty state with a link to the first active necesidad when there are no favorites", async () => {
