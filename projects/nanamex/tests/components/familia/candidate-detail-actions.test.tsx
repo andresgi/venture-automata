@@ -11,14 +11,15 @@ const props = {
 };
 
 describe("CandidateDetailActions", () => {
-  it("renders a functional favorite toggle and a coming-soon contact action, desktop + mobile", () => {
+  it("renders a functional favorite toggle and a functional contact action, desktop + mobile", () => {
     render(<CandidateDetailActions {...props} />);
     expect(screen.getByTestId("candidate-mobile-actions")).toBeInTheDocument();
     const favoriteButtons = screen.getAllByRole("button", { name: "Guardar favorita" });
     expect(favoriteButtons).toHaveLength(2);
     expect(favoriteButtons.every((button) => !button.hasAttribute("disabled"))).toBe(true);
-    expect(screen.getByRole("button", { name: "Contactar (próximamente)" })).toBeDisabled();
-    expect(screen.getByText("Próximamente")).toBeInTheDocument();
+    const contactButtons = screen.getAllByRole("button", { name: "Contactar" });
+    expect(contactButtons).toHaveLength(2);
+    expect(contactButtons.every((button) => !button.hasAttribute("disabled"))).toBe(true);
   });
 
   it("reflects an already-favorited state", () => {

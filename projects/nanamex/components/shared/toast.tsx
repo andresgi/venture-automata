@@ -11,6 +11,8 @@ export type ToastProps = {
   onDismiss: () => void;
   /** UI-SYSTEM.md §5.6: "auto-dismiss 4s". */
   durationMs?: number;
+  /** Reserves the mobile candidate action bar without changing desktop placement. */
+  avoidMobileActionBar?: boolean;
 };
 
 /**
@@ -26,7 +28,7 @@ export type ToastProps = {
  * message slot in local state and only ever mounting one `Toast` at a time, which is true
  * of every call site so far.
  */
-export function Toast({ message, variant, onDismiss, durationMs = 4000 }: ToastProps) {
+export function Toast({ message, variant, onDismiss, durationMs = 4000, avoidMobileActionBar = false }: ToastProps) {
   useEffect(() => {
     const timer = window.setTimeout(onDismiss, durationMs);
     return () => window.clearTimeout(timer);
@@ -37,7 +39,7 @@ export function Toast({ message, variant, onDismiss, durationMs = 4000 }: ToastP
   return (
     <div
       role={variant === "error" ? "alert" : "status"}
-      className="fixed inset-x-4 bottom-4 z-50 flex items-center gap-2 rounded-sm bg-bg-raised px-4 py-3 text-body-sm shadow-elevation-2 sm:inset-x-auto sm:left-4 sm:w-80"
+      className={`fixed inset-x-4 ${avoidMobileActionBar ? "bottom-[calc(68px+1rem+env(safe-area-inset-bottom))] lg:bottom-4" : "bottom-4"} z-50 flex items-center gap-2 rounded-sm bg-bg-raised px-4 py-3 text-body-sm shadow-elevation-2 sm:inset-x-auto sm:left-4 sm:w-80`}
     >
       <Icon size={20} weight="fill" aria-hidden="true" className={variant === "success" ? "shrink-0 text-primary-600" : "shrink-0 text-danger-600"} />
       <span className={variant === "success" ? "text-ink-900" : "text-danger-600"}>{message}</span>

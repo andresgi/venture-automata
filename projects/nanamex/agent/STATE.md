@@ -14,9 +14,9 @@ IN_PROGRESS
 
 ARCHITECTURE_GATE approved by human 2026-09-02 (see agent/DECISIONS.md). TECH_ARCHITECTURE
 VERIFIED. BUILD is proceeding per engineering/implementation-plan.md. Epic 0 Foundations,
-Epic 1 (E1-01–E1-03), E2-01 through E2-03, E3-01/E3-02, and E4-01 through E4-04 are all
-VERIFIED — this completes Epic 4. Next eligible story: E5-01 (Stripe Checkout Session
-creation), first story of Epic 5 (Paywall, Payments, Entitlements).
+Epic 1 (E1-01–E1-03), E2-01 through E2-03, E3-01/E3-02, E4-01 through E4-04, and E5-01 are
+all VERIFIED. E5-01 accepted a documented temporary exception (direct-to-Stripe redirect,
+FAM-08/FAM-09 screens deferred to E5-03 — see agent/DECISIONS.md 2026-09-04).
 
 ## Phase Status
 
@@ -81,10 +81,8 @@ unbuilt (E4-03).
 
 ## Next Eligible Action
 
-E5-01: Stripe integration, Checkout Session creation (Epic 5, dependency E1-02 already
-VERIFIED). Note: E5 involves real payment integration — flag any need for live Stripe
-credentials/webhook secrets to the human rather than inventing them, same pattern used for
-Twilio (E0-05) and Supabase project creation.
+E5-02: Stripe webhook handler (entitlement activation), dependency E5-01 now VERIFIED. Note:
+continues using Stripe test-mode/dummy credentials per the 2026-09-04 decision.
 
 ## Human Blocker
 

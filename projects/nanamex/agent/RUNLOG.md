@@ -509,3 +509,34 @@ Note: committed locally on branch nanamex/e4-03-fam06-candidate-detail; `git pus
 currently blocked by this session's permission settings (see agent/DECISIONS.md) — push/PR
 for E4-03+E4-04 remains outstanding.
 Next recommended action: E5-01 — Stripe integration, Checkout Session creation (Epic 5).
+
+---
+
+## 2026-09-04 — E5-01 Developer + Code Reviewer + Functional QA + Visual QA
+
+Objective: Implement and independently verify E5-01 — Stripe Checkout Session creation
+(Epic 5), using test-mode/dummy Stripe credentials per human decision (see
+agent/DECISIONS.md).
+Result: Built `createCheckoutSessionAction`/`checkEntitlementAction` with full server-side
+gating (auth, verification re-check, necesidad/candidate eligibility, active-entitlement
+short-circuit), new `entitlements`/`payments` tables, and a durable payment-boundary design
+(idempotency key, claim lease, safe pending-URL reuse). Code Review round 1: REVISE — the
+"Contactar" button redirected directly to Stripe instead of the approved FAM-08→FAM-09 flow
+(undocumented at the time), plus missing recovery-variant regression tests. Escalated the
+routing gap to the human: accepted as a temporary, documented exception since FAM-08/FAM-09
+are E5-03's scope and don't exist yet (same pattern as E1-02's scope narrowing) — E5-03 must
+replace it. Developer documented the exception and added the missing tests. Code Review
+round 2: PASS_WITH_MINOR_ISSUES. Functional QA: PASS. Visual QA: PASS. E5-01 marked
+VERIFIED.
+Validation: 305 tests, lint, typecheck, secret scan, production build, and test:db
+(including a new live concurrency probe for the payment-boundary unique constraint) all
+pass.
+Artifacts: actions/entitlements.ts, lib/stripe/client.ts, components/familia/
+contact-button.tsx, components/familia/candidate-detail-actions.tsx, components/shared/
+toast.tsx, db/migrations/20260903000014_entitlements_payments.sql,
+db/migrations/20260904000015_payment_boundary.sql,
+scripts/test-e5-01-payment-boundary.{mjs,sql}, agent/reviews/code-E5-01-review.md (2
+rounds), agent/qa/e5-01-{functional,visual}.md.
+Note: committed locally on branch nanamex/e4-03-fam06-candidate-detail (3rd commit); git
+push remains blocked by this session's permission settings.
+Next recommended action: E5-02 — Stripe webhook handler (entitlement activation).

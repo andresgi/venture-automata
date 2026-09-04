@@ -557,6 +557,69 @@ Validation: `npm test -- --run --no-file-parallelism` (272 tests), `npm run lint
 `npm run typecheck`, `npm run check:secrets`, `npm run build`, and `npm run test:db`
 (including the new E4-04 probe, run live/clean in round 3) all pass.
 
+## Epic 5 — Paywall, Payments, Entitlements
+
+### E5-01 — Stripe integration: Checkout Session creation
+
+Status: VERIFIED (2026-09-04; Code Review round 1 REVISE — two Required Changes, both fixed;
+round 2 PASS_WITH_MINOR_ISSUES. Functional QA PASS, Visual QA PASS. See
+agent/reviews/code-E5-01-review.md and agent/qa/e5-01-{functional,visual}.md.)
+Dependencies: E1-02 (verification gate).
+
+Delivered: `createCheckoutSessionAction`/`checkEntitlementAction` (`actions/entitlements.ts`)
+server-side gate for `Contactar`/`Solicitar entrevista` — requires an authenticated,
+`activa`-status `familia` session; re-reads `profiles.email_verified`/`phone_verified`
+directly (defense-in-depth: correo is already a hard login gate per the E0-04 decision, but
+this action never trusts that invariant, it re-checks); re-validates necesidad ownership and
+full candidate/matching eligibility server-side before ever touching payment state; checks
+for an active `entitlements` row (`expires_at > now()`, account-wide) and short-circuits
+before creating a new Checkout Session if one exists. New `entitlements`/`payments` tables
+(`db/migrations/20260903000014_entitlements_payments.sql`) plus a durable payment-boundary
+design added after Code Review hardening (`db/migrations/20260904000015_payment_boundary.sql`,
+architecture.md §16.4): one `pendiente` `payments` row is inserted *before* Stripe is ever
+called, carries its own idempotency key (also passed to Stripe), a short claim lease guards
+against concurrent duplicate provider calls, and a stored pending Checkout URL is only ever
+reused after re-verifying with Stripe that the session is still `open` and unexpired — never
+on a `complete`/`expired`/missing-expiry response. `lib/stripe/client.ts` wraps
+`checkout.sessions.create/retrieve/expire` (Twilio-verify's lazy-client-construction pattern
+— safe to import with no `STRIPE_SECRET_KEY` configured, throws only when actually called).
+Entitlement *activation* is explicitly out of scope here — only the E5-02 webhook may ever
+write `entitlements`/finalize `payments.status` (database.md §8/§9's stated ownership).
+
+**Documented exception (Code Review Important Issue #1, human-approved 2026-09-04):**
+`ContactButton` currently redirects straight to Stripe's hosted Checkout URL
+(`window.location.href = result.checkoutUrl`) on `checkout_created`, instead of routing
+through the approved `Contactar` → FAM-08 (paywall) → FAM-09 (checkout) screen flow that
+`engineering/implementation-plan.md`'s E5-01 acceptance criteria and `design/UI-SPEC.md`
+describe. This is a **deliberate, temporary interim wiring**, not a silent scope change:
+FAM-08/FAM-09's actual screens are E5-03's scope and do not exist yet (same "build only what
+exists to depend on, defer the rest explicitly" pattern as E1-02's scope narrowing,
+agent/BACKLOG.md's E1-02 entry). The smallest wiring that actually exercises
+`createCheckoutSessionAction` end to end without inventing E5-03's screens ahead of schedule
+was judged to be a direct redirect on success — verified/blocked/already-entitled states
+still surface via toast, not a hard failure. **E5-03 must replace this direct redirect with
+the real `Contactar` → FAM-08 → FAM-09 flow** before that story can be marked VERIFIED; this
+entry is the explicit record that the interim behavior was seen and accepted, not missed.
+
+**Round 1 Code Review (REVISE) — both Required Changes addressed this pass:**
+1. The FAM-08/FAM-09 routing exception above was undocumented; now recorded here per the
+   review's explicit instruction ("resolve or explicitly approve... do not silently retain
+   the direct Stripe redirect").
+2. Added three regression tests asserting the post-create existing-boundary-retry
+   verification branch fails closed on each unsafe Stripe response (`complete`, `expired`,
+   missing `expiresAt`) — previously only its success path was tested
+   (`tests/actions/entitlements.test.ts`).
+
+Validation: `npm test -- --run --no-file-parallelism` (305 tests), `npm run lint`,
+`npm run typecheck`, `npm run check:secrets`, `npm run build`, and `npm run test:db`
+(including the new `test-e5-01-payment-boundary` concurrency probe) all pass.
+
+**Not yet done:** re-review by Code Reviewer/Functional QA/Visual QA following this round's
+fixes (prior verdicts: Code Review REVISE now addressed above pending re-review, Functional
+QA PASS, Visual QA PASS — see agent/reviews/code-E5-01-review.md,
+agent/qa/e5-01-functional.md, agent/qa/e5-01-visual.md). Do not mark VERIFIED until the
+Code Reviewer confirms both Required Changes are resolved.
+
 ## Change Requests
 
 Ad-hoc, non-PRD asks made directly in chat (see AGENTS.md, "Change Requests"). Use `CR-NNN`

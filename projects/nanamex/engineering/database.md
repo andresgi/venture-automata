@@ -261,7 +261,12 @@ history, `FAM-13`).
 | `id` | uuid, PK | |
 | `familia_id` | uuid, FK | |
 | `provider` | text | `stripe` |
-| `provider_payment_id` | text | Stripe PaymentIntent/Checkout Session ID — idempotency key for webhook processing. |
+| `provider_payment_id` | text, nullable | Stripe Checkout Session ID once created; nullable during recovery before the provider call/link succeeds. |
+| `idempotency_key` | text, unique | Durable local/Stripe idempotency boundary, created before calling Stripe. |
+| `checkout_url` | text, nullable | Hosted Checkout URL, persisted for safe retries. |
+| `provider_session_status` | text | Local projection: `not_created`, `open`, `expired`, `complete`, or `unknown`; never grants entitlement. |
+| `provider_session_expires_at` | timestamptz, nullable | Stripe Checkout `expires_at`, normalized from Unix seconds and persisted when the session is linked; a provider projection used as a local hint, never payment proof. |
+| `checkout_claimed_at` | timestamptz, nullable | Short checkout-creation lease preventing concurrent provider calls. |
 | `amount` | int (cents, MXN) | |
 | `status` | enum(`pendiente`,`exitoso`,`fallido`) | |
 | `created_at` | timestamptz | |

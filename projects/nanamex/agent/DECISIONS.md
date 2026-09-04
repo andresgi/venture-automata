@@ -724,3 +724,62 @@ permits, converging cleanly rather than stalling:
 **E4-04 marked VERIFIED.** This completes Epic 4 in full. Per the standing overnight
 authorization, this and E4-03 remain committed locally pending the blocked-push issue noted
 above — proceeding to the next eligible backlog item (E5-01) rather than stopping.
+
+## 2026-09-03 — E5-01: use Stripe test-mode/dummy credentials, not real production keys
+
+Before starting E5-01 (Stripe Checkout Session creation), asked the human how to handle
+Stripe credentials, same pattern as E0-05's Twilio check-in. **Human decision: use dummy/
+placeholder values** — no real Stripe account/live keys are being supplied for this venture
+yet. Developer should use Stripe test-mode conventions (e.g. `sk_test_...`/`pk_test_...`
+placeholder-shaped values in `.env.example`, Stripe's official test card numbers for any
+manual verification) and mock the Stripe SDK in automated tests, the same testing posture
+E0-05 used for Twilio (no real credentials existed there either, and it was still marked
+VERIFIED). A real Stripe account/live keys remain a pre-RELEASE_GATE item, not a BUILD
+blocker.
+
+## 2026-09-04 — E5-01: direct-to-Stripe redirect accepted as a temporary, documented exception
+
+E5-01's Code Review round 1 found `ContactButton` redirects straight to Stripe's hosted
+Checkout URL instead of routing through the approved `Contactar` → FAM-08 (paywall) → FAM-09
+(checkout) screen flow that `engineering/implementation-plan.md` and `design/UI-SPEC.md`
+describe. Escalated to the human rather than silently accepted, since it's a real
+acceptance-criterion mismatch, not a trivial implementation detail.
+
+**Human decision: accept the direct redirect as a temporary, explicitly documented
+exception.** FAM-08/FAM-09's actual screens are E5-03's scope and don't exist yet — same
+"build only what exists to depend on, defer the rest explicitly" pattern as E1-02's earlier
+scope narrowing. **E5-03 must replace this direct redirect with the real
+`Contactar` → FAM-08 → FAM-09 flow before that story can be marked VERIFIED.** Recorded in
+full in `agent/BACKLOG.md`'s E5-01 entry.
+
+## 2026-09-04 — E5-01 VERIFIED
+
+`createCheckoutSessionAction`/`checkEntitlementAction` implement the Stripe Checkout
+Session creation gate: authenticated `familia`+`activa` session required; email/phone
+verification re-read server-side (defense-in-depth, doesn't trust the correo-hard-gate
+invariant); necesidad ownership and full candidate-matching eligibility re-validated
+server-side; active-entitlement short-circuit before ever calling Stripe. New
+`entitlements`/`payments` tables plus a durable payment-boundary design (idempotency key,
+claim lease, safe pending-URL reuse only when Stripe confirms `open`+unexpired) added after
+Code Review hardening. Entitlement *activation* is explicitly out of scope — only E5-02's
+webhook may ever write `entitlements`/finalize `payments.status`. Uses Stripe test-mode/
+dummy credentials only (see the dedicated decision above), mocked in all automated tests.
+
+Code Review round 1: REVISE (2 Required Changes — the routing exception above, and missing
+regression coverage for `complete`/`expired`/missing-`expiresAt` Stripe recovery
+responses). Developer fixed both (documented the exception per the human decision above;
+added 3 new fail-closed regression tests). Code Review round 2: PASS_WITH_MINOR_ISSUES —
+independently re-verified both fixes, full validation suite (305 tests, lint, typecheck,
+check:secrets, build) and `npm run test:db` (including the new payment-boundary concurrency
+probe) all pass live with no DB contention this round. Two Minor issues left non-blocking,
+consistent with round 1's assessment: the claim lease has no owner token (Stripe idempotency
+and re-read logic mitigate duplicate risk), and `already_entitled` currently ends in a
+terminal success toast rather than continuing anywhere (acceptable — the continuation target
+is E5-04's scope). Functional QA: PASS (real server-side gate testing plus the live DB
+concurrency probe). Visual QA: PASS (pending/disabled/accessible states, toast positioning
+above the mobile action bar, 44px touch targets all confirmed at the source level; full
+FAM-08/FAM-09 visuals correctly deferred to E5-03, not an E5-01 defect).
+
+**E5-01 marked VERIFIED.** Committed locally on branch `nanamex/e4-03-fam06-candidate-detail`
+(3rd commit on that branch, after E4-03/E4-04) — push remains blocked by this session's
+permission settings, same open item as before.

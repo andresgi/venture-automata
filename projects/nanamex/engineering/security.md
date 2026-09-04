@@ -161,6 +161,7 @@ policy rather than invent one. Per that instruction:
 | Admin account compromise (highest-impact account type — can view ID documents, resolve reports, suspend accounts) | Recommend MFA for admin accounts before production (§1); access logging on every document view (§7); admin accounts are the only role that cannot self-register, limiting the attack surface to accounts a human deliberately provisioned. |
 | Off-platform payment solicitation (niñera or familia asking to pay/transact outside Clin, evading the paywall) | Explicit report category exists (`solicitud_pago_fuera_plataforma`) for users to flag this; not technically preventable once contact info is revealed (inherent to the product's post-paywall model, same as any lead-gen marketplace) — accepted as a known limitation, not a build gap. |
 | Stripe webhook replay/spoofing to grant a free entitlement | Signature verification (§5) + idempotency on `provider_payment_id` (`database.md` §9) — a redelivered or forged webhook cannot create a duplicate or unauthorized entitlement. |
+| Checkout retry/concurrency or local DB outage | Durable `payments` boundary is inserted first; one pending row per family, a short DB claim lease, Stripe idempotency key, and `payment_boundary_id` metadata prevent duplicate charge attempts. Only a provider session proven `open` and unexpired may be reused. Failed links are re-read before compensation; E5-02 reconciles by `provider_payment_id` or metadata boundary ID. |
 
 ## 10. Summary of Explicit Open Items for Human Decision (not resolved by this document)
 
