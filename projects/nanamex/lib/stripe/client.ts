@@ -147,3 +147,28 @@ export async function expireStripeCheckoutSession(sessionId: string): Promise<vo
   const stripe = getStripeClient();
   await stripe.checkout.sessions.expire(sessionId);
 }
+
+/**
+ * Verifies and parses an inbound Stripe webhook payload (E5-02;
+ * app/api/webhooks/stripe/route.ts) using Stripe's official `constructEvent` signature
+ * verification -- the only supported way to authenticate a webhook request. `rawBody` must
+ * be the exact, unmodified request body bytes/string (never a re-serialized JSON.parse'd
+ * object), since the signature is computed over the raw payload.
+ *
+ * Throws (not a boolean return) on a missing/invalid signature or a missing configured
+ * secret, so the caller's `try/catch` is the single place that decides to reject with 400 --
+ * mirrors `getStripeClient()`'s "fail loudly only when actually used" posture. Uses Stripe's
+ * documented test-mode conventions in `.env.example`'s `STRIPE_WEBHOOK_SIGNING_SECRET`; no
+ * real Stripe account exists for this venture yet (agent/DECISIONS.md, 2026-09-03/04 entries).
+ */
+export function constructStripeWebhookEvent(rawBody: string | Buffer, signature: string): Stripe.Event {
+  const webhookSecret = process.env.STRIPE_WEBHOOK_SIGNING_SECRET;
+  if (!webhookSecret) {
+    throw new Error(
+      "Missing STRIPE_WEBHOOK_SIGNING_SECRET environment variable -- see .env.example. " +
+        "Stripe webhook payloads cannot be verified without it."
+    );
+  }
+  const stripe = getStripeClient();
+  return stripe.webhooks.constructEvent(rawBody, signature, webhookSecret);
+}
