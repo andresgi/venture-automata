@@ -13,6 +13,24 @@ Next recommended action:
 
 ---
 
+## 2026-09-04 — Developer — E5-04 review fixes
+
+Objective: Resolve the E5-04 Code Review findings without adding E6 pipeline UI or Epic 10
+notification delivery.
+Result: FAM-10 now enforces authenticated active familia, verification, and FAM-01 onboarding
+before reads; direct non-entitled access is routed through the existing FAM-08 marker flow;
+candidate phone data is read only after an explicit object/array contacto relation is present.
+Added route/action authorization, entitlement, pre-success disclosure, success/retry, and
+concurrent DB contact coverage. E5-04 remains IMPLEMENTED pending independent re-review.
+Artifacts changed: FAM-10/FAM-06 route and action components, focused route/action tests, DB
+contact probe, and backlog run log.
+Validation: 365 tests, lint, typecheck, secret scan, production build, and test:db pass. Build
+retains the existing Supabase Node 20 deprecation warning.
+Next recommended action: independent Code Review and Functional/Visual QA; do not mark VERIFIED
+or merge before those reviews.
+
+---
+
 ## 2026-09-03 — Developer — E4-02
 
 Objective: Implement FAM-05 filters for FAM-04.
@@ -540,3 +558,59 @@ rounds), agent/qa/e5-01-{functional,visual}.md.
 Note: committed locally on branch nanamex/e4-03-fam06-candidate-detail (3rd commit); git
 push remains blocked by this session's permission settings.
 Next recommended action: E5-02 — Stripe webhook handler (entitlement activation).
+
+## 2026-09-04 — Orchestrator / Functional QA
+
+Objective: Verify E5-02 (Stripe webhook handler, entitlement activation) — implementation
+and Code Review PASS were already present on disk from a prior session; ran independent
+Functional QA and closed out the story.
+Result: Functional QA PASS_WITH_MINOR_ISSUES (agent/qa/e5-02-functional.md) — independently
+re-verified signature verification, idempotency, and repurchase-expiry-stacking against
+live Postgres (run twice), plus full validation suite. One new finding: route path
+(`/api/stripe/webhook`) didn't match docs (`/api/webhooks/stripe`). Orchestrator fixed
+directly (moved route, updated test file + doc comment), re-verified lint/typecheck/315
+tests/check:secrets/build clean. E5-02 marked VERIFIED (agent/BACKLOG.md, agent/STATE.md,
+agent/DECISIONS.md updated). Next recommended action: E5-03 — FAM-08/09 paywall + checkout
+screens (must retire E5-01's documented interim direct-to-Stripe redirect).
+
+## 2026-09-04 — Orchestrator / Developer + Code Reviewer + Functional QA + Visual QA
+
+Objective: Implement and verify E5-03 (FAM-08/09 paywall + checkout screens), retiring
+E5-01's documented interim direct-to-Stripe redirect with the real `Contactar` -> FAM-08 ->
+FAM-09 flow.
+Result: Developer built `PaywallGate` (shared FAM-08/FAM-09 dialog shell) and
+`CheckoutReturnBanner`, wired `ContactButton` through the real flow. Code Review
+PASS_WITH_MINOR_ISSUES (3 Important issues), Functional QA PASS_WITH_MINOR_ISSUES (1 new
+issue), Visual QA PASS_WITH_MINOR_ISSUES (3 findings) — all run independently. Orchestrator
+fixed 6 of the 7 total findings directly rather than looping back to the Developer (all
+mechanical/well-specified): SSR hydration-mismatch fix in `CheckoutReturnBanner` (switched
+to `useSearchParams`/`useRouter`, matching the existing `UnauthorizedBanner` pattern),
+already-entitled interim behavior recorded as a decision, `already_entitled` test coverage
+added, banner-duration fix (pinned local state + 4s delayed URL-strip matching `Toast`'s
+convention), mobile-overflow fix (dialog now scrolls on all breakpoints, not just desktop),
+desktop-button-width fix. One finding (FAM-09 success-icon animation) deferred as
+non-blocking cosmetic follow-up. Full validation suite (329 tests, lint, typecheck,
+check:secrets, build) re-run clean after every fix. E5-03 marked VERIFIED (agent/BACKLOG.md,
+agent/STATE.md, agent/DECISIONS.md updated). Next recommended action: E5-04 (FAM-10
+solicitar entrevista) and E5-05 (FAM-13 entitlement/payment history) — both eligible in
+parallel, dependency E5-02 already VERIFIED.
+
+2026-09-04 — E5-05 VERIFIED: Built and independently verified the session-authorized FAM-13
+account page with contact verification status, live current entitlement/days remaining, payment
+history, account-specific loading/error/empty states, persistent responsive familia navigation,
+and the approved password-change placeholder. Added consistent FAM-01 direct-route guards and
+regression tests. Code Review, Functional QA, and Visual QA passed. Validation passed: 355
+tests, lint, typecheck, secret scan, production build, and test:db. Next recommended action:
+E5-04 — FAM-10 solicitar entrevista.
+
+---
+
+## 2026-09-04 — E5-04 VERIFIED
+
+Implemented and independently verified FAM-10 solicitar entrevista: atomic paid contact
+transaction, durable `contacto` and `candidate_contacted` event, idempotent lifecycle handling,
+post-expiry and closed-necesidad access, server-backed delayed-payment return state, FAM-10 form,
+cancellation, and interim handoff. Code Review PASS_WITH_MINOR_ISSUES, Functional QA PASS, and
+Visual QA PASS_WITH_SCOPE_LIMITATION. FAM-11 remains E6 scope and Epic 10 notification delivery
+remains deferred. Validation: 388 tests, lint, typecheck, secret scan, production build, and
+test:db all pass. Next recommended action: E6-01.

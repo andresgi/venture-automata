@@ -4,93 +4,83 @@
 
 PASS
 
-The permanent-contact lifecycle behavior is functionally correct in the independent focused suites and live local Postgres probe. Do not mark the story VERIFIED or merge based on this report; workflow/status ownership remains with the orchestrator. Notification delivery is intentionally deferred because Epic 10 infrastructure is not present; this pass confirms the durable contact/event transaction does not attempt notification delivery or depend on it.
+Final independent Functional QA passes E5-04. Do not mark VERIFIED or merge from this report; workflow/status ownership remains with the orchestrator.
 
 ## Environment
 
 - Repository: `projects/nanamex`
 - Test date: 2026-09-04
-- Platform: web-only Next.js 16.3.4, TypeScript, React 19, Vitest 4.1.11; mobile QA is not applicable per `config/CONSTRAINTS.md` and web QA is agent-driven.
-- Database: local Supabase/Postgres; `npm run test:db` reset the database and applied migration `20260904000017_confirm_contact.sql`.
-- Reviewed: E5-04 implementation plan, PRD/addendum, UX FAM-10/FAM-11 requirements, architecture/analytics/security, current action/route/RPC/UI, code review, and prior E5 QA findings.
-- No production code was modified by QA. The working tree contains unrelated sibling-story/workspace changes noted by Code Review; this report assesses runtime behavior only.
+- Platform: web-only Next.js 16.3.4, TypeScript, React 19, Vitest 4.1.11. Mobile QA is not applicable per `config/CONSTRAINTS.md`; web QA is agent-driven.
+- Database: local Supabase/Postgres, reset by `npm run test:db`; migration `20260904000017_confirm_contact.sql` applied.
+- No production code modified by QA. Existing unrelated workspace changes were not assessed as part of the functional verdict.
 
 ## Test Cases
 
-### TC-001 — Authenticated active familia, onboarding and verification gates
-- **Scenario:** Exercise the action and FAM-10 route with no session, non-familia, incomplete onboarding, and missing email/phone verification.
-- **Expected:** Reject/redirect before contact data reads or RPC execution.
-- **Actual:** Focused route tests pass: redirects are `/login`, `/familia`, `/familia/perfil`, and `/verificar`, with no destination reads. Action test returns the session-expired error and does not call the RPC when unauthenticated. The RPC independently requires active familia plus both verification flags.
+### TC-001 — FAM-10 happy path and input validation
+- **Scenario:** Submit an eligible new contact with an optional message; retry with an overlong message.
+- **Expected:** One atomic contact succeeds, message is trimmed/persisted, invalid input fails without partial writes.
+- **Actual:** Live SQL probe confirmed `contacted`, `contactada`, one `contacto`, trimmed message, and one event. A 1001-character message failed with pipeline still `nueva`, zero contact rows, and zero analytics rows. Focused component/action tests passed.
 - **Result:** PASS
 
-### TC-002 — Owned active necesidad and candidate authorization
-- **Scenario:** Attempt contact for an unowned/non-active necesidad or invalid/ineligible candidate.
-- **Expected:** No contact, pipeline transition, analytics event, or phone disclosure.
-- **Actual:** RPC locks only an active necesidad owned by the supplied family and fails closed for missing/wrong-owner pairs. Its write-boundary eligibility checks require published/complete/active candidate, role, zone, modality, availability, salary, age, and experience. Route tests verify unavailable candidates redirect back and apply candidate filters.
+### TC-002 — Authentication, role, onboarding, and verification gates
+- **Scenario:** Access/contact as unauthenticated, non-familia, incomplete-onboarding, or unverified user.
+- **Expected:** Reject or redirect before protected destination reads or contact RPC execution.
+- **Actual:** Route tests confirmed redirects to `/login`, `/familia`, `/familia/perfil`, and `/verificar`; action test returned the session-expired response and did not call the RPC. The RPC independently checks active familia plus email and phone verification.
 - **Result:** PASS
 
-### TC-003 — New-contact entitlement and pipeline eligibility
-- **Scenario:** Eligible `nueva` pipeline with active entitlement; repeat with missing/expired entitlement and stale candidate eligibility.
-- **Expected:** New contact succeeds only with an unexpired `contacto_30d` entitlement and current eligibility; stale/ineligible state cannot reveal phone.
-- **Actual:** Live SQL probe passes success and failure assertions. The RPC checks durable contact first, then requires `estado = nueva`, current eligibility, and `expires_at > now()` before inserting. Route sends non-entitled new access through the FAM-08 marker and does not read entitlement for established contact access.
+### TC-003 — Ownership, active-necesidad, eligibility, and entitlement gates
+- **Scenario:** Use wrong owner, invalid/ineligible/stale candidate, closed necesidad, missing/expired entitlement, and valid active entitlement.
+- **Expected:** Only an owned active necesidad, currently eligible candidate, and unexpired account-wide `contacto_30d` entitlement can create a new contact; closed necesidades cannot create one.
+- **Actual:** Route and action tests fail closed without phone disclosure. Live probe confirmed wrong owner, closed necesidad, expired/missing entitlement, and depublication/ineligibility rejection; valid entitlement succeeded. Server-derived session family ID is passed to the RPC.
 - **Result:** PASS
 
-### TC-004 — Atomic contact, pipeline, and analytics event
-- **Scenario:** Successful confirmation with optional message; invalid 1001-character message.
-- **Expected:** One transaction creates `contacto`, advances `nueva` → `contactada`, and writes exactly one `candidate_contacted` event containing the entitlement ID; invalid input leaves all three unchanged.
-- **Actual:** Live probe confirms one contact, `contactada`, preserved trimmed message, and one event. Rollback assertion confirms invalid message leaves pipeline `nueva`, zero contact rows, and zero event rows.
+### TC-004 — Established-contact access and closed-necesidad behavior
+- **Scenario:** Retry an existing contact after entitlement expiry, pipeline progression (`entrevista`, `contratada`, `descartada`), candidate depublication/deactivation, and necesidad closure (`cerrada_contratada`, `cerrada_cancelada`).
+- **Expected:** Durable established contact remains accessible and returns phone without entitlement/discoverability gates; no-contact closed necesidades remain blocked.
+- **Actual:** Route tests and live probe confirmed `already_contacted` with phone in every listed established state and both closed necesidad states, without entitlement reads. New contacts on both closed states were rejected.
 - **Result:** PASS
 
-### TC-005 — Existing-contact lifecycle after expiry and state progression
-- **Scenario:** Retry an established contact with expired/no entitlement while pipeline is `contactada`, `entrevista`, `contratada`, and `descartada`.
-- **Expected:** Return `already_contacted` with phone, without entitlement or new-event requirements.
-- **Actual:** Live SQL probe and route suite pass for every listed state. Route does not query entitlement once a durable `contacto` relation exists; RPC returns the durable contact before lifecycle and entitlement gates.
+### TC-005 — Phone disclosure boundary
+- **Scenario:** Render FAM-10 before a durable contact, after an established contact, and after successful confirmation.
+- **Expected:** Candidate phone is absent until positive contact authorization; phone is returned only for `contacted`/`already_contacted`.
+- **Actual:** Route tests confirmed no phone for a `contactada` pipeline lacking a `contacto` row, and phone only for object/array-shaped established relations. The form renders the phone only after a positive result or established-contact initialization.
 - **Result:** PASS
 
-### TC-006 — Existing contact after candidate depublication/deactivation
-- **Scenario:** After contact, set `perfil_ninera.publicado = false` and candidate `profiles.account_status = suspendida`, then retry.
-- **Expected:** Existing contact remains accessible and phone remains available; new contact must not be allowed.
-- **Actual:** Live probe passes both depublication and account-deactivation checks. Route/RPC use the established relation branch before discovery eligibility, returning the phone only for that owned durable contact.
+### TC-006 — Atomicity, idempotency, duplicate submission, and concurrency
+- **Scenario:** Retry with changed message and run two independent concurrent confirmations for the same pair.
+- **Expected:** One contact row, one `nueva -> contactada` transition, one `candidate_contacted` event; retries return the existing contact and do not duplicate analytics.
+- **Actual:** Live probe confirmed sequential idempotency and two concurrent calls resulted in one contact/event; either concurrent message was accepted. Row locking and the durable one-to-one contact relation enforce the boundary.
 - **Result:** PASS
 
-### TC-007 — Phone disclosure boundary and action/RPC wiring
-- **Scenario:** Render FAM-10 before contact, after established contact, and invoke the server action.
-- **Expected:** Phone absent before a positive contact result; phone present only on `contacted`/`already_contacted`; family ID comes from session.
-- **Actual:** Route tests pass: no phone is passed for a `contactada` pipeline without a contacto row, while object/array-shaped established relations receive phone. Action tests pass successful and idempotent responses and assert RPC receives session-derived `p_familia_id`.
+### TC-007 — Stale checkout-success return
+- **Scenario:** Visit FAM-10 with `checkout=success` before webhook finalization, with a stale boundary, and with an active entitlement.
+- **Expected:** Recent/unfinalized returns show a server-backed pending state; stale returns are reconciled and route to the new paywall path only when safe; query input never grants contact access.
+- **Actual:** Route tests confirmed pending state while webhook is delayed and redirect to `?contactar=1` for stale state. Source/action tracing confirms Stripe/provider state is consulted for stale boundaries and only expired/never-created boundaries are cleared; no entitlement or phone is granted from the query parameter.
 - **Result:** PASS
 
-### TC-008 — Duplicate and concurrent idempotency
-- **Scenario:** Retry with a changed message and invoke two independent sessions concurrently for the same pair.
-- **Expected:** One contact and one analytics event; later calls return `already_contacted`, with no duplicate transition/event.
-- **Actual:** Sequential retry assertions and the live concurrent probe pass. The database row lock serializes the pair; the probe leaves one contact/event and accepts either concurrent message. Code Review notes the probe has no deterministic barrier/induced delay, so this is strong runtime evidence but not a deterministic contention proof.
-- **Result:** PASS_WITH_MINOR_ISSUE
-
-### TC-009 — Notification deferral
-- **Scenario:** Inspect successful RPC transaction and E5-04 wiring for notification behavior.
-- **Expected:** Durable contact success is not rolled back or failed because notification infrastructure is unavailable; Epic 10 owns delivery.
-- **Actual:** Migration comment and action/RPC show no Resend/Twilio call or notification dependency. Live contact success completes without notification infrastructure. This matches the approved narrowed scope; the implementation plan’s original “notifies” wording is deferred to E10.
+### TC-008 — Analytics and notification deferral
+- **Scenario:** Complete a contact and inspect durable side effects and notification wiring.
+- **Expected:** Exactly one `candidate_contacted` event includes necesidad, niñera, familia, and entitlement context; notification delivery must not be required for contact success because Epic 10 infrastructure is deferred.
+- **Actual:** Live probe confirmed one event with the entitlement ID in metadata. `confirm_contact` and the action make no Resend/Twilio delivery call or delivery dependency; the durable transaction completes without notification infrastructure. This matches the approved E10 handoff.
 - **Result:** PASS (approved scope deferral)
 
 ## Bugs
 
-None found in E5-04 runtime behavior.
+None found.
 
-### Non-blocking QA notes
-
-- The concurrent probe launches sessions without a synchronization barrier, so exact lock contention is possible rather than guaranteed.
-- Code Review identified that the working tree is not a strict E5-04 diff and includes unrelated sibling-story/workspace changes. This is a change-set hygiene/merge concern, not a functional failure found by this QA run.
+Non-blocking evidence notes: the concurrency probe uses two independent processes but does not insert an artificial lock barrier, so contention overlap is not deterministically forced on every run. There is also no single combined Stripe-return → webhook → FAM-10 end-to-end test; the seams are covered by route tests and live probes. Neither is a functional failure in this final pass.
 
 ## Regression Results
 
-- Focused E5-04 suites (`actions/contact`, FAM-10 route, contact button): **PASS — 3 files, 18 tests**.
-- Full Vitest suite: **PASS — 54 files, 371 tests**.
+- Focused E5-04 suites: **PASS — 4 files, 26 tests**.
+- Full Vitest suite: **PASS — 56 files, 388 tests**.
 - `npm run lint`: **PASS**.
 - `npm run typecheck`: **PASS**; route types generated successfully.
 - `npm run check:secrets`: **PASS** — no server-only secret exposed client-side.
-- `npm run build`: **PASS**; FAM-10 route is listed as dynamic. Existing Supabase Node 20 deprecation warnings only.
-- `npm run test:db`: **PASS** — local reset, all prior probes, and E5-04 probe completed successfully. The payment-boundary duplicate-key error printed during its intentional concurrency assertion; command exited 0. E5-04 probe passed success, rollback, ownership, entitlement expiry, lifecycle states, depublication/deactivation, and concurrent idempotency checks.
+- `npm run build`: **PASS**; FAM-10 route listed as dynamic. Existing Supabase Node 20 deprecation warnings only.
+- `npm run test:db`: **PASS** — database reset and all probes passed, including E5-04 authorization, rollback, closed-necesidad, lifecycle, depublication/deactivation, analytics, stale/ineligible, and concurrent-idempotency checks. The payment-boundary duplicate-key message was from its intentional concurrency assertion; command exited 0.
 - `git diff --check`: **PASS**.
 
 ## Recommendation
 
-Recommend accepting E5-04 functional behavior as passing, while leaving VERIFIED/merge decisions to the orchestrator. Preserve the explicit Epic 10 notification handoff. Before merge, isolate the strict E5-04 change set from unrelated working-tree changes; a deterministic concurrency barrier and separate route tests for depublication versus account deactivation would improve evidence but are not functional blockers in this pass.
+Accept E5-04 functional behavior as passing. Preserve the explicit Epic 10 notification deferral and leave VERIFIED/merge decisions to the orchestrator. Keep unrelated workspace changes out of the E5-04 change set.
