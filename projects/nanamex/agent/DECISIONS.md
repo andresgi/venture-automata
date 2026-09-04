@@ -999,3 +999,45 @@ unblocks E6-02, E7-05/06 (niñera opportunity browsing), and the niñera side of
 marketplace generally — building it first makes E6-02 a real, connected screen instead of
 an orphaned one. Not a scope change to either story's acceptance criteria, just an
 ordering decision within what's already eligible.
+
+## 2026-09-04 — E7-01 VERIFIED
+
+Built `save_perfil_ninera` (SECURITY DEFINER RPC, `db/migrations/
+20260904000019_perfil_ninera_onboarding.sql`) and the two-step NIN-01/02 onboarding
+wizard. The story's central requirement — the PRD addendum's Critical Issue #2 — is
+directly resolved: `publicado` is set from `perfil_completo` alone, with
+`verification_status` never referenced anywhere in the RPC's write path, so a
+`no_verificada` niñera with a complete profile is genuinely discoverable/matchable. Also
+added the `profile-photos` Storage bucket (public-read, owner-scoped write RLS) — the
+first Supabase Storage bucket in this codebase.
+
+Code Review: PASS (agent/reviews/code-E7-01-review.md) — independently re-derived the
+Critical-Issue-2 resolution by reading the RPC SQL directly and cross-checking against
+`actions/necesidad.ts`'s real matching query (no `verification_status` filter present);
+confirmed `perfil_completo` uses exactly database.md §3's six required fields; confirmed
+authorization and Storage RLS. Also verified an unrelated fixture-collision fix the
+developer made to the already-VERIFIED E6-01's `test-e6-01-pipeline.sql` (a natural-key
+zona label change, logic-neutral) was safe.
+
+Functional QA: PASS (agent/qa/e7-01-functional.md) — independently re-traced the same
+critical requirement end-to-end, confirmed the `/ninera` completion gate mirrors FAM-01's
+pattern, confirmed the "Subir ahora" placeholder uses a real `disabled` attribute (not a
+misleading no-op), and re-ran the full validation suite including `test:db` against live
+Postgres.
+
+Visual QA: round 1 REVISION_REQUIRED (agent/qa/e7-01-visual.md) — the desktop
+anchored-side-rail shell UI-SPEC requires ("same wizard shell as FAM-03") was entirely
+absent; the wizard rendered its mobile layout stretched to desktop widths instead. Sent
+back to the Developer with the specific gap (missing `isDesktop` split, `<aside>` rail,
+`lg:static` override on the mobile action bar) plus two minor issues (identity prompt
+rendered as a disconnected full screen instead of a card inside paso 2). Round 2: PASS —
+Developer added the real desktop shell (matching `necesidad-wizard.tsx`'s structure,
+functional `scrollIntoView` rail navigation) and repositioned the identity prompt as a
+card within the wizard's chrome; independently re-verified both fixes and re-ran the full
+validation suite (442 tests, lint, typecheck, check:secrets, build) clean.
+
+**E7-01 marked VERIFIED.** Work done on branch `nanamex/e7-01-nin-onboarding` (branched
+from `nanamex/e6-01-fam11-pipeline`, per this project's per-story branch convention). Next
+eligible action: E7-03 (NIN-08 subir identificación) — closes the loop E7-01 left open
+with its disabled "Subir ahora" placeholder. E7-02 and E7-05 are also eligible in
+parallel.

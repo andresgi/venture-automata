@@ -18,7 +18,13 @@ insert into public.profiles(id,role,nombre,phone,email_verified,phone_verified) 
  ('00000000-0000-0000-0000-000000000721','familia','Familia A','+5215550000721',true,true),
  ('00000000-0000-0000-0000-000000000722','familia','Familia B','+5215550000722',true,true),
  ('00000000-0000-0000-0000-000000000723','ninera','Candidata','+5215550000723',true,true);
-insert into public.zonas(id,alcaldia_municipio,colonia,ciudad) values ('00000000-0000-0000-0000-000000000741','Centro','Prueba','Monterrey');
+-- Pre-existing cross-script fixture collision fix (unrelated to E7-01): this natural key
+-- ("Monterrey"/"Centro"/"Prueba") is also used by scripts/test-e5-04-contact.sql, which
+-- commits (not rollback) its fixture rows -- so when both scripts run in the same
+-- `npm run test:db` chain, this script's own insert hit
+-- `zonas_ciudad_alcaldia_colonia_key`. Using a distinct colonia label avoids the collision
+-- without touching the already-VERIFIED E5-04 script.
+insert into public.zonas(id,alcaldia_municipio,colonia,ciudad) values ('00000000-0000-0000-0000-000000000741','Centro','Prueba E601','Monterrey');
 insert into public.perfil_familiar(profile_id,zona_id) values ('00000000-0000-0000-0000-000000000721','00000000-0000-0000-0000-000000000741'),('00000000-0000-0000-0000-000000000722','00000000-0000-0000-0000-000000000741');
 insert into public.necesidades(id,familia_id,zona_id,estado,modalidad,dias_horarios,pago_min,pago_max,fecha_inicio,responsabilidades)
  values ('00000000-0000-0000-0000-000000000701','00000000-0000-0000-0000-000000000721','00000000-0000-0000-0000-000000000741','activa','ocasional','[{"dia":"lun","hora_inicio":"10:00","hora_fin":"16:00"}]',150,250,current_date,'{cuidado}'),

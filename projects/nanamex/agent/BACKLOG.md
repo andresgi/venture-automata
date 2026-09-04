@@ -795,6 +795,56 @@ Validation: `npm test -- --run --no-file-parallelism` (412 tests), `npm run lint
 `npm run typecheck`, `npm run check:secrets`, `npm run build`, and `npm run test:db`
 (including the new `test-e6-01-pipeline` probe) all pass.
 
+## Epic 7 — Niñera Profile & Discovery
+
+### E7-01 — NIN-01/02 onboarding wizard
+
+Status: VERIFIED (2026-09-04; Code Review PASS — see agent/reviews/code-E7-01-review.md.
+Functional QA PASS — see agent/qa/e7-01-functional.md. Visual QA round 1
+REVISION_REQUIRED — missing desktop anchored-side-rail shell entirely (UI-SPEC requires
+"same wizard shell as FAM-03"); round 2 PASS after the Developer added the desktop shell,
+see agent/qa/e7-01-visual.md.)
+
+Dependencies: E0-04 (VERIFIED).
+
+Delivered: `save_perfil_ninera` SECURITY DEFINER RPC
+(`db/migrations/20260904000019_perfil_ninera_onboarding.sql`, `service_role`-only)
+atomically upserts `perfil_ninera` + `ninera_zonas`/`ninera_experiencia_edades`/
+`referencias`, computes `perfil_completo` from exactly database.md §3's six required
+fields, and sets `publicado := perfil_completo` **unconditionally** — `verification_status`
+is never referenced anywhere in the write path. This is the direct, tested resolution of
+the PRD addendum's Critical Issue #2: a `no_verificada`, `perfil_completo=true` niñera
+genuinely appears in `computeMatches` results (proven both by a unit test and a live
+Postgres probe, `scripts/test-e7-01-perfil-ninera.sql`, cross-checked against the real
+matching query in `actions/necesidad.ts`, which has no `verification_status` filter).
+
+Two-step wizard (`components/ninera/perfil-ninera-wizard.tsx`) reusing E2-01's
+`necesidad-wizard.tsx` shell (mobile sticky nav / desktop anchored side-rail with
+`IntersectionObserver`-driven scroll sections): paso 1 (photo upload to the new public-read
+`profile-photos` Storage bucket, zona de trabajo multi-select, años de experiencia), paso 2
+(disponibilidad, expectativa salarial, modalidades, descripción, referencias, experiencia
+con edades). A `/ninera` completion gate mirrors FAM-01's `/familia` gate.
+
+**Documented interim behavior (accepted, not a defect):** the end-of-paso-2
+"Sube tu identificación" prompt's "Subir ahora" button is rendered genuinely `disabled`
+(real HTML attribute, not a misleading no-op) since NIN-08/E7-03 (the actual upload flow)
+doesn't exist yet — same "build only what exists to depend on" pattern as E1-02/E5-01/
+E5-03/E5-04/E6-01.
+
+**Scope judgment calls:** (1) `ZonaMultiSelect` — a multi-select variant of FAM-03's
+single-select zona autocomplete, since `ninera_zonas` is many-to-many (UI-SPEC's literal
+"same autocomplete as FAM-03" wording doesn't address this; Code Review flagged this as
+well-reasoned but recommending explicit UX/Product sign-off, not a defect); (2)
+`experiencia_edades` chip group added despite no literal UI-SPEC mention, required by
+database.md for `perfil_completo`/Match Score; (3) referencias has no enforced minimum
+count (UX-spec sets none). Minor non-blocking notes from Code/Functional QA: photo
+MIME-type validation trusts client-reported `File.type` (no magic-byte sniffing); desktop
+rail navigation's `scrollIntoView` doesn't also move keyboard focus.
+
+Validation: `npm test -- --run --no-file-parallelism` (442 tests), `npm run lint`,
+`npm run typecheck`, `npm run check:secrets`, `npm run build`, and `npm run test:db`
+(including the new `test-e7-01-perfil-ninera` probe) all pass.
+
 ## Change Requests
 
 Ad-hoc, non-PRD asks made directly in chat (see AGENTS.md, "Change Requests"). Use `CR-NNN`

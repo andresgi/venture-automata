@@ -639,3 +639,19 @@ agent/DECISIONS.md updated). Work moved from `main`'s working tree onto a proper
 branch (`nanamex/e6-01-fam11-pipeline`) before committing.
 Next recommended action: E7-01 (NIN-01/02 onboarding wizard) — E6-02 deliberately deferred,
 see agent/DECISIONS.md "E6-02 deferred in favor of Epic 7."
+
+## 2026-09-04 — Developer + Code Reviewer + Functional QA + Visual QA — E7-01
+
+Objective: Implement and verify E7-01 (NIN-01/02 niñera onboarding wizard), directly
+resolving the PRD addendum's Critical Issue #2 (a `no_verificada`, complete profile must
+still be discoverable/matchable).
+Result: `save_perfil_ninera` RPC + two-step wizard + new `profile-photos` Storage bucket
+built. Code Review PASS, Functional QA PASS, Visual QA round 1 REVISION_REQUIRED (missing
+desktop anchored-side-rail shell — a real, substantive gap, sent back to the Developer
+rather than patched directly given its size), round 2 PASS after the Developer added the
+shell. Full validation suite (442 tests, lint, typecheck, check:secrets, build, test:db)
+clean throughout. E7-01 marked VERIFIED (agent/BACKLOG.md, agent/STATE.md,
+agent/DECISIONS.md updated). Work done on feature branch
+`nanamex/e7-01-nin-onboarding`.
+Next recommended action: E7-03 (NIN-08 subir identificación) — closes the loop on E7-01's
+disabled "Subir ahora" placeholder. E7-02/E7-05 also eligible in parallel.

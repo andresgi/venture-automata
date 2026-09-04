@@ -104,16 +104,22 @@ default, not explicitly requested.
 transition, kanban/segmented views) VERIFIED. Branch `nanamex/e6-01-fam11-pipeline`, not
 yet pushed/merged.
 
+**Epic 7 (Niñera Profile & Discovery) — in progress**: E7-01 (NIN-01/02 onboarding wizard)
+VERIFIED. `save_perfil_ninera` RPC sets `publicado := perfil_completo` unconditionally,
+independent of `verification_status` — the direct, tested resolution of the PRD addendum's
+Critical Issue #2 (a `no_verificada` niñera with a complete profile appears in matching).
+Reuses E2-01's wizard shell (mobile sticky nav / desktop anchored side-rail) after a Visual
+QA round 1 REVISION_REQUIRED caught the desktop shell being entirely missing; round 2 PASS
+after the fix. Branch `nanamex/e7-01-nin-onboarding`, not yet pushed/merged.
+
 ## Next Eligible Action
 
-E7-01: NIN-01/02 onboarding wizard (dependency E0-04, VERIFIED). E6-02 (NIN-09 mis
-solicitudes) is technically eligible per its stated dependency (E6-01, now VERIFIED), but
-was deliberately deferred — see agent/DECISIONS.md 2026-09-04 "E6-02 deferred in favor of
-Epic 7." Its "Ver detalle" exit path points to NIN-06, which doesn't exist yet (no niñera
-profile/browsing screens are built at all — Epic 7 hasn't started), so building it now
-would produce an orphaned link with no real niñera-side context around it. Epic 7 has no
-such gap and is what actually unblocks E6-02, E7-05/06, and the niñera side of the
-marketplace generally.
+E7-03: NIN-08 subir identificación (dependency E7-01, now VERIFIED). Completes the loop
+E7-01 left open — the "Subir ahora" button on the end-of-onboarding identity prompt is
+currently a documented, genuinely-disabled placeholder pending this story. E7-02 (NIN-07
+mi perfil edit) is also eligible in parallel (same E7-01 dependency); E7-05 (NIN-04/05
+oportunidades) has been eligible since E3-02 VERIFIED and remains open too. E6-02 (NIN-09,
+deferred 2026-09-04) still needs E7-06, further downstream.
 
 ## Human Blocker
 
