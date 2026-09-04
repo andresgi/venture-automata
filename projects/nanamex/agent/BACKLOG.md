@@ -467,6 +467,34 @@ distinct from the no-results-after-filter message.
 Validation: `npm test -- --run --no-file-parallelism` (229 tests), `npm run lint`,
 `npm run typecheck`, `npm run check:secrets`, and `npm run build` all pass.
 
+### E4-03 — FAM-06 perfil de niñera detail + pipeline record auto-creation
+
+Status: VERIFIED (2026-09-03; round 1 — Code Review REVISE (Docker/test:db unavailable, so
+DB/RPC runtime behavior unverified), Functional QA FAIL (BUG-001: mobile overlay/references
+gaps), Visual QA REVISE (V01-V05: tooltip clipping, tablet full-bleed, loading composition,
+error-state conflation, reference spacing). Developer fixed the E4-03 DB probe's
+setup/teardown/role-handling bugs (app source for BUG-001/V01-V05 was already correct from
+a prior session) and got `npm run test:db` running end-to-end against real Postgres. Round
+2 — Code Review PASS_WITH_MINOR_ISSUES, Functional QA PASS, Visual QA PASS. See
+agent/reviews/code-E4-03-review.md and agent/qa/e4-03-functional.md / e4-03-visual.md for
+both rounds, and agent/DECISIONS.md 2026-09-03 "E4-03 VERIFIED".)
+
+Dependencies: E4-01.
+
+Delivered: authenticated candidate-detail route, current eligibility and ownership checks,
+live trust badge, full match/profile/reference detail, FAM-04 profile links, and an atomic
+database RPC that creates the frozen pipeline snapshot and durable analytics events. Repeated
+compatible views are idempotent through a database unique index; every view remains logged.
+Favorites/contact/report remain deferred to E4-04/E5/E9.
+
+Validation: `npm test -- --run --no-file-parallelism` (245 tests), `npm run lint`,
+`npm run typecheck`, `npm run check:secrets`, `npm run build`, and `npm run test:db`
+(including the E4-03 RPC probe, run twice consecutively) all pass.
+
+**Non-blocking housekeeping item carried to the PR step:** unrelated
+`projects/test-invoice-generator/*` deletions and root `.claude/settings.json` sit in the
+working tree from outside this story — exclude them from the E4-03 commit/PR.
+
 ## Change Requests
 
 Ad-hoc, non-PRD asks made directly in chat (see AGENTS.md, "Change Requests"). Use `CR-NNN`

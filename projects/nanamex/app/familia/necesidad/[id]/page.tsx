@@ -150,7 +150,7 @@ function EmptyState() {
 
 type RankedCandidate = CandidateFilterData & { profileCompleteness: number; createdAt: string };
 
-function mergeCandidates(pipeline: PipelineRow[], liveRows: NineraLiveRow[]): RankedCandidate[] {
+function mergeCandidates(necesidadId: string, pipeline: PipelineRow[], liveRows: NineraLiveRow[]): RankedCandidate[] {
   const liveById = new Map(liveRows.map((row) => [row.profile_id, row]));
   return pipeline
     .map((row) => {
@@ -158,6 +158,7 @@ function mergeCandidates(pipeline: PipelineRow[], liveRows: NineraLiveRow[]): Ra
       if (!live) return null;
       const profile = Array.isArray(live?.profiles) ? live?.profiles[0] : live?.profiles;
       return {
+        necesidadId,
         ninera_id: row.ninera_id,
         nombre: profile?.nombre ?? "Niñera",
         fotoUrl: live?.foto_url ?? null,
@@ -179,7 +180,7 @@ function mergeCandidates(pipeline: PipelineRow[], liveRows: NineraLiveRow[]): Ra
         createdAt: live.created_at ?? "",
       } satisfies CandidateFilterData;
     })
-    .filter((candidate): candidate is RankedCandidate => candidate !== null)
+    .filter((candidate): candidate is NonNullable<typeof candidate> => candidate !== null)
     .sort((a, b) => b.score - a.score || b.profileCompleteness - a.profileCompleteness || a.createdAt.localeCompare(b.createdAt) || a.ninera_id.localeCompare(b.ninera_id));
 }
 
@@ -242,7 +243,7 @@ export default async function MatchesPage({ params }: { params: Promise<{ id: st
       console.error("MatchesPage: failed to read live niñera verification status", liveError);
       liveStatusError = true;
     } else {
-      candidates = mergeCandidates(pipeline, (liveRows ?? []) as NineraLiveRow[]);
+      candidates = mergeCandidates(row.id, pipeline, (liveRows ?? []) as NineraLiveRow[]);
       if (pipeline.length > 0 && candidates.length === 0) liveStatusError = true;
     }
   }

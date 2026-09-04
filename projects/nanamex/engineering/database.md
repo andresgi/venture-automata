@@ -349,6 +349,10 @@ does).
 
 ## 12. `analytics_events` (thin, application-owned log — supplements PostHog)
 
+**Migration ownership:** E4-03 creates this shared table and owns durable FAM-06 event
+writes. E11-01 must consume and extend this schema in a follow-up migration; it must not
+recreate the table. PostHog delivery is intentionally deferred to E11-01.
+
 **Purpose:** Not a replacement for PostHog (the system of record for funnel analysis, per
 `engineering/analytics.md`), but a durable, queryable Postgres log for the specific
 addendum-mandated metrics that must survive independent of a third-party analytics vendor

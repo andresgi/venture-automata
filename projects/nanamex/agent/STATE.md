@@ -14,8 +14,8 @@ IN_PROGRESS
 
 ARCHITECTURE_GATE approved by human 2026-09-02 (see agent/DECISIONS.md). TECH_ARCHITECTURE
 VERIFIED. BUILD is proceeding per engineering/implementation-plan.md. Epic 0 Foundations,
-Epic 1 (E1-01–E1-03), E2-01 through E2-03, E3-01/E3-02, and E4-01/E4-02 are all VERIFIED;
-the next objective is E4-03, FAM-06 perfil de niñera.
+Epic 1 (E1-01–E1-03), E2-01 through E2-03, E3-01/E3-02, and E4-01 through E4-03 are all
+VERIFIED. Next eligible story: E4-04 (FAM-07 favoritas).
 
 ## Phase Status
 
@@ -80,8 +80,7 @@ unbuilt (E4-03).
 
 ## Next Eligible Action
 
-E4-03: Developer implements FAM-06 perfil de niñera detail + pipeline record auto-creation,
-dependent on E4-01.
+E4-04: FAM-07 favoritas (dependency E4-03 now VERIFIED).
 
 ## Human Blocker
 

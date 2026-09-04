@@ -44,6 +44,27 @@ describe("CandidateCard", () => {
     );
   });
 
+  it("links to the candidate profile when necesidadId is supplied", () => {
+    render(
+      <CandidateCard
+        candidate={{
+          necesidadId: "necesidad-42",
+          ninera_id: "ninera-7",
+          nombre: "Luz Méndez",
+          fotoUrl: null,
+          verificationStatus: "verificada",
+          score: 80,
+          checklist: [],
+        }}
+      />,
+    );
+
+    expect(screen.getByRole("link", { name: "Ver perfil" })).toHaveAttribute(
+      "href",
+      "/familia/necesidad/necesidad-42/candidatas/ninera-7",
+    );
+  });
+
   it("renders Guardar favorita and Ver perfil as disabled (E4-04/E4-03 not built yet)", () => {
     render(
       <CandidateCard

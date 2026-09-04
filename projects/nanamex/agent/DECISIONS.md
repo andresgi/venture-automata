@@ -611,3 +611,72 @@ The implementation retains the honest `Volver a mis necesidades` action because 
 already-published necesidad is explicitly owned by E2-04 and is not yet implemented. Human
 approved retaining the current behavior rather than introducing a misleading link or pulling
 E2-04 into E4-01.
+
+## 2026-09-03 — E4-03 FAM-06 implementation
+
+Implemented the smallest FAM-06 surface. Candidate views are written through a SECURITY
+DEFINER RPC after server-side family ownership, active-necesidad, and current candidate
+eligibility checks. The RPC creates the pipeline row only when absent, preserving the first
+snapshot, writes `candidate_profile_viewed` for every view, and uses a partial unique index
+plus `ON CONFLICT DO NOTHING` to make `compatible_match_found` exactly-once per pair. The
+implementation intentionally leaves favorite, contact/paywall, and report actions disabled
+until their owning stories.
+
+## 2026-09-03 — E4-03 review-resolution decisions
+
+Human approved the recommended resolution for the outstanding E4-03 findings:
+
+1. **Analytics table ownership:** E4-03 owns creation of the durable `analytics_events` table;
+   E11-01 must consume and extend that schema rather than recreate it.
+2. **PostHog timing:** server-side PostHog capture is deferred to E11-01. E4-03 retains the
+   durable Postgres event log now, and E11-01 must wire capture without duplicate events or
+   losing the existing durable events.
+3. **Mobile FAM-06 presentation:** implement the approved photo/name/TrustBadge overlay and
+   reference disclosure treatment rather than accepting a UX deviation.
+
+Executable integration coverage, including authorization, eligibility, snapshot preservation,
+repeated/concurrent views, and the compatibility threshold, remains required before E4-03 can
+   be marked VERIFIED.
+
+## 2026-09-03 — E4-03 VERIFIED
+
+Round 1 independent review found real gaps: Code Review REVISE (Docker was unavailable, so
+`npm run test:db` — and with it the E4-03 RPC probe covering ownership, atomicity,
+idempotency, and threshold behavior — never actually ran; also flagged unrelated
+`test-invoice-generator`/`.claude/settings.json` changes sitting in the working tree,
+unrelated to this story, to keep out of its commit); Functional QA FAIL (BUG-001, Medium:
+mobile FAM-06 rendered name/badge below the photo instead of overlaid on a scrim, and the
+references section was missing the mandatory unverified-disclosure copy, contact note, and
+heading-icon/divider treatment); Visual QA REVISE (V01 tooltip clipped by an overflow-hidden
+ancestor, V02 the 768px hero lost its full-bleed treatment early, V03 the loading skeleton
+omitted the sticky action bar causing layout shift, V04 (Medium) operational/query failures
+were shown as generic "candidate unavailable" with no retry, V05 double-applied spacing
+before References).
+
+Sent back to the Developer. Investigation found the application-source fixes for BUG-001 and
+V01–V05 were already correct in the working tree from a prior session — the actual blocker
+was the E4-03 database probe tooling itself (`scripts/test-e4-03-profile-view.sql`/`.mjs`),
+which had four real bugs (an impossible fixture state violating a CHECK constraint, a
+role/privilege mismatch for its own DDL, and teardown ordering/cross-test dependency bugs
+that would produce false failures once Docker was available). Developer fixed the probe,
+ran `npm run test:db` twice consecutively end-to-end against real Postgres with Docker
+running — the E4-03 probe's ownership, eligibility, frozen-snapshot, sub-60/exact-60
+threshold, and concurrent-idempotency assertions all passed.
+
+Round 2 independent re-review, run in parallel: Code Review **PASS_WITH_MINOR_ISSUES**
+(independently re-ran `test:db` and the full validation suite, re-verified the RPC/migration
+and the BUG-001/V01-V05 fixes at the source level; confirmed the unrelated
+test-invoice-generator/.claude/settings.json items are still outside `projects/nanamex` and
+must stay out of this story's commit — a commit-hygiene note, not an implementation defect).
+Functional QA **PASS** (re-verified TC-003 mobile overlay/references fix, and re-ran
+`test:db` confirming TC-004/TC-005's pipeline/analytics assertions are now genuinely
+runtime-verified, not code-inspection-only). Visual QA **PASS** (re-confirmed all five
+findings resolved at the source level; browser/screenshot tooling remains unavailable in
+this environment for both rounds — flagged as a non-blocking note for RELEASE_GATE-level
+scrutiny, not a gap in this story).
+
+**E4-03 marked VERIFIED.** This completes Epic 4 (Candidate listing, filtering, and detail)
+except any deferred favorite/contact/report scope owned by E4-04/E5/E9. Per the 2026-09-03
+overnight standing authorization, proceeding to commit/PR/merge without a per-story pause,
+excluding the unrelated test-invoice-generator/.claude/settings.json changes from the diff,
+then continuing to the next eligible backlog item.

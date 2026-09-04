@@ -6,11 +6,10 @@ import { Circle, Clock, ShieldCheck } from "@phosphor-icons/react/ssr";
 /**
  * `TrustBadge` (design/UI-SYSTEM.md §4.1) -- the one place identity-verification state is
  * ever rendered. Three mutually-exclusive states, invariant color/icon/label semantics
- * everywhere it appears. This is the "compact inline pill" geometry (24px height, pill
- * shape, `radius-full`) used as the default placement (FAM-04 candidate cards, FAM-06
- * profile detail, NIN-07 own profile, ADM-03 context panel) -- NIN-03's banner-scale and
- * NIN-08's large-standalone variants are documented as separate scale variants in
- * UI-SYSTEM §4.1 and are not built here (no screen needing them exists yet).
+ * everywhere it appears. The default is the "compact inline pill" geometry (24px height,
+ * pill shape, `radius-full`) used by FAM-04 cards and other secondary placements. Detail
+ * screens opt into the documented 28px variant; NIN-03's banner-scale and NIN-08's
+ * large-standalone variants are documented separately and are not built here.
  *
  * Fixed geometry across all three states (no layout shift, per this component's own
  * acceptance criterion): height, border width, padding, and type scale never change
@@ -56,16 +55,16 @@ const BADGE_CONFIG: Record<VerificationStatus, BadgeConfig> = {
   },
 };
 
-export function TrustBadge({ status }: { status: VerificationStatus }) {
+export function TrustBadge({ status, size = "compact" }: { status: VerificationStatus; size?: "compact" | "detail" }) {
   const [open, setOpen] = useState(false);
   const tooltipId = useId();
   const { Icon, weight, label, explanation, colorClasses } = BADGE_CONFIG[status];
 
   return (
-    <span className="relative inline-block">
+    <span className="relative z-20 inline-block overflow-visible">
       <button
         type="button"
-        className={`inline-flex h-6 items-center gap-1 whitespace-nowrap rounded-full border px-2 text-caption ${colorClasses}`}
+        className={`inline-flex ${size === "detail" ? "h-7" : "h-6"} items-center gap-1 whitespace-nowrap rounded-full border px-2 text-caption ${colorClasses}`}
         aria-describedby={tooltipId}
         aria-expanded={open}
         onMouseEnter={() => setOpen(true)}
@@ -81,7 +80,7 @@ export function TrustBadge({ status }: { status: VerificationStatus }) {
         id={tooltipId}
         role="tooltip"
         hidden={!open}
-        className="absolute left-0 top-full z-10 mt-2 w-56 rounded-sm border border-border bg-bg-raised p-2 text-body-sm text-ink-900 shadow-md"
+        className="absolute left-0 top-full z-30 mt-2 w-56 rounded-sm border border-border bg-bg-raised p-2 text-body-sm text-ink-900 shadow-md"
       >
         {explanation}
       </span>

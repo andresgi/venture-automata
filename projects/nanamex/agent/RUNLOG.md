@@ -421,3 +421,60 @@ dashboard CTA while deferring published-necesidad editing to E2-04.
 Validation: 225 tests, lint, typecheck, check:secrets, and production build pass. E4-01 marked
 VERIFIED.
 Next recommended action: E4-02 -- FAM-05 filtros.
+
+## 2026-09-03 — E4-03 Developer
+
+Objective: Implement FAM-06 candidate detail with pipeline snapshot and funnel analytics.
+Result: Added authenticated/current-eligibility candidate detail route, live TrustBadge,
+full match/profile/reference display, and FAM-04 profile navigation. Added atomic Supabase
+RPC and durable analytics event table: every profile view is recorded, while compatible-match
+events are unique per necesidad/candidate pair. Favorites, contact/paywall, and reporting
+remain deferred to their owning stories.
+Validation: 235 tests, lint, typecheck, secret scan, and production build pass.
+Next recommended action: independent Code Review and Functional QA for E4-03.
+
+---
+
+## 2026-09-03 — E4-03 Code Reviewer + Functional QA + Visual QA (round 1)
+
+Objective: Independently review FAM-06 candidate detail + pipeline/analytics auto-creation.
+Result: Code Review REVISE (Docker unavailable, so `npm run test:db`/the E4-03 RPC probe
+never ran; unrelated test-invoice-generator/.claude/settings.json noted as out-of-scope
+housekeeping). Functional QA FAIL (BUG-001, Medium: mobile overlay and references-section
+gaps). Visual QA REVISE (V01-V05: tooltip clipping, tablet full-bleed regression, loading
+composition shift, error-state conflation, reference spacing).
+Artifacts: agent/reviews/code-E4-03-review.md, agent/qa/e4-03-functional.md,
+agent/qa/e4-03-visual.md.
+Next recommended action: send consolidated findings back to Developer.
+
+---
+
+## 2026-09-03 — E4-03 Developer (fix round)
+
+Objective: Fix round-1 review findings for E4-03.
+Result: Found the application-source fixes for BUG-001/V01-V05 were already correct in the
+tree from a prior session. The actual blocker was the E4-03 DB probe itself
+(scripts/test-e4-03-profile-view.sql/.mjs) — fixed 4 real bugs (impossible fixture state
+violating a CHECK constraint, a role/privilege mismatch for DDL, and teardown
+ordering/cross-test dependency bugs). Ran `npm run test:db` twice consecutively end-to-end
+against real Postgres (Docker now available) — the E4-03 probe's ownership, eligibility,
+frozen-snapshot, threshold, and concurrency assertions all passed.
+Validation: 245 tests, lint, typecheck, secret scan, production build, and test:db (E4-03
+probe included) all pass.
+Next recommended action: round 2 independent re-review.
+
+---
+
+## 2026-09-03 — E4-03 Code Reviewer + Functional QA + Visual QA (round 2)
+
+Objective: Re-verify E4-03 after the fix round.
+Result: Code Review PASS_WITH_MINOR_ISSUES (re-ran test:db and full suite; re-verified
+BUG-01/V01-V05 fixes at source level; flagged excluding the unrelated
+test-invoice-generator/.claude/settings.json changes from this story's commit — housekeeping,
+not a defect). Functional QA PASS (re-verified TC-003 fix; test:db now genuinely
+runtime-verifies TC-004/TC-005). Visual QA PASS (all five findings resolved at source level;
+browser/screenshot tooling still unavailable in this environment, flagged for RELEASE_GATE
+scrutiny, non-blocking). E4-03 marked VERIFIED.
+Artifacts: agent/reviews/code-E4-03-review.md (round 2 appended), agent/qa/e4-03-functional.md
+(round 2 appended), agent/qa/e4-03-visual.md (round 2 appended).
+Next recommended action: E4-04 — FAM-07 favoritas.

@@ -1,8 +1,10 @@
 import { Heart } from "@phosphor-icons/react/ssr";
 import { TrustBadge, type VerificationStatus } from "@/components/shared/trust-badge";
 import { MatchScoreCompact } from "@/components/shared/match-score";
+import Link from "next/link";
 
 export type CandidateCardData = {
+  necesidadId?: string;
   ninera_id: string;
   nombre: string;
   fotoUrl: string | null;
@@ -52,8 +54,7 @@ function CandidateAvatar({ nombre, fotoUrl }: { nombre: string; fotoUrl: string 
  * Scope note -- three footer/identity affordances are rendered per the visual spec but are
  * deliberately non-functional in this story, each belonging to a later epic:
  * - "Guardar favorita" (heart toggle): E4-04's scope, no favorites mechanism exists yet.
- * - "Ver perfil": E4-03's scope, FAM-06 (candidate detail) doesn't exist yet -- a real link
- *   would 404, so this renders as a disabled control instead of a fake/broken destination.
+ * - "Ver perfil": links to FAM-06 when the parent list supplies its necesidad id.
  * - "Filtrar" is NOT part of this card (it's a page-level entry point) -- see the page file.
  * All three render in their spec-described visual position (disabled/40% opacity, per
  * UI-SYSTEM §5.1's disabled-button convention) so Visual QA can confirm layout/spacing
@@ -82,14 +83,15 @@ export function CandidateCard({ candidate }: { candidate: CandidateCardData }) {
           <Heart size={20} weight="regular" aria-hidden="true" />
           <span className="sr-only">Guardar favorita (próximamente)</span>
         </button>
-        <button
-          type="button"
-          disabled
-          title="Ver perfil (próximamente)"
-          className="pointer-events-none text-button text-primary-600 opacity-40"
-        >
-          Ver perfil
-        </button>
+        {candidate.necesidadId ? (
+          <Link href={`/familia/necesidad/${candidate.necesidadId}/candidatas/${candidate.ninera_id}`} className="min-h-11 inline-flex items-center text-button text-primary-600">
+            Ver perfil
+          </Link>
+        ) : (
+          <button type="button" disabled title="Ver perfil (próximamente)" className="pointer-events-none text-button text-primary-600 opacity-40">
+            Ver perfil
+          </button>
+        )}
       </div>
     </article>
   );
