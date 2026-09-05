@@ -101,8 +101,21 @@ default, not explicitly requested.
 
 **Epic 6 (Pipeline Management) — in progress**: E6-01 (FAM-11 estado de candidatas,
 `advance_pipeline_state` RPC structurally preventing any manual `nueva -> contactada`
-transition, kanban/segmented views) VERIFIED. Branch `nanamex/e6-01-fam11-pipeline`, not
-yet pushed/merged.
+transition, kanban/segmented views) VERIFIED.
+
+**Merged to `main` 2026-09-05**: PR #18
+(https://github.com/andresgi/venture-automata/pull/18, squash-merged `61910c3`) — E6-01
+through E7-05 (pipeline management, niñera onboarding/profile-edit/identity-upload/
+dashboard/opportunities). All CI checks passed before merge. Note: a separate tool session
+had pushed E6-01/E7-01/E7-02/E7-03's individual commits directly to `main` outside the PR
+flow before this merge — PR #18 by that point only carried E7-04/E7-05's genuinely new
+work forward; verified via `git log origin/main..origin/<branch>` that no unique work was
+lost before deleting branches. Cleaned up 4 now-fully-superseded branches (local + remote):
+`nanamex/e4-03-fam06-candidate-detail` (content already in `main` via PR #15's squash),
+`nanamex/e6-01-fam11-pipeline` and `nanamex/e7-01-nin-onboarding` (never pushed, local
+only), `nanamex/e7-03-nin08-identity-upload` (content already in `main` via the direct
+pushes). `nanamex/e7-02-nin07-profile-edit` (PR #18's branch) left undeleted per the
+established convention.
 
 **Epic 7 (Niñera Profile & Discovery) — in progress**: E7-01 (NIN-01/02 onboarding wizard)
 VERIFIED. `save_perfil_ninera` RPC sets `publicado := perfil_completo` unconditionally,

@@ -1138,3 +1138,20 @@ typecheck, check:secrets, build, test:db.
 are now dead code after the filtering architecture pivot (left in place, still tested);
 NIN-05's zona filter remains free-text exact-match rather than a `<select>` like FAM-05's
 reference. Next eligible action: E7-06 (NIN-06 detalle de vacante + Mostrar interés).
+
+## 2026-09-05 — PR #18 merged, stale branches cleaned up
+
+Merged PR #18 (`nanamex/e7-02-nin07-profile-edit` -> `main`, squash `61910c3`) once CI was
+green. Before merging, discovered a separate tool session had pushed E6-01/E7-01/E7-02/
+E7-03's individual commits directly to `main`, bypassing the PR flow entirely — a process
+gap worth flagging, though the work itself had already been independently code-reviewed at
+the agent level per this project's own tracking docs. Verified via `git log
+origin/main..origin/<branch>` for each candidate branch that no unique work would be lost,
+then deleted 4 fully-superseded branches (local and remote):
+`nanamex/e4-03-fam06-candidate-detail`, `nanamex/e6-01-fam11-pipeline`,
+`nanamex/e7-01-nin-onboarding`, `nanamex/e7-03-nin08-identity-upload`. GitHub's
+auto-delete-merged-branch setting also cleaned up several older already-merged PR branches
+as a side effect. `main` is now a single clean line with no dangling feature branches
+except the just-merged `nanamex/e7-02-nin07-profile-edit` (left undeleted per the
+established E4-03/PR #15 convention) and an old `nanamex/e0-01-repo-ci-scaffold` leftover
+from PR #1.
