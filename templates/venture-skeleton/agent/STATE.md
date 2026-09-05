@@ -2,6 +2,15 @@
 
 Last updated: unset — awaiting Project Initialization
 
+## Active Worker
+
+Active Worker: none
+Worker Lease Until: none
+
+(See AGENTS.md, "Distributed Worker Protocol" — only relevant if this repository is
+worked on autonomously from more than one machine. Leave both `none` for a single-machine
+setup; there is nothing else to do here in that case.)
+
 ## Current Phase
 
 INIT

@@ -264,6 +264,81 @@ After execution:
 
 Never claim work is complete unless its acceptance criteria have been checked.
 
+## Distributed Worker Protocol
+
+A venture's repository may be worked on autonomously from more than one machine (e.g. a
+laptop during the day, an always-on home machine overnight). GitHub is the durable shared
+checkpoint between them — not a branch that both machines commit to. This protocol exists
+to prevent two workers from editing the same story at the same time, and to make sure a
+worker never overwrites another worker's uncommitted or unpushed work.
+
+### Active Worker lease
+
+`agent/STATE.md` carries two fields:
+
+```
+Active Worker: none
+Worker Lease Until: none
+```
+
+- Before beginning autonomous work on a story, a worker sets `Active Worker` to its own
+  identifier (e.g. `laptop`, `home-pc`, or a machine hostname) and commits that change.
+- On finishing or safely checkpointing a story, the worker sets `Active Worker` back to
+  `none` and commits that change too, before considering the story "handed off."
+- A worker must not begin autonomous work if `Active Worker` is already set to a value
+  that is not its own and not `none` — that means another worker may still be active.
+  Treat this the same as a human gate: stop and do not proceed.
+- This lease is a cooperative convention, not a hard lock — it only works if every worker
+  checks it before starting and updates it before stopping. It is not a substitute for the
+  ordinary per-story branch model below.
+
+### Still one story, one branch, one worker
+
+Do not introduce a long-lived shared working branch that multiple machines push to
+directly. The existing per-story branch → PR → review → merge model already isolates
+concurrent work correctly: two workers only collide if they claim the *same* story at the
+same time, which the Active Worker lease above is what actually prevents. A shared branch
+just moves the collision risk somewhere else without removing it.
+
+### Sync before starting work
+
+Before starting autonomous work, a worker must sync with the remote rather than assume its
+local checkout is current:
+
+1. Confirm the local working tree is clean. If it is not, stop — do not overwrite
+   uncommitted work from a previous session on this same machine.
+2. Fetch `origin`.
+3. If local `HEAD` is behind `origin/<default-branch>`, fast-forward. Never
+   `git reset --hard origin/<default-branch>` to "sync" — that discards any local commits
+   that were never pushed.
+4. If local and remote history have diverged (neither is an ancestor of the other), stop.
+   Do not automatically merge, rebase, or reset. This needs human review.
+5. If local is ahead of remote (local commits exist that were never pushed), that is
+   itself worth surfacing, not silently continuing past — a previous session likely didn't
+   finish its checkpoint.
+
+`scripts/sync-from-github.sh` implements this check-and-report logic; ventures scaffolded
+from `templates/venture-skeleton/` include a copy.
+
+### Checkpoint after verified work
+
+Every story reaching VERIFIED must produce a real git checkpoint: commit the code changes
+and the updated `agent/` tracking files together, then push the current branch to origin.
+A verified story whose checkpoint was never pushed does not exist from another worker's
+point of view.
+
+Push is permitted for non-force pushes of the current working branch once a checkpoint is
+ready. Force-pushing (`--force`, `-f`, `--force-with-lease`) is never permitted
+autonomously, regardless of the reason — if history genuinely needs to be rewritten, that
+is a human decision, made by a human, run by a human.
+
+### Diverged history
+
+If local and remote history have diverged, or if the Active Worker lease shows another
+worker may be active, stop. Do not attempt to resolve it automatically (no
+merge/rebase/reset/discard). Record it as a blocker per the Failure Rules below and wait
+for human review.
+
 ## Implementation Rules
 
 Once software development begins:
@@ -457,6 +532,10 @@ Only the orchestrator may:
 - declare a phase complete
 
 Specialist agents may update their assigned artifacts but should not independently advance project workflow state.
+
+If the repository is being worked on from more than one machine, the orchestrator also
+owns the `Active Worker` / `Worker Lease Until` fields in `agent/STATE.md` — see
+"Distributed Worker Protocol" above.
 
 ## Backlog Status Vocabulary
 
