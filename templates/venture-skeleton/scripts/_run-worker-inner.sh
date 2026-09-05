@@ -5,6 +5,7 @@
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 CLI="$1"
+SKIP_PERMISSIONS="${2:-0}"
 WORKER_ID="$(hostname -s 2>/dev/null || hostname)"
 
 cleanup() {
@@ -18,4 +19,8 @@ cleanup() {
 trap cleanup EXIT
 
 cd "$REPO_ROOT"
-"$CLI"
+if [ "$CLI" = "claude" ] && [ "$SKIP_PERMISSIONS" = "1" ]; then
+  claude --dangerously-skip-permissions
+else
+  "$CLI"
+fi
