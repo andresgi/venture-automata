@@ -893,7 +893,10 @@ unavailable in this environment.
 
 ### E7-04 — NIN-03 dashboard (banner-scale badge, % completo)
 
-Status: IMPLEMENTED (2026-09-05; Functional QA PASS; Code/Visual QA REVISION_REQUIRED)
+Status: VERIFIED (2026-09-05; Functional QA PASS. Code Review round 1 REVISE (bundled with
+E7-05, see agent/reviews/code-E7-04-E7-05-review.md) — 5 Required Changes, all fixed by the
+orchestrator, round 2 PASS_WITH_MINOR_ISSUES. Visual QA round 1 REVISION_REQUIRED (3
+findings, see agent/qa/e7-04-e7-05-visual.md) — all fixed, round 2 PASS.)
 
 Dependencies: E7-01 and E7-03 (VERIFIED).
 
@@ -913,7 +916,13 @@ empty hierarchy, state-appropriate verification banner styling, and mobile-safe 
 
 ### E7-05 — NIN-04 oportunidades recibidas (pushed) + NIN-05 explorar vacantes
 
-Status: IMPLEMENTED (2026-09-05; Functional QA PASS; Code/Visual QA REVISION_REQUIRED)
+Status: VERIFIED (2026-09-05; Functional QA PASS. Code Review round 1 REVISE — 5 Required
+Changes (tablet-breakpoint claim, missing Limpiar action, incomplete modal accessibility,
+incomplete empty-state hierarchy, test coverage gaps), all resolved by the orchestrator;
+round 2 PASS_WITH_MINOR_ISSUES, see agent/reviews/code-E7-04-E7-05-review.md. Visual QA
+round 1 REVISION_REQUIRED (empty-state hierarchy, missing mobile sheet drag-handle/sticky
+footer, missing desktop live-apply filtering), all fixed; round 2 PASS, see
+agent/qa/e7-04-e7-05-visual.md.)
 
 Dependencies: E3-02 (VERIFIED).
 
@@ -927,9 +936,29 @@ Scope decision: NIN-06 owns the detail route and `interes_ninera` mutation. This
 `Ver detalle`, `Mostrar interés`, and pushed `Descartar` visibly scoped but disabled until
 that dependent mutation/detail story exists; no fake write or unsupported route was added.
 
-QA follow-up: remaining P2 visual polish covers mobile filter-sheet sticky footer/handle,
-desktop live-apply behavior, and richer NIN-04/NIN-05 empty-state hierarchy. Do not mark these
-stories VERIFIED until the visual revision and a browser-capable pass are complete.
+**Post-review fixes (orchestrator, 2026-09-05):** NIN-05's filtering was converted from
+server-side GET-param filtering (full page reload per change) to client-side filtering —
+`app/ninera/oportunidades/page.tsx` now fetches/scores all active necesidades once, and a
+new `components/ninera/opportunity-filters.tsx` (`OpportunityFiltersView`) applies
+zona/modalidad/pay/availability filters live on desktop (no submit step, matching FAM-05's
+already-VERIFIED `CandidateFiltersView`), with mobile keeping an explicit draft→"Aplicar
+filtros" step. Added a real "Limpiar" reset action (desktop and mobile), a full accessible
+modal (focus trap, Escape, focus restoration, body scroll lock — mirroring
+`candidate-filters.tsx`), a mobile sheet drag handle + sticky action footer, and a shared
+`components/ninera/opportunity-empty-state.tsx` (UI-SYSTEM §5.8 template) reused by NIN-04's
+and NIN-05's empty/no-results states. The tablet-breakpoint Code Review finding was
+recorded as an accepted scope exception rather than fixed — `design/UX-spec.md` Part D
+specifies only a binary mobile/desktop split for filters (matching FAM-05's own `lg`
+breakpoint), no third tablet tier.
+
+Known non-blocking items: `normalizeOpportunityFilters`/`matchesAvailabilityWindow` in
+`lib/ninera/opportunities.ts` are now dead code after the client-side filtering pivot
+(left in place, still covered by their own tests); NIN-05's zona filter remains free-text
+exact-match rather than a `<select>` like FAM-05's reference.
+
+Validation: `npm test -- --run --no-file-parallelism` (503 tests), `npm run lint`,
+`npm run typecheck`, `npm run check:secrets`, `npm run build`, and `npm run test:db` all
+pass.
 
 ## Change Requests
 

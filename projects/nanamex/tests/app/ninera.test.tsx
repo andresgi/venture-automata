@@ -105,8 +105,10 @@ describe("NIN-03 dashboard", () => {
   it("renders the honest opportunities placeholder route", async () => {
     render(await NineraOpportunitiesPage());
     expect(screen.getByRole("heading", { name: "Explorar vacantes" })).toBeInTheDocument();
-    expect(screen.getByText("Las vacantes abiertas aparecerán aquí")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Aún no hay vacantes abiertas" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Ver oportunidades recibidas" })).toHaveAttribute("href", "/ninera/oportunidades/recibidas");
   });
+
 
   it("provides dashboard loading UI", () => {
     render(<NineraHomeLoading />);

@@ -13,6 +13,7 @@ export type OpportunityCardData = {
   score: number;
   factors: OpportunityFactors;
   pushed: boolean;
+  diasHorarios: { dia: string; horaInicio: string; horaFin: string }[];
 };
 
 export type StoredNecesidadForMatching = {
@@ -89,6 +90,7 @@ export function scoreNecesidadForNinera(row: StoredNecesidadForMatching, ninera:
     score: result.score,
     factors: result.factors,
     pushed: false,
+    diasHorarios: necesidad.diasHorarios.map((item) => ({ dia: item.dia, horaInicio: item.horaInicio, horaFin: item.horaFin })),
   };
 }
 
@@ -105,6 +107,41 @@ export function matchesAvailabilityWindow(
   if (!requested.length || !offered.length) return false;
   if (!start || !end) return true;
   return requested.some((item) => item.hora_inicio <= start && item.hora_fin >= end) && offered.some((item) => item.horaInicio <= start && item.horaFin >= end);
+}
+
+export type OpportunityFilters = { zona: string; modalidad: string; minPay: number; maxPay: number; day: string; start: string; end: string };
+
+export const EMPTY_OPPORTUNITY_FILTERS: OpportunityFilters = { zona: "", modalidad: "", minPay: 0, maxPay: 0, day: "", start: "", end: "" };
+
+/**
+ * Client-side counterpart of `matchesAvailabilityWindow` + the zona/modalidad/pay filters
+ * applied server-side in `normalizeOpportunityFilters`'s query flow, operating on the
+ * already-scored `OpportunityCardData` shape (via its `diasHorarios`) instead of raw
+ * necesidad rows -- lets NIN-05 filter live, in the browser, the same way FAM-05's
+ * `candidateMatchesFilters` does (`components/familia/candidate-filters.tsx`), rather than
+ * requiring a page reload per filter change.
+ */
+export function opportunityMatchesFilters(
+  item: OpportunityCardData,
+  nineraDisponibilidad: readonly { dia: string; horaInicio: string; horaFin: string }[],
+  filters: OpportunityFilters,
+): boolean {
+  if (filters.zona && item.zona !== filters.zona) return false;
+  if (filters.modalidad && item.modalidad !== filters.modalidad) return false;
+  if (filters.minPay > 0 && item.pagoMax < filters.minPay) return false;
+  if (filters.maxPay > 0 && item.pagoMin > filters.maxPay) return false;
+  if (filters.day) {
+    const requested = item.diasHorarios.filter((entry) => entry.dia === filters.day);
+    const offered = nineraDisponibilidad.filter((entry) => entry.dia === filters.day);
+    if (!requested.length || !offered.length) return false;
+    if (filters.start && filters.end) {
+      const windowMatches =
+        requested.some((entry) => entry.horaInicio <= filters.start && entry.horaFin >= filters.end) &&
+        offered.some((entry) => entry.horaInicio <= filters.start && entry.horaFin >= filters.end);
+      if (!windowMatches) return false;
+    }
+  }
+  return true;
 }
 
 export function sortOpportunities<T extends Pick<OpportunityCardData, "score" | "recency" | "id">>(items: readonly T[]): T[] {

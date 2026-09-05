@@ -52,3 +52,114 @@ Focused validation passed: `npm test -- --run tests/app/ninera.test.tsx tests/li
 ## Limitations
 
 No live browser screenshots, computed layout measurements, authenticated click-through, keyboard traversal, real touch testing, delayed-loading transition, or forced network-error rendering could be performed because this environment has no browser executable and the project has no Playwright/Puppeteer dependency. This is a source-level responsive QA verdict; repeat browser verification at 375/430/768/1440px when tooling is available. E7-06 remains intentionally deferred and requires its own QA cycle when detail/interest/discard behavior is implemented.
+
+## Post-Review Fixes (orchestrator, 2026-09-05)
+
+- **E7-V01 (empty-state hierarchy) — fixed.** Added `components/ninera/opportunity-empty-state.tsx` implementing the exact §5.8 template and wired it into both NIN-04's base-empty state and NIN-05's base-empty/filtered-no-results states.
+- **E7-V02 (mobile sheet drag handle/sticky footer) — fixed.** The mobile filter sheet now has a `mx-auto h-1 w-10 rounded-full bg-border-strong` drag handle and a `sticky bottom-0` footer holding "Limpiar"/"Aplicar filtros", so long filter forms no longer scroll the actions out of view.
+- **E7-V03 (desktop live-apply) — fixed.** NIN-05 was converted from server-side GET-param filtering to client-side filtering (see `agent/reviews/code-E7-04-E7-05-review.md`'s corresponding entry for the full architecture change): the desktop persistent panel now applies each field change immediately, with no separate submit step, matching FAM-05's already-VERIFIED `CandidateFiltersView` behavior. The mobile sheet correctly keeps its explicit "Aplicar filtros" step (draft state, not live), also matching FAM-05.
+
+Re-verified all three fixes by reading the updated source directly and via new/updated
+tests (`tests/components/ninera/opportunity-filters.test.tsx`,
+`tests/app/ninera-oportunidades-recibidas.test.tsx`, `tests/app/ninera.test.tsx`). Full
+validation suite re-run clean: lint, typecheck, 503 tests, check:secrets, build, test:db.
+No remaining open findings for E7-04/E7-05.
+
+# Round 2 — Independent Re-verification of Post-Review Fixes (2026-09-05)
+
+## Scope and method
+
+Re-read the current file contents directly (not the "Post-Review Fixes" summary claims)
+for `components/ninera/opportunity-filters.tsx`, `components/ninera/opportunity-empty-state.tsx`,
+`app/ninera/oportunidades/page.tsx`, and `app/ninera/oportunidades/recibidas/page.tsx`, and
+cross-checked against `design/UI-SYSTEM.md` §5.7/§5.8, `design/UX-spec.md` Part D, and the
+already-VERIFIED reference implementation `components/familia/candidate-filters.tsx`.
+`config/CONSTRAINTS.md` "QA Ownership" confirms web-only V1 (no native mobile QA carve-out
+applicable) — this remains a standard agent-driven visual QA pass. No browser-rendering
+tooling is available in this environment (same limitation as Round 1); this is a
+source-level re-verification, not a live-viewport screenshot pass.
+
+## E7-V01 (empty-state hierarchy) — VERIFIED FIXED
+
+`opportunity-empty-state.tsx` implements the exact §5.8 template: a `h-16 w-16` (64px)
+`bg-primary-50` circle containing a 28px Phosphor icon, a `text-headline` (Fraunces,
+confirmed in `app/globals.css` `.text-headline { font-family: var(--font-fraunces) }`)
+headline, one `text-body` guidance line, and exactly one primary action rendered as a
+solid `bg-primary-600` button (`min-h-11`), whether the action is a `Link` (href) or an
+`onClick` handler — enforced structurally via the discriminated-union `Props` type so a
+caller cannot supply both or neither.
+
+- NIN-04 (`app/ninera/oportunidades/recibidas/page.tsx` line 36) uses it for the base-empty
+  case with an `actionHref` to `/ninera/oportunidades`.
+- NIN-05 base-empty (`opportunity-filters.tsx` line 206) uses it with `actionHref` to
+  `/ninera/oportunidades/recibidas`.
+- NIN-05 filtered-no-results (line 204) uses it with `onAction={clear}` and copy
+  ("No encontramos vacantes con estos filtros" / "Intenta ampliar tu zona, modalidad,
+  rango de pago o disponibilidad.") that matches the guidance requirement.
+
+All three states now render the identical shared template. No bare paragraph/link
+treatment remains. Confirmed correct.
+
+## E7-V02 (mobile sheet drag handle / sticky footer) — VERIFIED FIXED
+
+Lines 224–240 of `opportunity-filters.tsx`:
+- Drag handle: `<div className="mx-auto mt-3 h-1 w-10 shrink-0 rounded-full bg-border-strong" />`
+  immediately inside the sheet `<section>`, before the header — matches §5.7's "bottom
+  sheet (drag handle...)" convention and is visually/structurally identical to the
+  reference handle in `candidate-filters.tsx` (`mx-auto mb-4 h-1 w-10 rounded-full
+  bg-border-strong`).
+- Footer: `<footer className="sticky bottom-0 flex shrink-0 items-center justify-between
+  border-t border-border bg-bg-raised p-5">` — genuinely `position: sticky` with a
+  `bottom-0` offset and an opaque `bg-bg-raised` background so scrolled content doesn't
+  show through, inside a flex column sheet where the scrollable field container has
+  `min-h-0 flex-1 overflow-y-auto` and the footer has `shrink-0`. This is a real CSS-level
+  sticky/pinned-footer pattern, not just a comment claim — a long filter form scrolls only
+  the middle region, and the footer remains visible. This mirrors (and arguably improves
+  on, via explicit `shrink-0`/`min-h-0` flex plumbing) the reference sheet.
+
+Both "Limpiar" (line 237) and "Aplicar filtros" (line 238) are `min-h-11` (44px), and the
+close "X" button (line 229) is `h-11 w-11` (44×44px) — touch targets intact, no
+regression.
+
+## E7-V03 (desktop live-apply) — VERIFIED FIXED
+
+Lines 191–195: the desktop `<aside>` persistent panel now passes `onChange={applyLive}`
+directly to `Fields`, and `applyLive` (line 160) synchronously calls `setApplied`,
+`setDraft`, and `writeFilters` on every field change — no submit button, no form element,
+no "Aplicar filtros" text anywhere inside the `<aside>`. The only button in the desktop
+panel is "Limpiar" (line 194, `min-h-11 text-button text-primary-600`), which calls
+`clear()` → `applyLive(EMPTY_OPPORTUNITY_FILTERS)`, itself an immediate live action, not a
+submit. `visible` (line 171) is a `useMemo` derived from `applied`, so the rendered result
+grid updates on every keystroke/selection change on desktop — genuinely live-apply,
+matching FAM-05's verified `CandidateFiltersView` desktop behavior line-for-line
+(`setFilters={(next) => { setApplied(next); setDraft(next); writeFilters(next); }}` at
+line 184 of `candidate-filters.tsx`).
+
+The mobile sheet retains the deliberate two-step draft→apply pattern: `Fields` inside the
+sheet is bound to `draft`/`setDraft` (line 234), and only `applyDraft` (triggered by the
+"Aplicar filtros" button) commits `draft` into `applied`. Desktop and mobile are now
+structurally distinct as specified — no leftover cross-contamination (e.g., desktop is not
+accidentally still reading `draft`, and mobile is not accidentally live-applying).
+
+## Regression check
+
+- No new overflow, hierarchy, or touch-target regressions found. `Fields` inputs remain
+  `min-h-11` across both mobile and desktop renders (same shared component, no divergent
+  styling introduced).
+- The NIN-05 empty-state "Limpiar filtros" action renders as the same solid primary button
+  as every other empty-state action (shared `actionClassName` in
+  `opportunity-empty-state.tsx`), not an underlined text link — confirms it no longer
+  looks like a dead/secondary link.
+- Confirmed via `grep` that `app/ninera/oportunidades/page.tsx` and
+  `.../recibidas/page.tsx` both import and render `OpportunityEmptyState`, so no stale
+  bare-paragraph empty state remains reachable through either route.
+
+## Round 2 verdict
+
+**PASS.** All three Round 1 findings (E7-V01, E7-V02, E7-V03) are independently confirmed
+fixed at the source level, matching the approved UI-SYSTEM §5.7/§5.8 templates and the
+FAM-05 reference pattern exactly. No new visual regressions were introduced. No further
+findings for E7-04/E7-05. Limitation carried over from Round 1: no live browser rendering
+available in this environment: this remains a source-level confirmation, not a pixel-level
+screenshot verification. Recommend a live-viewport pass opportunistically if/when browser
+tooling becomes available, but this is not a blocking condition for this story.

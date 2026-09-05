@@ -716,3 +716,20 @@ Fixed the E7-04 mobile navigation overflow risk, verification banner state styli
 empty hierarchy. NIN-06 detail/interest mutations remain explicitly deferred; cards contain no
 paywall or lock affordance and their requested action labels are inert until that story.
 Validation: 483 tests, lint, typecheck, check:secrets, production build, and test:db pass.
+
+## 2026-09-05 — Orchestrator — E7-04/E7-05 review-cycle fixes + E7-06 handoff
+
+Objective: Resolve Code Review's REVISE (5 Required Changes) and Visual QA's
+REVISION_REQUIRED (3 findings) for E7-04/E7-05, then verify independently before marking
+VERIFIED.
+Result: Fixed all 5 Code Review Required Changes directly (Limpiar action, modal
+accessibility/focus-trap, shared empty-state template, test coverage; tablet breakpoint
+recorded as an accepted scope exception after checking UX-spec.md Part D directly) plus
+the Visual QA architecture finding (converted NIN-05 from server GET-param filtering to
+client-side live-apply filtering matching FAM-05's `CandidateFiltersView`, added mobile
+sheet drag handle + sticky footer). Got independent round-2 Code Review
+(PASS_WITH_MINOR_ISSUES) and round-2 Visual QA (PASS) given the scope of the changes.
+E7-04 and E7-05 marked VERIFIED (agent/BACKLOG.md, agent/STATE.md, agent/DECISIONS.md
+updated). Full validation suite (503 tests, lint, typecheck, check:secrets, build,
+test:db) clean throughout.
+Next recommended action: E7-06 — NIN-06 detalle de vacante + Mostrar interés.

@@ -1084,3 +1084,57 @@ submission; non-identity edits do not alter verification. The profile editor fai
 profile, join-table, or zone-reference read errors to prevent overwriting persisted data with
 fallback values. E7-02 passed Functional QA and Visual QA; Code Review passed with minor
 non-blocking coverage notes. Next eligible work is E7-04 dashboard or E7-05 opportunities.
+
+## 2026-09-05 — E7-04/E7-05 VERIFIED (after a real REVISE + REVISION_REQUIRED cycle)
+
+E7-04 (NIN-03 dashboard) and E7-05 (NIN-04 oportunidades recibidas / NIN-05 explorar
+vacantes) were implemented and passed Functional QA cleanly, but Code Review returned
+**REVISE** (agent/reviews/code-E7-04-E7-05-review.md) with 5 Required Changes, and Visual
+QA returned **REVISION_REQUIRED** (agent/qa/e7-04-e7-05-visual.md) with 3 findings — this
+was substantially more than routine minor-issue cleanup, so the orchestrator fixed
+everything directly rather than patching around it:
+
+1. **Tablet breakpoint** (Code Review Required Change #1) — investigated rather than
+   blindly implemented: `design/UX-spec.md` Part D's actual Responsive Behavior section
+   specifies only a binary mobile/desktop split for FAM-04/NIN-04/NIN-05 filters ("bottom
+   sheet on mobile, persistent sidebar panel on desktop"), matching the already-VERIFIED
+   `components/familia/candidate-filters.tsx`'s own `lg` (1024px) breakpoint exactly. No
+   third "tablet" tier is specified anywhere. Recorded as an accepted scope exception, not
+   changed — introducing one for NIN-05 alone would have made it inconsistent with FAM-05's
+   own reviewed precedent for the identical pattern.
+2. **Limpiar action** (Required Change #2) — added on both desktop and mobile.
+3. **Modal accessibility** (Required Change #3) — ported `candidate-filters.tsx`'s exact
+   focus-trap/Escape/focus-restoration/body-scroll-lock pattern.
+4. **Empty-state hierarchy** (Required Change #4) — added
+   `components/ninera/opportunity-empty-state.tsx` (UI-SYSTEM §5.8's shared template),
+   wired into NIN-04's and NIN-05's empty/no-results states, with NIN-05's "Limpiar
+   filtros" as a real in-place button, not a dead link.
+5. **Test coverage** (Required Change #5) — added `tests/app/ninera-oportunidades-recibidas.test.tsx`
+   (auth/onboarding ordering) and rewrote the filters test suite around real interactions.
+
+**Additional architecture change, from the Visual QA report's desktop-live-apply finding
+(E7-V03), not in Code Review's original list:** NIN-05 was converted from server-side
+GET-param filtering (a full page reload per filter change) to client-side filtering —
+`app/ninera/oportunidades/page.tsx` now fetches and scores all active necesidades once,
+and a rewritten `components/ninera/opportunity-filters.tsx` (`OpportunityFiltersView`)
+applies filters live on desktop via a new pure function (`opportunityMatchesFilters` in
+`lib/ninera/opportunities.ts`), matching `CandidateFiltersView`'s live-apply-desktop /
+draft-then-apply-mobile split exactly. Also fixed the mobile sheet's missing drag handle
+and made its action footer `sticky` (E7-V02).
+
+Given the scope of these fixes (a real architecture change, not mechanical patches), got
+independent round-2 re-verification rather than just self-certifying: Code Review round 2
+came back PASS_WITH_MINOR_ISSUES (confirmed all 5 Required Changes genuinely resolved,
+confirmed the tablet-breakpoint exception is correctly justified by reading UX-spec.md Part
+D independently, confirmed the architecture pivot introduces no new security exposure —
+all auth/onboarding checks still run server-side before any data fetch, and `scoreMatch`'s
+modality hard-filter still runs before any opportunity ever reaches the client). Visual QA
+round 2 came back PASS (confirmed all 3 findings fixed by re-reading current source, not
+the fix-summary text). Full validation suite re-run clean throughout: 503 tests, lint,
+typecheck, check:secrets, build, test:db.
+
+**E7-04 and E7-05 marked VERIFIED.** Two non-blocking notes carried forward:
+`normalizeOpportunityFilters`/`matchesAvailabilityWindow` in `lib/ninera/opportunities.ts`
+are now dead code after the filtering architecture pivot (left in place, still tested);
+NIN-05's zona filter remains free-text exact-match rather than a `<select>` like FAM-05's
+reference. Next eligible action: E7-06 (NIN-06 detalle de vacante + Mostrar interés).

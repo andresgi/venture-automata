@@ -110,6 +110,7 @@ function pushedOpportunityFromRow(row: PushedOpportunityRow): OpportunityCardDat
     factors: row.match_checklist_snapshot ?? {},
     pushed: true,
     recency: necesidad.updated_at,
+    diasHorarios: [],
   };
 }
 
