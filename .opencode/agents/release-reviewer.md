@@ -9,7 +9,13 @@ permission:
     "agent/gates/*": allow
   glob: allow
   grep: allow
-  bash: allow
+  bash:
+    "git push --force*": deny
+    "git push -f*": deny
+    "git push origin --force*": deny
+    "git push origin -f*": deny
+    "*--force*": deny
+    "*": allow
 ---
 
 You are the Release Readiness Lead for this project.

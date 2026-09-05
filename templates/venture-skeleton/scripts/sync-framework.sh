@@ -19,17 +19,20 @@
 #   AGENTS.md
 #   CLAUDE.md
 #   .claude/agents/*.md
+#   .opencode/agents/*.md
 #   scripts/sync-framework.sh (this script itself)
 #   scripts/sync-from-github.sh
 #   scripts/hooks/deny-force-push.sh
 #
 # What does NOT get copied: anything project-specific (config/, product/, engineering/,
-# agent/ tracking files, app source, .claude/settings.json). Settings.json in particular
-# is never overwritten here -- a venture's own permission/hook customizations must not be
-# silently replaced. If .claude/settings.json doesn't yet have the git-push allow rule and
-# force-push-deny hook this framework expects, add them by hand (see
-# templates/venture-skeleton/.claude/settings.json in venture-automata for the reference
-# shape) rather than running this script against it.
+# agent/ tracking files, app source, .claude/settings.json, opencode.jsonc). Both settings
+# files are never overwritten here -- a venture's own permission/hook customizations must
+# not be silently replaced. If they don't yet have the git-push allow rule and
+# force-push-deny protection this framework expects (a Claude Code PreToolUse hook, or the
+# equivalent per-agent `permission.bash` pattern for OpenCode subagents), add them by hand
+# -- see templates/venture-skeleton/.claude/settings.json and this repo's own
+# opencode.jsonc / .opencode/agents/*.md frontmatter for the reference shape -- rather
+# than running this script against them.
 
 set -euo pipefail
 
@@ -61,6 +64,12 @@ mkdir -p "$REPO_ROOT/.claude/agents"
 rm -f "$REPO_ROOT"/.claude/agents/*.md
 cp "$TMP_DIR"/.claude/agents/*.md "$REPO_ROOT/.claude/agents/"
 
+if [ -d "$TMP_DIR/.opencode/agents" ]; then
+  mkdir -p "$REPO_ROOT/.opencode/agents"
+  rm -f "$REPO_ROOT"/.opencode/agents/*.md
+  cp "$TMP_DIR"/.opencode/agents/*.md "$REPO_ROOT/.opencode/agents/"
+fi
+
 mkdir -p "$REPO_ROOT/scripts/hooks"
 SKELETON_SCRIPTS="$TMP_DIR/templates/venture-skeleton/scripts"
 if [ -d "$SKELETON_SCRIPTS" ]; then
@@ -73,5 +82,5 @@ fi
 RESOLVED_SHA="$(cd "$TMP_DIR" && git rev-parse HEAD)"
 echo "==> Done. Synced from venture-automata@${REF} (${RESOLVED_SHA})."
 echo "==> Review the diff (git status / git diff) and commit if it looks right, e.g.:"
-echo "    git add AGENTS.md CLAUDE.md .claude/agents scripts"
+echo "    git add AGENTS.md CLAUDE.md .claude/agents .opencode/agents scripts"
 echo "    git commit -m \"chore: sync framework from venture-automata@${RESOLVED_SHA:0:7}\""

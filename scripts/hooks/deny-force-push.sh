@@ -9,6 +9,11 @@
 # `"Bash(git push origin *)"` allow rule would otherwise let through. This hook
 # inspects the full command string with a real regex instead, so flag position
 # doesn't matter.
+#
+# Heredoc bodies (e.g. `git commit -m "$(cat <<'EOF' ... EOF)"`, used throughout
+# this project's own commit convention) are stripped before scanning -- a commit
+# message that merely *mentions* "git push --force" in prose must not trip this
+# check. Only text outside heredoc bodies is treated as real shell command text.
 set -euo pipefail
 
 input="$(cat)"
@@ -19,8 +24,22 @@ if [ -z "$cmd" ]; then
   exit 0
 fi
 
-if printf '%s' "$cmd" | grep -Eq 'git[[:space:]]+push' \
-  && printf '%s' "$cmd" | grep -Eq -- '(--force([^-[:alnum:]]|$)|--force-with-lease|(^|[[:space:]])-f([[:space:]]|$))'; then
+stripped="$(printf '%s' "$cmd" | python3 -c '
+import re
+import sys
+
+text = sys.stdin.read()
+# Match <<EOF, <<"EOF", <<'"'"'EOF'"'"', <<-EOF (any quoting/dash-indent style),
+# then remove everything up to the matching closing delimiter line.
+pattern = re.compile(
+    r"<<-?[\"\x27]?(\w+)[\"\x27]?.*?\n(?:.*?\n)*?\s*\1\s*(?=\n|$)",
+    re.MULTILINE,
+)
+print(pattern.sub("", text))
+')"
+
+if printf '%s' "$stripped" | grep -Eq 'git[[:space:]]+push' \
+  && printf '%s' "$stripped" | grep -Eq -- '(--force([^-[:alnum:]]|$)|--force-with-lease|(^|[[:space:]])-f([[:space:]]|$))'; then
   echo '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":"Force push is never allowed autonomously (git push --force/-f detected). If this is genuinely needed, a human must run it manually."}}'
 else
   echo '{}'

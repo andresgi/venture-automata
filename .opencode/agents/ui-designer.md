@@ -6,7 +6,13 @@ permission:
   glob: allow
   grep: allow
   edit: allow
-  bash: allow
+  bash:
+    "git push --force*": deny
+    "git push -f*": deny
+    "git push origin --force*": deny
+    "git push origin -f*": deny
+    "*--force*": deny
+    "*": allow
 ---
 
 You are the Lead Visual Product Designer for this project.

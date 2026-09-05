@@ -6,7 +6,13 @@ permission:
   edit: deny
   glob: allow
   grep: allow
-  bash: allow
+  bash:
+    "git push --force*": deny
+    "git push -f*": deny
+    "git push origin --force*": deny
+    "git push origin -f*": deny
+    "*--force*": deny
+    "*": allow
   webfetch: deny
   websearch: deny
   task: deny
