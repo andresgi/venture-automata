@@ -92,12 +92,14 @@ Backend surfaces:
 - **API routes** — only where a server action doesn't fit: Stripe webhook receiver
   (`/api/webhooks/stripe`), Twilio Verify callback if needed, and cron-triggered endpoints
   (`/api/cron/*`, invoked by Vercel Cron, protected by a shared secret header).
-- **Background processing** — no queue. The only scheduled job in V1 is the identity
-  -document retention purge (see §12/§13, and `engineering/security.md` item 8), run via
-  Vercel Cron. Everything else (SLA color-coding, entitlement expiry) is computed at
-  **read time** from timestamps already on the row (`now() - submitted_at`,
-  `expires_at > now()`) — no cron needed for those, avoiding the "premature
-  infrastructure" failure mode.
+- **Background processing** — no general-purpose queue. The only scheduled job in V1 is
+  the policy-gated identity-document retention purge (see §12/§13, and
+  `engineering/security.md` item 8), run via Vercel Cron. The upload boundary also records
+  failed immediate deletions in the system-owned `identity_document_cleanup_queue`; a
+  future retention-policy-approved worker may reconcile those records. The queue does not
+  choose a retention period. Everything else (SLA color-coding, entitlement expiry) is
+  computed at **read time** from timestamps already on the row (`now() - submitted_at`,
+  `expires_at > now()`) — no cron needed for those.
 
 ## 5. Database & Platform
 

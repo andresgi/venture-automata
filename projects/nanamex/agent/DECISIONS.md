@@ -4,6 +4,14 @@ Important product, technical, operational, and workflow decisions are recorded h
 
 Do not record trivial implementation choices.
 
+## 2026-09-04 — E7-03 identity submission reasons
+
+NIN-08 derives review reason server-side: a first submission or rejected resubmission is
+`primera_vez`; replacing a verified document uses `re-revision_por_edicion_de_perfil`, the
+existing enum value for a renewed identity requiring review. The E7-01 onboarding prompt is
+wired to `/ninera/perfil/identificacion` now that the route exists, without making upload a
+completion gate. Admin decisions and retention/deletion remain E8/E12 scope.
+
 ## 2026-09-04 — E5-04 stale checkout-return policy approved
 
 An old local `payments.status = pendiente` row must not make a revisited `checkout=success`
@@ -1041,3 +1049,18 @@ from `nanamex/e6-01-fam11-pipeline`, per this project's per-story branch convent
 eligible action: E7-03 (NIN-08 subir identificación) — closes the loop E7-01 left open
 with its disabled "Subir ahora" placeholder. E7-02 and E7-05 are also eligible in
 parallel.
+
+## 2026-09-04 — E7-03 VERIFIED
+
+E7-03 delivered NIN-08 identity upload with private `identity-documents` Storage, server-side
+MIME/extension/size and byte-signature validation, immutable owner-scoped document paths,
+append-only verification submissions, active-submission concurrency protection, durable cleanup
+reconciliation, and the three-state TrustBadge/verification UI. Rejected resubmission uses
+`primera_vez`; replacing a verified document uses `re-revision_por_edicion_de_perfil`. The E7-01
+"Subir ahora" prompt is wired to NIN-08 and remains optional/non-blocking.
+
+Code Review: PASS_WITH_MINOR_ISSUES. Functional QA: PASS. Visual QA: PASS_WITH_LIMITATIONS;
+browser pixel verification was unavailable, with no remaining source-level defects. E8 admin
+review and E12 retention/deletion remain out of scope; the identity-document retention policy
+must still be resolved before production collection. Validation passed: 464 tests, lint,
+typecheck, secret scan, build, and test:db.

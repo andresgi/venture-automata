@@ -112,14 +112,14 @@ Reuses E2-01's wizard shell (mobile sticky nav / desktop anchored side-rail) aft
 QA round 1 REVISION_REQUIRED caught the desktop shell being entirely missing; round 2 PASS
 after the fix. Branch `nanamex/e7-01-nin-onboarding`, not yet pushed/merged.
 
+E7-03 (NIN-08 identity upload) is also VERIFIED, including private Storage, byte-level file
+validation, durable cleanup reconciliation, and optional non-blocking verification.
+
 ## Next Eligible Action
 
-E7-03: NIN-08 subir identificación (dependency E7-01, now VERIFIED). Completes the loop
-E7-01 left open — the "Subir ahora" button on the end-of-onboarding identity prompt is
-currently a documented, genuinely-disabled placeholder pending this story. E7-02 (NIN-07
-mi perfil edit) is also eligible in parallel (same E7-01 dependency); E7-05 (NIN-04/05
-oportunidades) has been eligible since E3-02 VERIFIED and remains open too. E6-02 (NIN-09,
-deferred 2026-09-04) still needs E7-06, further downstream.
+E7-02: NIN-07 mi perfil edit (dependency E7-01, now VERIFIED). E7-05 (NIN-04/05
+oportunidades) is also eligible in parallel; E6-02 (NIN-09, deferred 2026-09-04) still needs
+E7-06, further downstream.
 
 ## Human Blocker
 

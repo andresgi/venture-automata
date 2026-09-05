@@ -72,6 +72,94 @@ export async function savePerfilNineraDraftAction(
 
 export type UploadFotoState = { status: "idle" | "uploaded" | "error"; message?: string; fotoUrl?: string };
 
+export type IdentityUploadState = { status: "idle" | "uploaded" | "error"; message?: string };
+const MAX_IDENTITY_BYTES = 10 * 1024 * 1024;
+const IDENTITY_TYPES: Record<string, string[]> = { "image/jpeg": ["jpg", "jpeg"], "image/png": ["png"], "image/webp": ["webp"] };
+
+function hasImageSignature(bytes: Uint8Array, type: string): boolean {
+  if (type === "image/jpeg") return bytes.length >= 3 && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff;
+  if (type === "image/png") return [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a].every((value, index) => bytes[index] === value);
+  return bytes.length >= 12 && bytes[0] === 0x52 && bytes[1] === 0x49 && bytes[2] === 0x46 && bytes[3] === 0x46
+    && bytes[8] === 0x57 && bytes[9] === 0x45 && bytes[10] === 0x42 && bytes[11] === 0x50;
+}
+
+async function enqueueIdentityCleanup(db: ReturnType<typeof createServiceRoleClient>, path: string, reason: string) {
+  try {
+    const { error } = await db.from("identity_document_cleanup_queue").insert({ document_storage_path: path, reason });
+    if (error) console.error("submitIdentityDocumentAction: durable cleanup queue insert failed", error);
+  } catch (error) {
+    console.error("submitIdentityDocumentAction: durable cleanup queue insert threw", error);
+  }
+}
+
+export async function submitIdentityDocumentAction(_previous: IdentityUploadState, formData: FormData): Promise<IdentityUploadState> {
+  let db: ReturnType<typeof createServiceRoleClient> | undefined;
+  let bucket: ReturnType<ReturnType<typeof createServiceRoleClient>["storage"]["from"]> | undefined;
+  let path: string | undefined;
+  let uploaded = false;
+  try {
+    const supabase = await createServerSupabaseClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { status: "error", message: "Tu sesión expiró. Inicia sesión de nuevo." };
+    db = createServiceRoleClient();
+    const { data: profile } = await db.from("profiles").select("role, account_status").eq("id", user.id).maybeSingle();
+    if (!profile || profile.role !== "ninera" || profile.account_status !== "activa") return { status: "error", message: "No se pudo subir tu identificación." };
+    const file = formData.get("documento");
+    if (!(file instanceof File) || file.size === 0) return { status: "error", message: "Selecciona una foto de tu identificación." };
+    const extension = file.name.toLowerCase().split(".").pop();
+    if (file.size > MAX_IDENTITY_BYTES) return { status: "error", message: "La identificación no puede superar 10 MB." };
+    const acceptedExtensions = IDENTITY_TYPES[file.type];
+    if (!acceptedExtensions || !extension || !acceptedExtensions.includes(extension)) return { status: "error", message: "Formato no permitido. Usa JPG, PNG o WEBP." };
+    const bytes = new Uint8Array(await file.arrayBuffer());
+    if (!hasImageSignature(bytes, file.type)) return { status: "error", message: "El archivo no parece ser una imagen JPG, PNG o WEBP válida." };
+    const canonicalExtension = file.type === "image/jpeg" ? "jpg" : extension;
+    path = `${user.id}/${crypto.randomUUID()}.${canonicalExtension}`;
+    bucket = db.storage.from("identity-documents");
+    const { error: uploadError } = await bucket.upload(path, bytes, { contentType: file.type, upsert: false });
+    if (uploadError) {
+      console.error("submitIdentityDocumentAction: identity document upload returned an error", uploadError);
+      return { status: "error", message: "No se pudo subir tu identificación. Intenta de nuevo." };
+    }
+    uploaded = true;
+    const { error: submitError } = await db.rpc("submit_identity_verification", { p_ninera_id: user.id, p_document_storage_path: path });
+    if (submitError) {
+      if (uploaded && path) {
+        try {
+          const { error: cleanupError } = await bucket.remove([path]);
+          if (cleanupError) {
+            console.error("submitIdentityDocumentAction: uploaded document cleanup failed", cleanupError);
+            await enqueueIdentityCleanup(db, path, "submission_rpc_rejected");
+          }
+        } catch (cleanupError) {
+          console.error("submitIdentityDocumentAction: uploaded document cleanup threw", cleanupError);
+          await enqueueIdentityCleanup(db, path, "submission_rpc_rejected");
+        }
+      }
+      if (submitError.message === "identity_verification_already_in_process") {
+        return { status: "error", message: "Tu identificación ya está en revisión." };
+      }
+      console.error("submitIdentityDocumentAction: submission RPC failed", submitError);
+      return { status: "error", message: "No se pudo registrar tu identificación. Intenta de nuevo." };
+    }
+    return { status: "uploaded", message: "Recibimos tu identificación y ya está en revisión." };
+  } catch (error) {
+    if (uploaded && db && bucket && path) {
+      try {
+        const { error: cleanupError } = await bucket.remove([path]);
+        if (cleanupError) {
+          console.error("submitIdentityDocumentAction: uploaded document cleanup failed", cleanupError);
+          await enqueueIdentityCleanup(db, path, "submission_exception");
+        }
+      } catch (cleanupError) {
+        console.error("submitIdentityDocumentAction: uploaded document cleanup threw", cleanupError);
+        await enqueueIdentityCleanup(db, path, "submission_exception");
+      }
+    }
+    console.error("submitIdentityDocumentAction: identity document upload failed", error);
+    return { status: "error", message: uploaded ? "No se pudo registrar tu identificación. Intenta de nuevo." : "No se pudo subir tu identificación. Intenta de nuevo." };
+  }
+}
+
 /**
  * Uploads a niñera's profile photo to the public `profile-photos` bucket
  * (db/migrations/20260904000020_profile_photos_storage.sql; architecture.md §8) under her

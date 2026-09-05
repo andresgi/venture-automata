@@ -56,7 +56,7 @@ describe("PerfilNineraWizard step 2", () => {
     expect(screen.getByRole("button", { name: "Finalizar" })).toBeDisabled();
   });
 
-  it("shows the identity-upload prompt (with only Más tarde live) after a complete finish", async () => {
+  it("shows the identity-upload prompt after a complete finish", async () => {
     render(
       <PerfilNineraWizard
         zonas={[zona]}
@@ -76,7 +76,7 @@ describe("PerfilNineraWizard step 2", () => {
     fireEvent.click(screen.getByRole("button", { name: "Finalizar" }));
 
     await waitFor(() => expect(screen.getByRole("heading", { name: "Sube tu identificación" })).toBeInTheDocument());
-    expect(screen.getByRole("button", { name: "Subir ahora" })).toBeDisabled();
+    expect(screen.getByRole("link", { name: "Subir ahora" })).toHaveAttribute("href", "/ninera/perfil/identificacion");
     fireEvent.click(screen.getByRole("button", { name: "Más tarde" }));
     expect(push).toHaveBeenCalledWith("/ninera");
   });

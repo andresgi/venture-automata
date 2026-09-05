@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Camera, SpinnerGap } from "@phosphor-icons/react/ssr";
 import { ZonaMultiSelect } from "@/components/ninera/zona-multi-select";
 import { savePerfilNineraDraftAction, uploadPerfilFotoAction } from "@/actions/perfil-ninera";
@@ -599,9 +600,9 @@ function IdentityPromptCard({ onSkip }: { onSkip: () => void }) {
         Verificar tu identidad ayuda a las familias a confiar más en tu perfil. Puedes hacerlo cuando quieras — tu perfil ya es visible mientras tanto.
       </p>
       <div className="flex flex-col gap-3 sm:flex-row">
-        <button type="button" disabled title="Próximamente" className="min-h-11 rounded-sm bg-primary-600 px-4 py-3 text-button text-white opacity-40 sm:flex-1">
+        <Link href="/ninera/perfil/identificacion" className="flex min-h-11 items-center justify-center rounded-sm bg-primary-600 px-4 py-3 text-button text-white sm:flex-1">
           Subir ahora
-        </button>
+        </Link>
         <button type="button" onClick={onSkip} className="min-h-11 rounded-sm px-4 py-3 text-button text-ink-600 sm:flex-1">
           Más tarde
         </button>

@@ -57,6 +57,13 @@ describe("TrustBadge", () => {
     expect(screen.getByRole("button").className).not.toContain("h-6");
   });
 
+  it.each([["en_proceso", "trust-pending-50", "trust-pending-800"], ["verificada", "trust-verified-50", "trust-verified-800"]] as const)("keeps %s color semantics in the large variant", (status, background, text) => {
+    render(<TrustBadge status={status} size="large" />);
+    const badge = screen.getByRole("button");
+    expect(badge.className).toContain(background);
+    expect(badge.className).toContain(text);
+  });
+
   it("reveals the plain-language tooltip explanation on click, one per state", () => {
     const explanations: Record<string, string> = {
       no_verificada: "Esta niñera aún no ha subido su identificación.",

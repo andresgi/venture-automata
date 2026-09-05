@@ -825,11 +825,8 @@ Two-step wizard (`components/ninera/perfil-ninera-wizard.tsx`) reusing E2-01's
 (disponibilidad, expectativa salarial, modalidades, descripción, referencias, experiencia
 con edades). A `/ninera` completion gate mirrors FAM-01's `/familia` gate.
 
-**Documented interim behavior (accepted, not a defect):** the end-of-paso-2
-"Sube tu identificación" prompt's "Subir ahora" button is rendered genuinely `disabled`
-(real HTML attribute, not a misleading no-op) since NIN-08/E7-03 (the actual upload flow)
-doesn't exist yet — same "build only what exists to depend on" pattern as E1-02/E5-01/
-E5-03/E5-04/E6-01.
+The end-of-paso-2 "Sube tu identificación" prompt's "Subir ahora" action is wired to the
+NIN-08 route; upload remains optional and non-blocking.
 
 **Scope judgment calls:** (1) `ZonaMultiSelect` — a multi-select variant of FAM-03's
 single-select zona autocomplete, since `ninera_zonas` is many-to-many (UI-SPEC's literal
@@ -844,6 +841,30 @@ rail navigation's `scrollIntoView` doesn't also move keyboard focus.
 Validation: `npm test -- --run --no-file-parallelism` (442 tests), `npm run lint`,
 `npm run typecheck`, `npm run check:secrets`, `npm run build`, and `npm run test:db`
 (including the new `test-e7-01-perfil-ninera` probe) all pass.
+
+### E7-03 — NIN-08 subir identificación
+
+Status: VERIFIED (2026-09-04; Code Review PASS_WITH_MINOR_ISSUES, Functional QA PASS, Visual QA PASS_WITH_LIMITATIONS)
+
+Dependencies: E7-01 (VERIFIED).
+
+Delivered: `/ninera/perfil/identificacion` with no-verificada, rejected-with-reason/resubmit,
+en-proceso read-only, and verified read-only states; mobile camera/gallery inputs, desktop
+picker/drop zone, quality guidance, and client/server size/type/extension validation. The
+server derives the authenticated niñera, requires an active account, generates an own-path
+private Storage object, and calls a service-role-only atomic RPC that appends the submission,
+sets `en_proceso` without changing `publicado`, and records `identity_verification_submitted`.
+Storage policies deny browser writes/updates, keep the bucket private, and allow reads only to
+admins. Failed object cleanup is durably queued without inventing a retention period.
+
+Scope decision: rejected resubmission is `primera_vez`; replacing a verified document uses
+`re-revision_por_edicion_de_perfil` as the closest approved review reason. Admin review (E8)
+and deletion/retention policy (E12) remain out of scope.
+
+Validation: `npm test -- --run --no-file-parallelism` (464 tests), `npm run lint`,
+`npm run typecheck`, `npm run check:secrets`, `npm run build`, and `npm run test:db` all pass.
+Independent Code Review, Functional QA, and Visual QA passed; browser pixel verification was
+unavailable in this environment.
 
 ## Change Requests
 
