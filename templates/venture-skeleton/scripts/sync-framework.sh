@@ -27,6 +27,7 @@
 #   scripts/notify-telegram.sh
 #   scripts/start-worker-session.sh
 #   scripts/_run-worker-inner.sh
+#   scripts/claim-for-session.sh
 #
 # What does NOT get copied: anything project-specific (config/, product/, engineering/,
 # agent/ tracking files, app source, .claude/settings.json, opencode.jsonc). Both settings
@@ -90,6 +91,7 @@ if [ -d "$SKELETON_SCRIPTS" ]; then
   cp "$SKELETON_SCRIPTS/notify-telegram.sh" "$REPO_ROOT/scripts/notify-telegram.sh"
   cp "$SKELETON_SCRIPTS/start-worker-session.sh" "$REPO_ROOT/scripts/start-worker-session.sh"
   cp "$SKELETON_SCRIPTS/_run-worker-inner.sh" "$REPO_ROOT/scripts/_run-worker-inner.sh"
+  cp "$SKELETON_SCRIPTS/claim-for-session.sh" "$REPO_ROOT/scripts/claim-for-session.sh"
   chmod +x \
     "$REPO_ROOT/scripts/sync-framework.sh" \
     "$REPO_ROOT/scripts/sync-from-github.sh" \
@@ -97,7 +99,8 @@ if [ -d "$SKELETON_SCRIPTS" ]; then
     "$REPO_ROOT/scripts/worker-lease.sh" \
     "$REPO_ROOT/scripts/notify-telegram.sh" \
     "$REPO_ROOT/scripts/start-worker-session.sh" \
-    "$REPO_ROOT/scripts/_run-worker-inner.sh"
+    "$REPO_ROOT/scripts/_run-worker-inner.sh" \
+    "$REPO_ROOT/scripts/claim-for-session.sh"
 fi
 
 RESOLVED_SHA="$(cd "$TMP_DIR" && git rev-parse HEAD)"

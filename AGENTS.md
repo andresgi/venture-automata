@@ -365,6 +365,17 @@ around, unlike a fully unattended/cron-triggered invocation would have. `worker-
 can also be run standalone (`claim`, `release`, `release --force`, `status`) for manual
 lease management, e.g. cleaning up after a session that died without releasing.
 
+For a long-running process with no start/exit boundary of its own to hook a sync and
+lease-claim into — e.g. `opencode web` left running for days as an "always on" mobile
+front end — `start-worker-session.sh`'s auto-claim/auto-release model doesn't fit: the
+server never exits between tasks, so there's nothing to trigger a release, and syncing
+only once at server-start goes stale the moment another machine pushes. Use
+`scripts/claim-for-session.sh` instead, immediately before starting a real work session in
+that UI: it syncs and claims the lease in one step (failing loudly, per the sync rules
+above, if the tree's dirty or history has diverged). Release manually with
+`scripts/worker-lease.sh release` when that work session ends — there is no automatic
+trigger for this path, unlike the tmux flow.
+
 ## Implementation Rules
 
 Once software development begins:
