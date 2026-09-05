@@ -40,8 +40,8 @@ begin
   ) then raise exception 'candidate_not_available'; end if;
   if p_match_score not between 0 and 100 then raise exception 'invalid_match_score'; end if;
 
-  insert into public.pipeline(necesidad_id, ninera_id, estado, match_score_snapshot, match_checklist_snapshot)
-  values (p_necesidad_id, p_ninera_id, 'nueva', p_match_score, coalesce(p_match_checklist, '{}'::jsonb))
+  insert into public.pipeline(necesidad_id, ninera_id, estado, match_score_snapshot, match_checklist_snapshot, source)
+  values (p_necesidad_id, p_ninera_id, 'nueva', p_match_score, coalesce(p_match_checklist, '{}'::jsonb), 'family_view')
   on conflict (necesidad_id, ninera_id) do nothing;
 
   insert into public.analytics_events(event_name, profile_id, necesidad_id, ninera_id, metadata)

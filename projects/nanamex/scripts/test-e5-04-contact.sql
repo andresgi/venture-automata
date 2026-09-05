@@ -30,9 +30,9 @@ insert into public.necesidades(id,familia_id,zona_id,estado,modalidad,dias_horar
 insert into public.ninera_zonas(ninera_id,zona_id) values ('00000000-0000-0000-0000-000000000623','00000000-0000-0000-0000-000000000641');
 insert into public.ninera_experiencia_edades(ninera_id,rango_edad) values ('00000000-0000-0000-0000-000000000623','3-6');
 insert into public.necesidad_children(necesidad_id,rango_edad) values ('00000000-0000-0000-0000-000000000601','3-6'),('00000000-0000-0000-0000-000000000602','3-6');
-insert into public.pipeline(id,necesidad_id,ninera_id,estado,match_score_snapshot,match_checklist_snapshot) values
- ('00000000-0000-0000-0000-000000000611','00000000-0000-0000-0000-000000000601','00000000-0000-0000-0000-000000000623','nueva',100,'{}'),
- ('00000000-0000-0000-0000-000000000612','00000000-0000-0000-0000-000000000602','00000000-0000-0000-0000-000000000623','nueva',100,'{}');
+insert into public.pipeline(id,necesidad_id,ninera_id,estado,match_score_snapshot,match_checklist_snapshot,source) values
+ ('00000000-0000-0000-0000-000000000611','00000000-0000-0000-0000-000000000601','00000000-0000-0000-0000-000000000623','nueva',100,'{}','unknown'),
+ ('00000000-0000-0000-0000-000000000612','00000000-0000-0000-0000-000000000602','00000000-0000-0000-0000-000000000623','nueva',100,'{}','unknown');
 insert into public.entitlements(id,familia_id,expires_at) values ('00000000-0000-0000-0000-000000000631','00000000-0000-0000-0000-000000000621',now()+interval '30 days');
 insert into public.entitlements(id,familia_id,expires_at) values ('00000000-0000-0000-0000-000000000632','00000000-0000-0000-0000-000000000622',now()-interval '1 day');
 commit;

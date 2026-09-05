@@ -692,3 +692,27 @@ preview/progress/error states, and E7-01 wiring. Code Review PASS_WITH_MINOR_ISS
 QA PASS, Visual QA PASS_WITH_LIMITATIONS. E8 admin review and E12 retention remain deferred.
 Validation: 464 tests, lint, typecheck, secret scan, production build, and test:db all pass.
 E7-03 marked VERIFIED. Next recommended actions: E7-02 and E7-05.
+
+---
+
+## 2026-09-05 — E7-04/E7-05 implementation and QA
+
+Implemented NIN-03 dashboard, NIN-04 pushed opportunities, and NIN-05 active vacancy browsing
+with explicit pipeline provenance, lifecycle filtering, deterministic score/recency ordering,
+day/time availability filters, responsive navigation, placeholder Cuenta/Mis solicitudes
+routes, and no-paywall behavior. Functional QA passed; Code Review and Visual QA still require
+revision for mobile filter-sheet sticky behavior, desktop live-apply semantics, and richer list
+empty-state hierarchy. Core validation passed at 490 tests, lint, typecheck, secret scan, build,
+and test:db. Stories remain IMPLEMENTED, not VERIFIED; E7-06 stays deferred.
+
+---
+
+## 2026-09-05 — E7-04 revision + E7-05 implementation
+
+Implemented NIN-03's real pushed-opportunity preview and NIN-04 received-opportunities route,
+plus NIN-05 open-vacancy browsing with the existing matching scorer, niñera-facing checklist
+labels, supported filters, honest empty/error boundaries, and server-side `activa` scoping.
+Fixed the E7-04 mobile navigation overflow risk, verification banner state styling, and compact
+empty hierarchy. NIN-06 detail/interest mutations remain explicitly deferred; cards contain no
+paywall or lock affordance and their requested action labels are inert until that story.
+Validation: 483 tests, lint, typecheck, check:secrets, production build, and test:db pass.

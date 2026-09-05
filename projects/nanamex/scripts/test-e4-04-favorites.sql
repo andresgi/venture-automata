@@ -50,8 +50,8 @@ end $$;
 
 -- Favoriting an existing (previously-viewed) pipeline row flips es_favorita without
 -- touching its already-frozen snapshot.
-insert into public.pipeline(necesidad_id, ninera_id, estado, match_score_snapshot, match_checklist_snapshot, es_favorita)
-values ('00000000-0000-0000-0000-000000000502','00000000-0000-0000-0000-000000000513','nueva',55,'{"availability":true}',false);
+insert into public.pipeline(necesidad_id, ninera_id, estado, match_score_snapshot, match_checklist_snapshot, es_favorita, source)
+values ('00000000-0000-0000-0000-000000000502','00000000-0000-0000-0000-000000000513','nueva',55,'{"availability":true}',false,'family_view');
 select public.set_candidate_favorite('00000000-0000-0000-0000-000000000502','00000000-0000-0000-0000-000000000512','00000000-0000-0000-0000-000000000513',true,99,'{}');
 do $$ declare fav boolean; s int; c jsonb; begin
   select es_favorita, match_score_snapshot, match_checklist_snapshot into fav, s, c from public.pipeline where necesidad_id='00000000-0000-0000-0000-000000000502' and ninera_id='00000000-0000-0000-0000-000000000513';

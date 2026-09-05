@@ -4,6 +4,18 @@ Important product, technical, operational, and workflow decisions are recorded h
 
 Do not record trivial implementation choices.
 
+## 2026-09-05 — E7-05 opportunity action boundary
+
+NIN-04/NIN-05 now read pushed and open opportunities, but NIN-06 owns the vacancy-detail
+route and the existing `pipeline.interes_ninera` mutation. The cards therefore render the
+approved `Ver detalle`, `Mostrar interés`, and passive `Descartar` labels without inventing a
+client-side mutation or a paywall; the controls are explicitly inert until E7-06 supplies
+the detail/action flow. NIN-05 only queries `necesidades.estado = activa`, so closed and
+future non-open states are excluded server-side before matching. Because the existing schema
+now has `pipeline.source`, NIN-04 queries only `source = pushed`. Existing rows are retained
+as `unknown` and are intentionally excluded from the passive list until a future migration or
+operator reconciliation can establish their origin.
+
 ## 2026-09-04 — E7-03 identity submission reasons
 
 NIN-08 derives review reason server-side: a first submission or rejected resubmission is

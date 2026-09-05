@@ -337,6 +337,9 @@ PRD/addendum requirements: `journeys.md` J-NIN-3/J-NIN-4 (Decision 1 hybrid mode
 Acceptance criteria: `NIN-05` excludes necesidades in `cerrada_*` state; niñera-side
 Match Score checklist uses the niñera-facing factor labels per spec; no paywall affordance
 anywhere on either screen.
+NIN-04 additionally reads only `pipeline.source = 'pushed'`, `pipeline.estado = 'nueva'`,
+and related `necesidades.estado = 'activa'`. Ordering is score descending, then
+`necesidades.updated_at` descending (stable recency), then `pipeline.id` ascending.
 Validation: Functional QA confirms zero lock/paywall UI elements on `NIN-04`/`NIN-05` per
 `UI-SPEC.md`'s cross-cutting checklist item 3 (family-side rule, verify it's also true on
 the mirrored niñera-side screens even though not explicitly re-stated there).

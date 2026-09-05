@@ -891,6 +891,46 @@ Validation: `npm test -- --run --no-file-parallelism` (464 tests), `npm run lint
 Independent Code Review, Functional QA, and Visual QA passed; browser pixel verification was
 unavailable in this environment.
 
+### E7-04 — NIN-03 dashboard (banner-scale badge, % completo)
+
+Status: IMPLEMENTED (2026-09-05; Functional QA PASS; Code/Visual QA REVISION_REQUIRED)
+
+Dependencies: E7-01 and E7-03 (VERIFIED).
+
+Acceptance criteria: replace the niñera home placeholder with the NIN-03 dashboard showing
+verification status at banner scale with 24–48h expectation copy while pending, profile
+completion progress with a completion CTA, recent opportunity preview, and an Explorar
+vacantes entry. Preserve the onboarding redirect for incomplete profiles and keep identity
+verification optional/non-blocking.
+
+Validation: authenticated dashboard states cover incomplete-profile redirect, verification
+states, complete-profile progress, no-opportunity empty state, and navigation to NIN-07/NIN-08;
+lint, typecheck, tests, secret scan, build, and database probes pass.
+
+Delivered in the current revision: populated recent-opportunity preview (up to three cards)
+with `Ver todas` to NIN-04, separate `Explorar vacantes` entry to NIN-05, compact truthful
+empty hierarchy, state-appropriate verification banner styling, and mobile-safe niñera nav.
+
+### E7-05 — NIN-04 oportunidades recibidas (pushed) + NIN-05 explorar vacantes
+
+Status: IMPLEMENTED (2026-09-05; Functional QA PASS; Code/Visual QA REVISION_REQUIRED)
+
+Dependencies: E3-02 (VERIFIED).
+
+Delivered: server-authorized pushed-opportunity listing at `/ninera/oportunidades/recibidas`
+and active open-vacancy browse at `/ninera/oportunidades`, both reusing the V1 matching
+scorer and niñera-facing checklist labels. Browse reads query `estado = activa` and applies
+supported zone, modality, and salary-overlap filters. Cards anonymize the family, include
+Match Score and requested actions, and contain no paywall/lock UI.
+
+Scope decision: NIN-06 owns the detail route and `interes_ninera` mutation. This story keeps
+`Ver detalle`, `Mostrar interés`, and pushed `Descartar` visibly scoped but disabled until
+that dependent mutation/detail story exists; no fake write or unsupported route was added.
+
+QA follow-up: remaining P2 visual polish covers mobile filter-sheet sticky footer/handle,
+desktop live-apply behavior, and richer NIN-04/NIN-05 empty-state hierarchy. Do not mark these
+stories VERIFIED until the visual revision and a browser-capable pass are complete.
+
 ## Change Requests
 
 Ad-hoc, non-PRD asks made directly in chat (see AGENTS.md, "Change Requests"). Use `CR-NNN`
