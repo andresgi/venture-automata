@@ -2,7 +2,9 @@
 
 import { createServerSupabaseClient } from "@/lib/supabase/auth-server";
 import { createServiceRoleClient } from "@/lib/supabase/server";
-import { validatePerfilNineraDraft, normalizePerfilNineraPayload } from "@/lib/ninera/perfil-validation";
+import { validatePerfilNineraDraft, normalizePerfilNineraPayload, perfilReferenciaSchema, perfilScheduleSchema, modalidadValues } from "@/lib/ninera/perfil-validation";
+import { z } from "zod";
+import { rangoEdadValues } from "@/lib/familia/necesidad-validation";
 
 export type PerfilNineraActionState = {
   status: "idle" | "saved" | "error";
@@ -13,6 +15,33 @@ export type PerfilNineraActionState = {
 const GENERIC_ERROR = "No se pudo guardar tu perfil. Intenta de nuevo.";
 const MAX_PHOTO_BYTES = 5 * 1024 * 1024;
 const ALLOWED_PHOTO_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
+
+export type PerfilNineraSection = "identity" | "work" | "availability" | "about" | "references";
+export type PerfilNineraSectionState = { status: "idle" | "saved" | "error"; message?: string; perfilCompleto?: boolean };
+const sectionSchemas = {
+  identity: z.object({ nombre: z.string().trim().min(1).max(120), fotoUrl: z.string().trim().url().optional().or(z.literal("")) }).strict(),
+  work: z.object({ zonaIds: z.array(z.string().uuid()), anosExperiencia: z.number().int().nonnegative(), experienciaEdades: z.array(z.enum(rangoEdadValues)) }).strict(),
+  availability: z.object({ disponibilidad: z.array(perfilScheduleSchema), salarioMin: z.number().int().nonnegative(), salarioMax: z.number().int().nonnegative(), modalidadesAceptadas: z.array(z.enum(modalidadValues)) }).refine(v => v.salarioMin <= v.salarioMax, "El mínimo no puede ser mayor que el máximo.").strict(),
+  about: z.object({ descripcion: z.string().trim().min(1).max(1000) }).strict(),
+  references: z.object({ referencias: z.array(perfilReferenciaSchema) }).strict(),
+} as const;
+
+export async function savePerfilNineraSectionAction(_previous: PerfilNineraSectionState, section: PerfilNineraSection, payload: unknown): Promise<PerfilNineraSectionState> {
+  if (!Object.hasOwn(sectionSchemas, section)) return { status: "error", message: "La sección del perfil no es válida." };
+  const parsed = sectionSchemas[section].safeParse(payload);
+  if (!parsed.success) return { status: "error", message: parsed.error.issues[0]?.message ?? "Revisa los datos del perfil." };
+  try {
+    const supabase = await createServerSupabaseClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { status: "error", message: "Tu sesión expiró. Inicia sesión de nuevo." };
+    const db = createServiceRoleClient();
+    const { data: profile } = await db.from("profiles").select("role, account_status").eq("id", user.id).maybeSingle();
+    if (!profile || profile.role !== "ninera" || profile.account_status !== "activa") return { status: "error", message: GENERIC_ERROR };
+    const rpc = await db.rpc("save_perfil_ninera_section", { p_ninera_id: user.id, p_section: section, p_payload: normalizePerfilNineraPayload(parsed.data as Record<string, unknown>) });
+    if (rpc.error) { console.error("savePerfilNineraSectionAction: RPC failed", rpc.error); return { status: "error", message: GENERIC_ERROR }; }
+    return { status: "saved", perfilCompleto: Boolean(rpc.data) };
+  } catch (error) { console.error("savePerfilNineraSectionAction failed", error); return { status: "error", message: GENERIC_ERROR }; }
+}
 
 /**
  * NIN-01/NIN-02 onboarding persistence (design/UI-SPEC.md; engineering/database.md §3/§3a/
@@ -47,8 +76,12 @@ export async function savePerfilNineraDraftAction(
   if (!user) return { status: "error", message: "Tu sesión expiró. Inicia sesión de nuevo." };
 
   const db = createServiceRoleClient();
-  const { data: profile } = await db.from("profiles").select("role").eq("id", user.id).maybeSingle();
-  if (!profile || profile.role !== "ninera") return { status: "error", message: GENERIC_ERROR };
+    const { data: profile } = await db.from("profiles").select("role").eq("id", user.id).maybeSingle();
+    if (!profile || profile.role !== "ninera") return { status: "error", message: GENERIC_ERROR };
+  // Completed verified profiles use NIN-07's section RPC, which owns the identity
+  // re-review transition. Do not let the progressive onboarding action bypass it.
+  const { data: existingPerfil } = await db.from("perfil_ninera").select("verification_status, perfil_completo").eq("profile_id", user.id).maybeSingle();
+  if (existingPerfil?.verification_status === "verificada" && existingPerfil?.perfil_completo === true) return { status: "error", message: "Edita tu perfil desde Mi perfil." };
 
   const zonaIds = parsed.data.zonaIds ?? [];
   if (zonaIds.length > 0) {
@@ -175,8 +208,8 @@ export async function uploadPerfilFotoAction(_previous: UploadFotoState, formDat
   if (!user) return { status: "error", message: "Tu sesión expiró. Inicia sesión de nuevo." };
 
   const db = createServiceRoleClient();
-  const { data: profile } = await db.from("profiles").select("role").eq("id", user.id).maybeSingle();
-  if (!profile || profile.role !== "ninera") return { status: "error", message: "No se pudo subir la foto." };
+  const { data: profile } = await db.from("profiles").select("role, account_status").eq("id", user.id).maybeSingle();
+  if (!profile || profile.role !== "ninera" || profile.account_status !== "activa") return { status: "error", message: "No se pudo subir la foto." };
 
   const file = formData.get("foto");
   if (!(file instanceof File) || file.size === 0) {

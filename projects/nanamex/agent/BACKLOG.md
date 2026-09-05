@@ -842,6 +842,31 @@ Validation: `npm test -- --run --no-file-parallelism` (442 tests), `npm run lint
 `npm run typecheck`, `npm run check:secrets`, `npm run build`, and `npm run test:db`
 (including the new `test-e7-01-perfil-ninera` probe) all pass.
 
+### E7-02 — NIN-07 mi perfil (edit) + badge-integrity re-review trigger
+
+Status: VERIFIED (2026-09-05; Code Review PASS_WITH_MINOR_ISSUES, Functional QA PASS, Visual QA PASS)
+
+Dependencies: E7-01 (VERIFIED).
+
+Acceptance criteria: add the NIN-07 profile view/edit screen with section-level saves and
+verification-status badge/action. Editing identity-relevant `nombre` or `foto_url` while
+`verification_status = verificada` sets it to `en_proceso` and appends an
+`identity_verifications` row with `motivo = re-revision_por_edicion_de_perfil`, reusing the
+existing document path. Editing any other field must not change verification status. Preserve
+the PRD rule that profile completeness/publication is independent of verification status.
+
+Validation: unit and database tests cover both identity-relevant and non-identity edits,
+including the exact re-review reason and document-path reuse; lint, typecheck, tests, secret
+scan, build, and database probes pass.
+
+Delivered: `/ninera/perfil` with structured section-level editing, responsive niñera shell
+navigation, verification badge/NIN-08 action, photo upload feedback, reference add/edit/remove
+controls, cancel restoration, and fail-closed profile/reference-data reads. Identity edits
+trigger the exact re-review reason and reuse the latest document path; non-identity edits
+preserve verification status. Direct RPC validation rejects malformed schedules and preserves
+profile completeness/publication invariants. 469 tests, lint, typecheck, secret scan, build,
+and database probes pass. Browser pixel verification was unavailable.
+
 ### E7-03 — NIN-08 subir identificación
 
 Status: VERIFIED (2026-09-04; Code Review PASS_WITH_MINOR_ISSUES, Functional QA PASS, Visual QA PASS_WITH_LIMITATIONS)

@@ -12,7 +12,7 @@ const db = {
 };
 vi.mock("@/lib/supabase/server", () => ({ createServiceRoleClient: vi.fn(() => db) }));
 
-const { savePerfilNineraDraftAction, uploadPerfilFotoAction, submitIdentityDocumentAction } = await import("@/actions/perfil-ninera");
+const { savePerfilNineraDraftAction, savePerfilNineraSectionAction, uploadPerfilFotoAction, submitIdentityDocumentAction } = await import("@/actions/perfil-ninera");
 
 function fd(payload: unknown) {
   const form = new FormData();
@@ -100,6 +100,15 @@ describe("savePerfilNineraDraftAction", () => {
     ]);
   });
 
+  it("keeps incomplete draft profiles in onboarding despite a real profile row", async () => {
+    getUser.mockResolvedValue({ data: { user: { id: "user-1" } } });
+    db.from.mockImplementation((table: string) => table === "profiles" ? chain({ role: "ninera" }) : chain({ verification_status: "no_verificada", perfil_completo: false }));
+    db.rpc.mockResolvedValue({ data: false, error: null });
+    const result = await savePerfilNineraDraftAction({ status: "idle" }, fd({}));
+    expect(result).toEqual({ status: "saved", perfilCompleto: false });
+    expect(db.rpc).toHaveBeenCalledWith("save_perfil_ninera", expect.anything());
+  });
+
   it("surfaces an error when the RPC fails", async () => {
     getUser.mockResolvedValue({ data: { user: { id: "user-1" } } });
     db.from.mockImplementation(() => chain({ role: "ninera" }));
@@ -107,6 +116,32 @@ describe("savePerfilNineraDraftAction", () => {
 
     const result = await savePerfilNineraDraftAction({ status: "idle" }, fd({}));
     expect(result.status).toBe("error");
+  });
+});
+
+describe("savePerfilNineraSectionAction", () => {
+  beforeEach(() => {
+    getUser.mockResolvedValue({ data: { user: { id: "user-1" } } });
+    db.from.mockImplementation(() => chain({ role: "ninera", account_status: "activa" }));
+    db.rpc.mockResolvedValue({ data: true, error: null });
+  });
+
+  it("sends identity edits through the re-review-capable RPC", async () => {
+    const result = await savePerfilNineraSectionAction({ status: "idle" }, "identity", { nombre: "Nueva", fotoUrl: "" });
+    expect(result).toEqual({ status: "saved", perfilCompleto: true });
+    expect(db.rpc).toHaveBeenCalledWith("save_perfil_ninera_section", expect.objectContaining({ p_section: "identity", p_ninera_id: "user-1" }));
+  });
+
+  it("sends non-identity edits without a verification-status input", async () => {
+    const result = await savePerfilNineraSectionAction({ status: "idle" }, "about", { descripcion: "Una descripción" });
+    expect(result.status).toBe("saved");
+    expect(db.rpc.mock.calls[0][1].p_payload).toEqual({ descripcion: "Una descripción", disponibilidad: undefined });
+  });
+
+  it("returns controlled errors for invalid runtime sections and payloads", async () => {
+    expect((await savePerfilNineraSectionAction({ status: "idle" }, "unknown" as never, {})).status).toBe("error");
+    expect((await savePerfilNineraSectionAction({ status: "idle" }, "availability", { disponibilidad: [{ dia: "xxx", horaInicio: "bad", horaFin: "bad" }], salarioMin: 5, salarioMax: 1, modalidadesAceptadas: [] })).status).toBe("error");
+    expect((await savePerfilNineraSectionAction({ status: "idle" }, "references", { referencias: [{ nombre: "A", relacion: "Familia", periodo: "2024", contacto: null }] })).status).toBe("saved");
   });
 });
 
@@ -123,9 +158,17 @@ describe("uploadPerfilFotoAction", () => {
     expect(result.status).toBe("error");
   });
 
+  it("rejects an inactive niñera before touching storage", async () => {
+    getUser.mockResolvedValue({ data: { user: { id: "user-1" } } });
+    db.from.mockImplementation(() => chain({ role: "ninera", account_status: "suspendida" }));
+    const result = await uploadPerfilFotoAction({ status: "idle" }, new FormData());
+    expect(result.status).toBe("error");
+    expect(storageUpload).not.toHaveBeenCalled();
+  });
+
   it("rejects an oversized file server-side", async () => {
     getUser.mockResolvedValue({ data: { user: { id: "user-1" } } });
-    db.from.mockImplementation(() => chain({ role: "ninera" }));
+    db.from.mockImplementation(() => chain({ role: "ninera", account_status: "activa" }));
     const big = new File([new Uint8Array(5 * 1024 * 1024 + 1)], "foto.jpg", { type: "image/jpeg" });
     const result = await uploadPerfilFotoAction({ status: "idle" }, fileForm(big));
     expect(result.status).toBe("error");
@@ -134,7 +177,7 @@ describe("uploadPerfilFotoAction", () => {
 
   it("rejects a disallowed file type even if the client bypassed its own accept filter", async () => {
     getUser.mockResolvedValue({ data: { user: { id: "user-1" } } });
-    db.from.mockImplementation(() => chain({ role: "ninera" }));
+    db.from.mockImplementation(() => chain({ role: "ninera", account_status: "activa" }));
     const pdf = new File([new Uint8Array(10)], "foto.pdf", { type: "application/pdf" });
     const result = await uploadPerfilFotoAction({ status: "idle" }, fileForm(pdf));
     expect(result.status).toBe("error");
@@ -143,7 +186,7 @@ describe("uploadPerfilFotoAction", () => {
 
   it("uploads a valid image under the user's own path and returns its public URL", async () => {
     getUser.mockResolvedValue({ data: { user: { id: "user-1" } } });
-    db.from.mockImplementation(() => chain({ role: "ninera" }));
+    db.from.mockImplementation(() => chain({ role: "ninera", account_status: "activa" }));
     storageUpload.mockResolvedValue({ error: null });
     storageGetPublicUrl.mockReturnValue({ data: { publicUrl: "https://cdn.test/user-1/1.jpg" } });
     const image = new File([new Uint8Array(10)], "foto.jpg", { type: "image/jpeg" });

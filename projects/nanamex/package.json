@@ -10,7 +10,7 @@
     "typecheck": "next typegen && tsc --noEmit",
     "test": "vitest run",
     "check:secrets": "node scripts/check-no-public-secrets.mjs",
-    "test:db": "supabase db reset --local && node scripts/test-necesidad-rpc.mjs && node scripts/test-e4-03-profile-view.mjs && node scripts/test-e4-04-favorites.mjs && node scripts/test-e5-01-payment-boundary.mjs && node scripts/test-e5-02-webhook-finalize.mjs && node scripts/test-e5-04-contact.mjs && node scripts/test-e6-01-pipeline.mjs && node scripts/test-e7-01-perfil-ninera.mjs && node scripts/test-e7-03-identity-verification.mjs && node scripts/test-e7-03-concurrency.mjs"
+    "test:db": "supabase db reset --local && node scripts/test-necesidad-rpc.mjs && node scripts/test-e4-03-profile-view.mjs && node scripts/test-e4-04-favorites.mjs && node scripts/test-e5-01-payment-boundary.mjs && node scripts/test-e5-02-webhook-finalize.mjs && node scripts/test-e5-04-contact.mjs && node scripts/test-e6-01-pipeline.mjs && node scripts/test-e7-01-perfil-ninera.mjs && node scripts/test-e7-02-profile-edit.mjs && node scripts/test-e7-03-identity-verification.mjs && node scripts/test-e7-03-concurrency.mjs"
   },
   "dependencies": {
     "@phosphor-icons/react": "^2.1.10",

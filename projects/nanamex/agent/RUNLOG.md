@@ -668,6 +668,20 @@ disabled "Subir ahora" placeholder. E7-02/E7-05 also eligible in parallel.
 
 ---
 
+## 2026-09-05 — E7-02 Developer + Code Reviewer + Functional QA + Visual QA
+
+Objective: Implement and verify E7-02 / NIN-07 mi perfil edit and the verified-profile
+identity-integrity re-review trigger.
+Result: Added structured section-level profile editing, responsive niñera navigation, secure
+photo editing, references add/edit/remove controls with self-reported treatment, cancel
+restoration, fail-closed reads, and the atomic `save_perfil_ninera_section` RPC. Verified name/
+photo edits transition a verified profile to `en_proceso` with exact reason and document-path
+reuse; other edits preserve verification. Code Review PASS_WITH_MINOR_ISSUES, Functional QA
+PASS, Visual QA PASS. Full validation: 469 tests, lint, typecheck, secret scan, build, and
+test:db. Browser pixel verification was unavailable. Next recommended action: E7-04 or E7-05.
+
+---
+
 ## 2026-09-04 — E7-03 Developer + Code Reviewer + Functional QA + Visual QA
 
 Objective: Implement and independently verify E7-03 — NIN-08 subir identificación.

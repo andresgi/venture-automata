@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import { createServerSupabaseClient } from "@/lib/supabase/auth-server";
 import { getNineraOnboardingState } from "@/lib/auth/ninera-onboarding";
 import { UnauthorizedBanner } from "@/components/auth/unauthorized-banner";
+import { NineraNavigation } from "@/components/ninera/ninera-navigation";
 
 // NIN-03 "Inicio" (dashboard) placeholder -- full screen is a later BUILD story (E7-04).
 //
@@ -28,7 +29,7 @@ export default async function NineraHomePage() {
   }
 
   return (
-    <main className="flex min-h-screen flex-col gap-4 p-8">
+    <><NineraNavigation /><main className="flex min-h-screen flex-col gap-4 p-8 lg:ml-[248px]">
       <Suspense fallback={null}>
         <UnauthorizedBanner />
       </Suspense>
@@ -36,6 +37,6 @@ export default async function NineraHomePage() {
       <p className="max-w-md text-sm text-zinc-500">
         Área niñera. Contenido completo llega en una historia de BUILD posterior.
       </p>
-    </main>
+    </main></>
   );
 }
