@@ -23,6 +23,10 @@
 #   scripts/sync-framework.sh (this script itself)
 #   scripts/sync-from-github.sh
 #   scripts/hooks/deny-force-push.sh
+#   scripts/worker-lease.sh
+#   scripts/notify-telegram.sh
+#   scripts/start-worker-session.sh
+#   scripts/_run-worker-inner.sh
 #
 # What does NOT get copied: anything project-specific (config/, product/, engineering/,
 # agent/ tracking files, app source, .claude/settings.json, opencode.jsonc). Both settings
@@ -73,10 +77,27 @@ fi
 mkdir -p "$REPO_ROOT/scripts/hooks"
 SKELETON_SCRIPTS="$TMP_DIR/templates/venture-skeleton/scripts"
 if [ -d "$SKELETON_SCRIPTS" ]; then
-  cp "$SKELETON_SCRIPTS/sync-framework.sh" "$REPO_ROOT/scripts/sync-framework.sh"
+  # sync-framework.sh copies itself here. Overwriting the running script's file
+  # in place (cp truncates+rewrites the same inode) corrupts bash's read of the
+  # rest of THIS execution. Write to a temp name and atomically rename instead --
+  # that swaps the directory entry to a new inode and leaves the inode bash is
+  # currently reading untouched.
+  cp "$SKELETON_SCRIPTS/sync-framework.sh" "$REPO_ROOT/scripts/sync-framework.sh.new"
+  mv "$REPO_ROOT/scripts/sync-framework.sh.new" "$REPO_ROOT/scripts/sync-framework.sh"
   cp "$SKELETON_SCRIPTS/sync-from-github.sh" "$REPO_ROOT/scripts/sync-from-github.sh"
   cp "$SKELETON_SCRIPTS/hooks/deny-force-push.sh" "$REPO_ROOT/scripts/hooks/deny-force-push.sh"
-  chmod +x "$REPO_ROOT/scripts/sync-framework.sh" "$REPO_ROOT/scripts/sync-from-github.sh" "$REPO_ROOT/scripts/hooks/deny-force-push.sh"
+  cp "$SKELETON_SCRIPTS/worker-lease.sh" "$REPO_ROOT/scripts/worker-lease.sh"
+  cp "$SKELETON_SCRIPTS/notify-telegram.sh" "$REPO_ROOT/scripts/notify-telegram.sh"
+  cp "$SKELETON_SCRIPTS/start-worker-session.sh" "$REPO_ROOT/scripts/start-worker-session.sh"
+  cp "$SKELETON_SCRIPTS/_run-worker-inner.sh" "$REPO_ROOT/scripts/_run-worker-inner.sh"
+  chmod +x \
+    "$REPO_ROOT/scripts/sync-framework.sh" \
+    "$REPO_ROOT/scripts/sync-from-github.sh" \
+    "$REPO_ROOT/scripts/hooks/deny-force-push.sh" \
+    "$REPO_ROOT/scripts/worker-lease.sh" \
+    "$REPO_ROOT/scripts/notify-telegram.sh" \
+    "$REPO_ROOT/scripts/start-worker-session.sh" \
+    "$REPO_ROOT/scripts/_run-worker-inner.sh"
 fi
 
 RESOLVED_SHA="$(cd "$TMP_DIR" && git rev-parse HEAD)"

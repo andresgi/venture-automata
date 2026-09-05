@@ -339,6 +339,32 @@ worker may be active, stop. Do not attempt to resolve it automatically (no
 merge/rebase/reset/discard). Record it as a blocker per the Failure Rules below and wait
 for human review.
 
+### Interactive worker sessions (e.g. an always-on home machine)
+
+A second machine (a home PC left on, reachable over Tailscale or similar) can run the same
+agent CLI interactively — not headless, not on a timer — by being started manually from a
+terminal or phone SSH session:
+
+```
+scripts/start-worker-session.sh <claude|opencode>
+```
+
+This: runs `sync-from-github.sh` first and refuses to proceed if it reports anything other
+than up-to-date/fast-forwarded; claims the Active Worker lease (`scripts/worker-lease.sh
+claim`); starts the chosen CLI inside a detached `tmux` session named `venture-worker`, so
+closing the phone's SSH app just detaches rather than killing the session
+(`tmux attach -t venture-worker` to reattach, `Ctrl-b d` to detach without ending it); and
+guarantees the lease is released and a Telegram notification sent
+(`scripts/notify-telegram.sh`, silently a no-op if `TELEGRAM_BOT_TOKEN`/`TELEGRAM_CHAT_ID`
+aren't configured) whenever the session ends for any reason — normal exit, crash, or the
+tmux session being killed — via a `trap ... EXIT` in `scripts/_run-worker-inner.sh`.
+
+Because this is interactive, permission prompts are answered by whoever is attached to the
+tmux session, not a headless process — there is no wall-clock-timeout risk to design
+around, unlike a fully unattended/cron-triggered invocation would have. `worker-lease.sh`
+can also be run standalone (`claim`, `release`, `release --force`, `status`) for manual
+lease management, e.g. cleaning up after a session that died without releasing.
+
 ## Implementation Rules
 
 Once software development begins:
