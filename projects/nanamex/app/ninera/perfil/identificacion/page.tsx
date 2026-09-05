@@ -1,8 +1,0 @@
-import { redirect } from "next/navigation";
-import { createServerSupabaseClient } from "@/lib/supabase/auth-server";
-import { createServiceRoleClient } from "@/lib/supabase/server";
-import { IdentityUpload } from "@/components/ninera/identity-upload";
-import { NineraNavigation } from "@/components/ninera/ninera-navigation";
-export const dynamic = "force-dynamic";
-const rejectionLabels: Record<string, string> = { foto_ilegible: "La foto no se puede leer.", nombre_no_coincide: "El nombre del documento no coincide con tu perfil.", documento_invalido: "El documento no es válido.", no_se_pudo_abrir: "No se pudo abrir el documento." };
-export default async function IdentificacionPage() { const { data: { user } } = await (await createServerSupabaseClient()).auth.getUser(); if (!user) redirect("/login"); const db = createServiceRoleClient(); const [{ data: perfil }, { data: latest }] = await Promise.all([db.from("perfil_ninera").select("verification_status").eq("profile_id", user.id).maybeSingle(), db.from("identity_verifications").select("status, rejection_reason_code, rejection_note").eq("ninera_id", user.id).order("submitted_at", { ascending: false }).limit(1).maybeSingle()]); if (!perfil) redirect("/ninera/perfil"); const code = latest?.rejection_reason_code as string | null | undefined; const reason = latest?.status === "rechazada" ? latest.rejection_note || (code ? rejectionLabels[code] ?? "Necesitamos revisar nuevamente tu documento." : null) : null; return <><NineraNavigation /><div className="lg:ml-[248px]"><IdentityUpload status={perfil.verification_status} rejectionReason={reason} /></div></>; }
