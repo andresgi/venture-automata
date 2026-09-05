@@ -38,8 +38,8 @@ begin
     ) then raise exception 'candidate_not_available'; end if;
     if p_match_score not between 0 and 100 then raise exception 'invalid_match_score'; end if;
 
-    insert into public.pipeline(necesidad_id, ninera_id, estado, match_score_snapshot, match_checklist_snapshot, es_favorita)
-    values (p_necesidad_id, p_ninera_id, 'nueva', p_match_score, coalesce(p_match_checklist, '{}'::jsonb), true)
+    insert into public.pipeline(necesidad_id, ninera_id, estado, match_score_snapshot, match_checklist_snapshot, es_favorita, source)
+    values (p_necesidad_id, p_ninera_id, 'nueva', p_match_score, coalesce(p_match_checklist, '{}'::jsonb), true, 'family_favorite')
     on conflict (necesidad_id, ninera_id) do update set es_favorita = true, updated_at = now();
   else
     -- Unfavoriting a row that doesn't exist yet is a no-op, not an error -- there is

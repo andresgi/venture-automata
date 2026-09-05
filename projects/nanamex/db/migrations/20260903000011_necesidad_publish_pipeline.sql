@@ -55,8 +55,8 @@ begin
     if (v_match->>'match_score_snapshot')::integer not between 0 and 100 then
       raise exception 'invalid_match_score: % is out of range', v_match->>'match_score_snapshot';
     end if;
-    insert into public.pipeline(necesidad_id, ninera_id, estado, match_score_snapshot, match_checklist_snapshot)
-    values (v_necesidad.id, (v_match->>'ninera_id')::uuid, 'nueva', (v_match->>'match_score_snapshot')::integer, v_match->'match_checklist_snapshot')
+    insert into public.pipeline(necesidad_id, ninera_id, estado, match_score_snapshot, match_checklist_snapshot, source)
+    values (v_necesidad.id, (v_match->>'ninera_id')::uuid, 'nueva', (v_match->>'match_score_snapshot')::integer, v_match->'match_checklist_snapshot', 'pushed')
     on conflict (necesidad_id, ninera_id) do nothing;
   end loop;
   return v_necesidad.id;

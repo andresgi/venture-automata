@@ -692,3 +692,44 @@ preview/progress/error states, and E7-01 wiring. Code Review PASS_WITH_MINOR_ISS
 QA PASS, Visual QA PASS_WITH_LIMITATIONS. E8 admin review and E12 retention remain deferred.
 Validation: 464 tests, lint, typecheck, secret scan, production build, and test:db all pass.
 E7-03 marked VERIFIED. Next recommended actions: E7-02 and E7-05.
+
+---
+
+## 2026-09-05 — E7-04/E7-05 implementation and QA
+
+Implemented NIN-03 dashboard, NIN-04 pushed opportunities, and NIN-05 active vacancy browsing
+with explicit pipeline provenance, lifecycle filtering, deterministic score/recency ordering,
+day/time availability filters, responsive navigation, placeholder Cuenta/Mis solicitudes
+routes, and no-paywall behavior. Functional QA passed; Code Review and Visual QA still require
+revision for mobile filter-sheet sticky behavior, desktop live-apply semantics, and richer list
+empty-state hierarchy. Core validation passed at 490 tests, lint, typecheck, secret scan, build,
+and test:db. Stories remain IMPLEMENTED, not VERIFIED; E7-06 stays deferred.
+
+---
+
+## 2026-09-05 — E7-04 revision + E7-05 implementation
+
+Implemented NIN-03's real pushed-opportunity preview and NIN-04 received-opportunities route,
+plus NIN-05 open-vacancy browsing with the existing matching scorer, niñera-facing checklist
+labels, supported filters, honest empty/error boundaries, and server-side `activa` scoping.
+Fixed the E7-04 mobile navigation overflow risk, verification banner state styling, and compact
+empty hierarchy. NIN-06 detail/interest mutations remain explicitly deferred; cards contain no
+paywall or lock affordance and their requested action labels are inert until that story.
+Validation: 483 tests, lint, typecheck, check:secrets, production build, and test:db pass.
+
+## 2026-09-05 — Orchestrator — E7-04/E7-05 review-cycle fixes + E7-06 handoff
+
+Objective: Resolve Code Review's REVISE (5 Required Changes) and Visual QA's
+REVISION_REQUIRED (3 findings) for E7-04/E7-05, then verify independently before marking
+VERIFIED.
+Result: Fixed all 5 Code Review Required Changes directly (Limpiar action, modal
+accessibility/focus-trap, shared empty-state template, test coverage; tablet breakpoint
+recorded as an accepted scope exception after checking UX-spec.md Part D directly) plus
+the Visual QA architecture finding (converted NIN-05 from server GET-param filtering to
+client-side live-apply filtering matching FAM-05's `CandidateFiltersView`, added mobile
+sheet drag handle + sticky footer). Got independent round-2 Code Review
+(PASS_WITH_MINOR_ISSUES) and round-2 Visual QA (PASS) given the scope of the changes.
+E7-04 and E7-05 marked VERIFIED (agent/BACKLOG.md, agent/STATE.md, agent/DECISIONS.md
+updated). Full validation suite (503 tests, lint, typecheck, check:secrets, build,
+test:db) clean throughout.
+Next recommended action: E7-06 — NIN-06 detalle de vacante + Mostrar interés.

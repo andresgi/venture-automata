@@ -29,9 +29,9 @@ insert into public.perfil_familiar(profile_id,zona_id) values ('00000000-0000-00
 insert into public.necesidades(id,familia_id,zona_id,estado,modalidad,dias_horarios,pago_min,pago_max,fecha_inicio,responsabilidades)
  values ('00000000-0000-0000-0000-000000000701','00000000-0000-0000-0000-000000000721','00000000-0000-0000-0000-000000000741','activa','ocasional','[{"dia":"lun","hora_inicio":"10:00","hora_fin":"16:00"}]',150,250,current_date,'{cuidado}'),
  ('00000000-0000-0000-0000-000000000702','00000000-0000-0000-0000-000000000721','00000000-0000-0000-0000-000000000741','activa','ocasional','[{"dia":"lun","hora_inicio":"10:00","hora_fin":"16:00"}]',150,250,current_date,'{cuidado}');
-insert into public.pipeline(id,necesidad_id,ninera_id,estado,match_score_snapshot,match_checklist_snapshot) values
- ('00000000-0000-0000-0000-000000000711','00000000-0000-0000-0000-000000000701','00000000-0000-0000-0000-000000000723','nueva',100,'{}'),
- ('00000000-0000-0000-0000-000000000712','00000000-0000-0000-0000-000000000702','00000000-0000-0000-0000-000000000723','contactada',100,'{}');
+insert into public.pipeline(id,necesidad_id,ninera_id,estado,match_score_snapshot,match_checklist_snapshot,source) values
+ ('00000000-0000-0000-0000-000000000711','00000000-0000-0000-0000-000000000701','00000000-0000-0000-0000-000000000723','nueva',100,'{}','unknown'),
+ ('00000000-0000-0000-0000-000000000712','00000000-0000-0000-0000-000000000702','00000000-0000-0000-0000-000000000723','contactada',100,'{}','unknown');
 commit;
 set role service_role;
 

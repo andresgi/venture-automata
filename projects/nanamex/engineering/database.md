@@ -197,6 +197,7 @@ identified/tracked across edits — only the *set* of age ranges matters for mat
 | `match_score_snapshot` | int | Frozen at row-creation time (architecture §17) — never recomputed after creation. |
 | `match_checklist_snapshot` | jsonb | Frozen checklist (which factors passed) at creation time. |
 | `interes_ninera` | boolean, default false | Set true if the niñera separately showed interest via `NIN-04`/`NIN-05` (informational "interesada" flag — does not itself change `estado`, per J-NIN-3). |
+| `source` | enum(`pushed`,`family_view`,`family_favorite`,`unknown`) | Provenance of pipeline creation. Publish matching writes `pushed`; family profile views/favorites write their respective values. Legacy rows default to `unknown` and are excluded from NIN-04 rather than inferred as pushed. |
 | `created_at` / `updated_at` | timestamptz | |
 
 Unique (`necesidad_id`, `ninera_id`) — one pipeline record per pair.

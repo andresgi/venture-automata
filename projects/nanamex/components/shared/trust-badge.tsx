@@ -55,7 +55,7 @@ const BADGE_CONFIG: Record<VerificationStatus, BadgeConfig> = {
   },
 };
 
-export function TrustBadge({ status, size = "compact" }: { status: VerificationStatus; size?: "compact" | "detail" | "large" }) {
+export function TrustBadge({ status, size = "compact" }: { status: VerificationStatus; size?: "compact" | "detail" | "banner" | "large" }) {
   const [open, setOpen] = useState(false);
   const tooltipId = useId();
   const { Icon, weight, label, explanation, colorClasses } = BADGE_CONFIG[status];
@@ -64,7 +64,7 @@ export function TrustBadge({ status, size = "compact" }: { status: VerificationS
     <span className="relative z-20 inline-block overflow-visible">
       <button
         type="button"
-         className={`inline-flex ${size === "large" ? "min-h-20 flex-col gap-2 border-0 px-0 text-h2" : size === "detail" ? "h-7" : "h-6"} items-center gap-1 whitespace-nowrap ${size === "large" ? "" : "rounded-full border px-2"} ${size === "large" ? "text-h2" : "text-caption"} ${colorClasses}`}
+         className={`inline-flex ${size === "large" ? "min-h-20 flex-col gap-2 border-0 px-0 text-h2" : size === "banner" ? "min-h-11 gap-2 px-3 text-button" : size === "detail" ? "h-7" : "h-6"} items-center whitespace-nowrap ${size === "large" ? "" : "rounded-full border"} ${size === "large" ? "" : size === "banner" ? "" : "px-2"} ${size === "large" || size === "banner" ? "" : "text-caption"} ${colorClasses}`}
         aria-describedby={tooltipId}
         aria-expanded={open}
         onMouseEnter={() => setOpen(true)}
@@ -73,7 +73,7 @@ export function TrustBadge({ status, size = "compact" }: { status: VerificationS
         onBlur={() => setOpen(false)}
         onClick={() => setOpen((current) => !current)}
       >
-         <Icon size={size === "large" ? 48 : 14} weight={weight} aria-hidden="true" />
+          <Icon size={size === "large" ? 48 : size === "banner" ? 24 : 14} weight={weight} aria-hidden="true" />
         {label}
       </button>
       <span

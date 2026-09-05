@@ -118,11 +118,25 @@ E7-02 (NIN-07 mi perfil edit) is VERIFIED, including section-level saves, identi
 re-review triggering, structured references editing, responsive navigation, and fail-closed
 profile/reference reads.
 
+E7-04 (NIN-03 dashboard) and E7-05 (NIN-04/NIN-05 opportunities) are now VERIFIED. Both had
+a Code Review REVISE (5 Required Changes) and a Visual QA REVISION_REQUIRED (3 findings) in
+round 1; the orchestrator fixed all of them directly rather than looping back to the
+Developer, including converting NIN-05's filtering from server-side GET-params to
+client-side live-apply filtering (matching FAM-05's established `CandidateFiltersView`
+pattern). Both rounds 2 came back PASS/PASS_WITH_MINOR_ISSUES. Pushed opportunities use
+`/ninera/oportunidades/recibidas`; active browse uses `/ninera/oportunidades`.
+
+**Epic 7 progress: E7-01 through E7-05 are all VERIFIED.** E7-06 (NIN-06 detalle de vacante
++ Mostrar interés) is next — it owns the vacancy detail route and `interes_ninera` mutation
+that E7-05's cards currently leave visibly disabled. E6-02 (NIN-09, deferred 2026-09-04)
+still needs E7-06 too.
+
 ## Next Eligible Action
 
-E7-04: NIN-03 dashboard (dependency E7-01 and E7-03, both VERIFIED). E7-05 (NIN-04/05
-oportunidades) is also eligible in parallel; E6-02 (NIN-09, deferred 2026-09-04) still needs
-E7-06, further downstream.
+E7-06: NIN-06 detalle de vacante + Mostrar interés (dependency E7-05, now VERIFIED). Sets
+`interes_ninera` on the pipeline row (auto-created if absent) without changing `estado`;
+family sees the "interesada" flag. Once E7-06 lands, E6-02 (NIN-09 read-only mirror,
+deferred 2026-09-04) becomes a real, connected screen instead of an orphaned one.
 
 ## Human Blocker
 

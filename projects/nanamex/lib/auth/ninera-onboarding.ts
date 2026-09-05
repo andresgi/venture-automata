@@ -29,6 +29,7 @@ export async function getNineraOnboardingState(userId: string) {
 
   const typedProfile = profileResult.data as NineraOnboardingProfile | null;
   return {
+    readError: Boolean(profileResult.error || perfilNineraResult.error),
     isNinera: typedProfile?.role === "ninera" && typedProfile.account_status === "activa",
     isOnboarded: Boolean(perfilNineraResult.data?.perfil_completo),
     profile: typedProfile,
