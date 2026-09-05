@@ -4,7 +4,7 @@ import { diasValues, rangoEdadValues } from "@/lib/familia/necesidad-validation"
 export const modalidadValues = ["planta", "entrada_salida", "ocasional"] as const;
 
 const time = z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, "Selecciona una hora válida.");
-const schedule = z
+export const perfilScheduleSchema = z
   .object({ dia: z.enum(diasValues), horaInicio: time, horaFin: time })
   .strict()
   .superRefine((value, ctx) => {
@@ -13,12 +13,12 @@ const schedule = z
     }
   });
 
-const referencia = z
+export const perfilReferenciaSchema = z
   .object({
     nombre: z.string().trim().min(1, "Agrega un nombre."),
     relacion: z.string().trim().min(1, "Agrega una relación."),
     periodo: z.string().trim().min(1, "Agrega un periodo."),
-    contacto: z.string().trim().optional(),
+    contacto: z.string().trim().nullable().optional(),
   })
   .strict();
 
@@ -33,13 +33,13 @@ export const perfilNineraDraftSchema = z
     fotoUrl: z.string().trim().url().optional().or(z.literal("")),
     zonaIds: z.array(z.string().uuid()).optional(),
     anosExperiencia: z.number().int().nonnegative("Los años de experiencia no pueden ser negativos.").optional(),
-    disponibilidad: z.array(schedule).optional(),
+    disponibilidad: z.array(perfilScheduleSchema).optional(),
     salarioMin: z.number().int().nonnegative("El salario no puede ser negativo.").optional(),
     salarioMax: z.number().int().nonnegative("El salario no puede ser negativo.").optional(),
     modalidadesAceptadas: z.array(z.enum(modalidadValues)).optional(),
     descripcion: z.string().trim().max(1000, "Máximo 1000 caracteres.").optional(),
     experienciaEdades: z.array(z.enum(rangoEdadValues)).optional(),
-    referencias: z.array(referencia).optional(),
+    referencias: z.array(perfilReferenciaSchema).optional(),
   })
   .strict()
   .superRefine((value, ctx) => {

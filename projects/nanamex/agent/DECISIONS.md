@@ -1064,3 +1064,11 @@ browser pixel verification was unavailable, with no remaining source-level defec
 review and E12 retention/deletion remain out of scope; the identity-document retention policy
 must still be resolved before production collection. Validation passed: 464 tests, lint,
 typecheck, secret scan, build, and test:db.
+## 2026-09-05 — E7-02 VERIFIED
+
+Accepted NIN-07 profile editing after the implementation/review loop. Identity-relevant edits
+reuse the latest identity document path and create the exact `re-revision_por_edicion_de_perfil`
+submission; non-identity edits do not alter verification. The profile editor fails closed on
+profile, join-table, or zone-reference read errors to prevent overwriting persisted data with
+fallback values. E7-02 passed Functional QA and Visual QA; Code Review passed with minor
+non-blocking coverage notes. Next eligible work is E7-04 dashboard or E7-05 opportunities.

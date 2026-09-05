@@ -114,10 +114,13 @@ after the fix. Branch `nanamex/e7-01-nin-onboarding`, not yet pushed/merged.
 
 E7-03 (NIN-08 identity upload) is also VERIFIED, including private Storage, byte-level file
 validation, durable cleanup reconciliation, and optional non-blocking verification.
+E7-02 (NIN-07 mi perfil edit) is VERIFIED, including section-level saves, identity-integrity
+re-review triggering, structured references editing, responsive navigation, and fail-closed
+profile/reference reads.
 
 ## Next Eligible Action
 
-E7-02: NIN-07 mi perfil edit (dependency E7-01, now VERIFIED). E7-05 (NIN-04/05
+E7-04: NIN-03 dashboard (dependency E7-01 and E7-03, both VERIFIED). E7-05 (NIN-04/05
 oportunidades) is also eligible in parallel; E6-02 (NIN-09, deferred 2026-09-04) still needs
 E7-06, further downstream.
 
