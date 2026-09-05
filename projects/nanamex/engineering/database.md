@@ -330,6 +330,15 @@ same retention stance as `analytics_events`, §12).
 
 ---
 
+### 10b. `identity_document_cleanup_queue`
+
+**Purpose:** Durable reconciliation record for a private Storage object whose deletion
+failed after the submission transaction was rejected or unavailable. The upload action
+attempts immediate deletion first; only a failed attempt is queued. This table is
+system-owned, has no browser RLS policy, and is intended for a future policy-gated worker.
+It does not define or imply an identity-document retention period (that remains unresolved
+per §8/security.md).
+
 ## 11. `reportes`
 
 **Purpose:** Moderation queue object (`ADM-04`/`ADM-05`).

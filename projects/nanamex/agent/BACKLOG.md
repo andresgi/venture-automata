@@ -747,6 +747,125 @@ pipeline UI or Epic 10 notification delivery.
 Validation: `npm test -- --run --no-file-parallelism` (388 tests), `npm run lint`,
 `npm run typecheck`, `npm run check:secrets`, `npm run build`, and `npm run test:db` all pass.
 
+## Epic 6 — Pipeline Management
+
+### E6-01 — FAM-11 estado de candidatas (kanban/segmented views)
+
+Status: VERIFIED (2026-09-04; Code Review PASS, no required changes — see
+agent/reviews/code-E6-01-review.md. Functional QA PASS — see agent/qa/e6-01-functional.md.
+Visual QA PASS_WITH_MINOR_ISSUES — 2 minor mobile touch-target/layout findings, both fixed
+directly, see agent/qa/e6-01-visual.md.)
+
+Dependencies: E5-04 (VERIFIED).
+
+Delivered: `advance_pipeline_state` RPC
+(`db/migrations/20260904000018_pipeline_state_transitions.sql`, SECURITY DEFINER,
+`service_role`-only) enforcing the story's central security requirement — a manual
+`nueva -> contactada` transition is structurally unreachable, enforced independently at
+three layers: the RPC's first statement hard-rejects `contactada`/`nueva` as targets before
+any row lookup; `actions/pipeline.ts`'s Zod schema excludes both from its input domain
+entirely; and the UI (`components/familia/pipeline-board.tsx`) renders no advance control
+for `nueva` at all. That transition remains exclusively E5-04's `confirm_contact` flow.
+Forward transitions are strictly ordered (`contactada->entrevista->contratada`, no
+skipping/backward), verified live against Postgres. `Descartar` is available from any
+non-terminal state and idempotent. Ownership is enforced server-side
+(`familia_id` derived from session, never client input).
+
+FAM-11 page (`app/familia/necesidad/[id]/pipeline/page.tsx`): desktop 5-column kanban
+(220px columns, horizontal scroll not shrink, no per-column color-coding, `h2`+`ink-400`
+headers), mobile horizontally-scrollable segmented control with denser stacked rows,
+empty state pointing back to FAM-04, success toast on manual advance (reuses the existing
+`Toast` component from E4-04). `app/familia/page.tsx` gained a "Ver pipeline" link on active
+necesidad cards, and `components/familia/contact-request-form.tsx` gained a FAM-11 exit
+link after a successful FAM-10 contact — closing a navigation gap E5-04's Visual QA had
+flagged (no FAM-10 -> FAM-11 handoff existed until now).
+
+**Documented interim behavior (accepted, not a defect):** per UX-spec.md, "every subsequent
+state change notifies the niñera" — Epic 10 (Resend/Twilio notification infrastructure)
+does not exist yet, same as E5-04's precedent (see agent/DECISIONS.md "E5-04 notification
+handoff narrowed"). This story writes the durable `pipeline_state_advanced` analytics event
+in the same atomic transaction as the state change, but does not attempt notification
+delivery or invent a queue. E10 must consume this handoff.
+
+**Out of scope (explicitly, not silently skipped):** E6-02 (NIN-09 read-only mirror) is a
+separate story. Closing the parent necesidad on `contratada` is not implemented — not in
+this story's acceptance criteria.
+
+Validation: `npm test -- --run --no-file-parallelism` (412 tests), `npm run lint`,
+`npm run typecheck`, `npm run check:secrets`, `npm run build`, and `npm run test:db`
+(including the new `test-e6-01-pipeline` probe) all pass.
+
+## Epic 7 — Niñera Profile & Discovery
+
+### E7-01 — NIN-01/02 onboarding wizard
+
+Status: VERIFIED (2026-09-04; Code Review PASS — see agent/reviews/code-E7-01-review.md.
+Functional QA PASS — see agent/qa/e7-01-functional.md. Visual QA round 1
+REVISION_REQUIRED — missing desktop anchored-side-rail shell entirely (UI-SPEC requires
+"same wizard shell as FAM-03"); round 2 PASS after the Developer added the desktop shell,
+see agent/qa/e7-01-visual.md.)
+
+Dependencies: E0-04 (VERIFIED).
+
+Delivered: `save_perfil_ninera` SECURITY DEFINER RPC
+(`db/migrations/20260904000019_perfil_ninera_onboarding.sql`, `service_role`-only)
+atomically upserts `perfil_ninera` + `ninera_zonas`/`ninera_experiencia_edades`/
+`referencias`, computes `perfil_completo` from exactly database.md §3's six required
+fields, and sets `publicado := perfil_completo` **unconditionally** — `verification_status`
+is never referenced anywhere in the write path. This is the direct, tested resolution of
+the PRD addendum's Critical Issue #2: a `no_verificada`, `perfil_completo=true` niñera
+genuinely appears in `computeMatches` results (proven both by a unit test and a live
+Postgres probe, `scripts/test-e7-01-perfil-ninera.sql`, cross-checked against the real
+matching query in `actions/necesidad.ts`, which has no `verification_status` filter).
+
+Two-step wizard (`components/ninera/perfil-ninera-wizard.tsx`) reusing E2-01's
+`necesidad-wizard.tsx` shell (mobile sticky nav / desktop anchored side-rail with
+`IntersectionObserver`-driven scroll sections): paso 1 (photo upload to the new public-read
+`profile-photos` Storage bucket, zona de trabajo multi-select, años de experiencia), paso 2
+(disponibilidad, expectativa salarial, modalidades, descripción, referencias, experiencia
+con edades). A `/ninera` completion gate mirrors FAM-01's `/familia` gate.
+
+The end-of-paso-2 "Sube tu identificación" prompt's "Subir ahora" action is wired to the
+NIN-08 route; upload remains optional and non-blocking.
+
+**Scope judgment calls:** (1) `ZonaMultiSelect` — a multi-select variant of FAM-03's
+single-select zona autocomplete, since `ninera_zonas` is many-to-many (UI-SPEC's literal
+"same autocomplete as FAM-03" wording doesn't address this; Code Review flagged this as
+well-reasoned but recommending explicit UX/Product sign-off, not a defect); (2)
+`experiencia_edades` chip group added despite no literal UI-SPEC mention, required by
+database.md for `perfil_completo`/Match Score; (3) referencias has no enforced minimum
+count (UX-spec sets none). Minor non-blocking notes from Code/Functional QA: photo
+MIME-type validation trusts client-reported `File.type` (no magic-byte sniffing); desktop
+rail navigation's `scrollIntoView` doesn't also move keyboard focus.
+
+Validation: `npm test -- --run --no-file-parallelism` (442 tests), `npm run lint`,
+`npm run typecheck`, `npm run check:secrets`, `npm run build`, and `npm run test:db`
+(including the new `test-e7-01-perfil-ninera` probe) all pass.
+
+### E7-03 — NIN-08 subir identificación
+
+Status: VERIFIED (2026-09-04; Code Review PASS_WITH_MINOR_ISSUES, Functional QA PASS, Visual QA PASS_WITH_LIMITATIONS)
+
+Dependencies: E7-01 (VERIFIED).
+
+Delivered: `/ninera/perfil/identificacion` with no-verificada, rejected-with-reason/resubmit,
+en-proceso read-only, and verified read-only states; mobile camera/gallery inputs, desktop
+picker/drop zone, quality guidance, and client/server size/type/extension validation. The
+server derives the authenticated niñera, requires an active account, generates an own-path
+private Storage object, and calls a service-role-only atomic RPC that appends the submission,
+sets `en_proceso` without changing `publicado`, and records `identity_verification_submitted`.
+Storage policies deny browser writes/updates, keep the bucket private, and allow reads only to
+admins. Failed object cleanup is durably queued without inventing a retention period.
+
+Scope decision: rejected resubmission is `primera_vez`; replacing a verified document uses
+`re-revision_por_edicion_de_perfil` as the closest approved review reason. Admin review (E8)
+and deletion/retention policy (E12) remain out of scope.
+
+Validation: `npm test -- --run --no-file-parallelism` (464 tests), `npm run lint`,
+`npm run typecheck`, `npm run check:secrets`, `npm run build`, and `npm run test:db` all pass.
+Independent Code Review, Functional QA, and Visual QA passed; browser pixel verification was
+unavailable in this environment.
+
 ## Change Requests
 
 Ad-hoc, non-PRD asks made directly in chat (see AGENTS.md, "Change Requests"). Use `CR-NNN`

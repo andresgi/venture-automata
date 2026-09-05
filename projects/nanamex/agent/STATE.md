@@ -79,22 +79,47 @@ the whole `/familia/*` subtree (tracked, non-blocking, see E2-03's BACKLOG.md en
 active-necesidad editing remains unbuilt (E2-04's scope); FAM-06 profile details remain
 unbuilt (E4-03).
 
-**Epic 5 (Paywall, Payments, Entitlements) — in progress**: E5-01 (Stripe Checkout Session
+**Epic 5 (Paywall, Payments, Entitlements) — complete**: E5-01 (Stripe Checkout Session
 creation), E5-02 (Stripe webhook handler / entitlement activation, `POST
-/api/webhooks/stripe`, idempotent + correctly stacks `expires_at` on repurchase), and E5-03
-(real FAM-08/FAM-09 paywall + checkout screens, retiring E5-01's interim direct-redirect)
-all VERIFIED. E5-05 (FAM-13 entitlement/payment history) is now VERIFIED; E5-04 (FAM-10
-solicitar entrevista) is now VERIFIED; Epic 5 is complete.
+/api/webhooks/stripe`, idempotent + correctly stacks `expires_at` on repurchase), E5-03
+(real FAM-08/FAM-09 paywall + checkout screens, retiring E5-01's interim direct-redirect),
+E5-04 (FAM-10 solicitar entrevista, paid contact confirmation), and E5-05 (FAM-13
+entitlement/payment history) are all VERIFIED.
 
 **Pre-RELEASE_GATE backlog item (E5-03):** FAM-09's success confirmation has no icon
 animation per spec; deferred as cosmetic, no motion convention exists yet in this codebase
 (agent/qa/e5-03-visual.md V03).
 
+**Merged to `main` 2026-09-04**: PR #15
+(https://github.com/andresgi/venture-automata/pull/15, squash-merged
+`f267404`) — E4-03 through E5-05 (FAM-06 candidate detail, FAM-07 favoritas, and all of
+Epic 5). All CI checks passed (lint/typecheck/test/build, migrations-apply-cleanly,
+Vercel preview build) before merge, per the standing overnight authorization below. Local
+`main` fast-forwarded to match; the feature branch
+`nanamex/e4-03-fam06-candidate-detail` was left undeleted (remote and local) as a safety
+default, not explicitly requested.
+
+**Epic 6 (Pipeline Management) — in progress**: E6-01 (FAM-11 estado de candidatas,
+`advance_pipeline_state` RPC structurally preventing any manual `nueva -> contactada`
+transition, kanban/segmented views) VERIFIED. Branch `nanamex/e6-01-fam11-pipeline`, not
+yet pushed/merged.
+
+**Epic 7 (Niñera Profile & Discovery) — in progress**: E7-01 (NIN-01/02 onboarding wizard)
+VERIFIED. `save_perfil_ninera` RPC sets `publicado := perfil_completo` unconditionally,
+independent of `verification_status` — the direct, tested resolution of the PRD addendum's
+Critical Issue #2 (a `no_verificada` niñera with a complete profile appears in matching).
+Reuses E2-01's wizard shell (mobile sticky nav / desktop anchored side-rail) after a Visual
+QA round 1 REVISION_REQUIRED caught the desktop shell being entirely missing; round 2 PASS
+after the fix. Branch `nanamex/e7-01-nin-onboarding`, not yet pushed/merged.
+
+E7-03 (NIN-08 identity upload) is also VERIFIED, including private Storage, byte-level file
+validation, durable cleanup reconciliation, and optional non-blocking verification.
+
 ## Next Eligible Action
 
-E6-01: FAM-11 estado de candidatas (pipeline management), dependency E5-04 now VERIFIED.
-Adds family pipeline views and manual transitions from `contactada` onward, plus discard from
-any state. The `nueva -> contactada` transition remains exclusively owned by E5-04.
+E7-02: NIN-07 mi perfil edit (dependency E7-01, now VERIFIED). E7-05 (NIN-04/05
+oportunidades) is also eligible in parallel; E6-02 (NIN-09, deferred 2026-09-04) still needs
+E7-06, further downstream.
 
 ## Human Blocker
 

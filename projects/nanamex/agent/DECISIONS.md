@@ -4,6 +4,14 @@ Important product, technical, operational, and workflow decisions are recorded h
 
 Do not record trivial implementation choices.
 
+## 2026-09-04 — E7-03 identity submission reasons
+
+NIN-08 derives review reason server-side: a first submission or rejected resubmission is
+`primera_vez`; replacing a verified document uses `re-revision_por_edicion_de_perfil`, the
+existing enum value for a renewed identity requiring review. The E7-01 onboarding prompt is
+wired to `/ninera/perfil/identificacion` now that the route exists, without making upload a
+completion gate. Admin decisions and retention/deletion remain E8/E12 scope.
+
 ## 2026-09-04 — E5-04 stale checkout-return policy approved
 
 An old local `payments.status = pendiente` row must not make a revisited `checkout=success`
@@ -927,3 +935,132 @@ handoff without changing contact success semantics. Validation passed: 388 tests
 typecheck, secret scan, build, and test:db. E5-04 implementation and integration tests are in
 isolated local commits; unrelated sibling-project deletions and workspace settings remain
 uncommitted.
+
+## 2026-09-04 — PR #15 merged to main (E4-03 through Epic 5)
+
+Per the 2026-09-03 standing overnight authorization (orchestrator may auto-merge
+BUILD-story PRs once CI + Code Review/QA pass, without pausing for per-PR approval), pushed
+branch `nanamex/e4-03-fam06-candidate-detail` and opened PR #15
+(https://github.com/andresgi/venture-automata/pull/15) bundling E4-03 (FAM-06 candidate
+detail), E4-04 (FAM-07 favoritas), and all of Epic 5 (E5-01 through E5-05). All CI checks
+passed: `Lint, typecheck, test, build`, `Migrations apply cleanly to a fresh Supabase
+instance`, and the Vercel preview build. Squash-merged as `f267404`. Local `main`
+fast-forwarded; feature branch left undeleted (remote and local) as a safety default.
+
+Next eligible action: E6-01 — FAM-11 estado de candidatas (pipeline management), dependency
+E5-04 now VERIFIED and merged.
+
+## 2026-09-04 — E6-01 VERIFIED
+
+Built the `advance_pipeline_state` RPC (SECURITY DEFINER, `db/migrations/
+20260904000018_pipeline_state_transitions.sql`) and FAM-11 pipeline board, satisfying the
+story's central security requirement: a manual `nueva -> contactada` transition is
+structurally unreachable, enforced independently at three layers (RPC hard-rejects both as
+targets before any lookup and is `service_role`-only; the action layer's Zod schema
+excludes both from its input domain; the UI renders no advance control for `nueva`). That
+transition remains exclusively E5-04's `confirm_contact` flow. Forward transitions are
+strictly ordered (`contactada->entrevista->contratada`); `Descartar` works from any
+non-terminal state and is idempotent; ownership is server-derived, never client input.
+
+Code Review: PASS, no required changes (agent/reviews/code-E6-01-review.md) — independently
+re-verified all three enforcement layers by reading the actual SQL/Zod/UI code, not just
+the developer's report, plus a live-database probe.
+
+Functional QA: PASS (agent/qa/e6-01-functional.md) — independently re-derived the same
+three-layer guarantee from scratch, confirmed forward-ordering/discard/ownership against a
+live Postgres probe, verified empty state, toast copy, and the FAM-06 "Ver perfil" link.
+
+Visual QA: PASS_WITH_MINOR_ISSUES (agent/qa/e6-01-visual.md) — 2 minor mobile findings:
+segmented-control tabs below the 44px touch-target convention, and the mobile stacked row's
+action block misaligned inside its `items-center` flex parent (reused the desktop
+`mt-3` spacing verbatim). Both fixed directly by the orchestrator: tabs now use
+`min-h-11`; `PipelineActions` takes a `className` prop so the mobile row's actions render
+on their own bordered line instead of inheriting the desktop card's margin. Re-verified
+lint/typecheck/412 tests/check:secrets/build clean.
+
+**Notification handoff narrowed, same pattern as E5-04:** per UX-spec.md, every pipeline
+state change should notify the niñera; Epic 10 (Resend/Twilio) doesn't exist yet, so this
+story only writes the durable `pipeline_state_advanced` analytics event in the same
+transaction as the state change — no delivery attempted.
+
+**E6-01 marked VERIFIED.** Work was originally done directly on `main`'s working tree
+(continuing from the PR #15 merge); moved onto a proper feature branch
+(`nanamex/e6-01-fam11-pipeline`) before committing, per this project's established
+per-story branch convention (same pattern as the "E2-02 continuity" entry).
+
+## 2026-09-04 — E6-02 deferred in favor of Epic 7
+
+E6-02 (NIN-09 mis solicitudes, read-only pipeline mirror for the niñera role) is technically
+eligible — its stated dependency (E6-01) is now VERIFIED. Escalating anyway: per
+design/UX-spec.md, NIN-09's only action is "Ver detalle → NIN-06," and NIN-06 (vacante
+detail + mostrar interés) doesn't exist — no niñera-side profile, dashboard, or browsing
+screens are built at all yet (Epic 7 hasn't started). Building NIN-09 now would produce a
+read-only list with a dead-end link and no surrounding niñera UI context to sit inside of,
+the same category of premature-ahead-of-dependency risk this project has consistently
+avoided (E1-02, E5-01, E5-03, E5-04 precedent) rather than a case where narrow scoping
+would help — there's no smaller version of "mirror a pipeline for a role with no other UI"
+that's actually useful to ship.
+
+**Orchestrator decision: defer E6-02, start Epic 7 instead.** E7-01 (NIN-01/02 onboarding
+wizard) depends only on E0-04 (VERIFIED) and has no such gap. Epic 7 is what actually
+unblocks E6-02, E7-05/06 (niñera opportunity browsing), and the niñera side of the
+marketplace generally — building it first makes E6-02 a real, connected screen instead of
+an orphaned one. Not a scope change to either story's acceptance criteria, just an
+ordering decision within what's already eligible.
+
+## 2026-09-04 — E7-01 VERIFIED
+
+Built `save_perfil_ninera` (SECURITY DEFINER RPC, `db/migrations/
+20260904000019_perfil_ninera_onboarding.sql`) and the two-step NIN-01/02 onboarding
+wizard. The story's central requirement — the PRD addendum's Critical Issue #2 — is
+directly resolved: `publicado` is set from `perfil_completo` alone, with
+`verification_status` never referenced anywhere in the RPC's write path, so a
+`no_verificada` niñera with a complete profile is genuinely discoverable/matchable. Also
+added the `profile-photos` Storage bucket (public-read, owner-scoped write RLS) — the
+first Supabase Storage bucket in this codebase.
+
+Code Review: PASS (agent/reviews/code-E7-01-review.md) — independently re-derived the
+Critical-Issue-2 resolution by reading the RPC SQL directly and cross-checking against
+`actions/necesidad.ts`'s real matching query (no `verification_status` filter present);
+confirmed `perfil_completo` uses exactly database.md §3's six required fields; confirmed
+authorization and Storage RLS. Also verified an unrelated fixture-collision fix the
+developer made to the already-VERIFIED E6-01's `test-e6-01-pipeline.sql` (a natural-key
+zona label change, logic-neutral) was safe.
+
+Functional QA: PASS (agent/qa/e7-01-functional.md) — independently re-traced the same
+critical requirement end-to-end, confirmed the `/ninera` completion gate mirrors FAM-01's
+pattern, confirmed the "Subir ahora" placeholder uses a real `disabled` attribute (not a
+misleading no-op), and re-ran the full validation suite including `test:db` against live
+Postgres.
+
+Visual QA: round 1 REVISION_REQUIRED (agent/qa/e7-01-visual.md) — the desktop
+anchored-side-rail shell UI-SPEC requires ("same wizard shell as FAM-03") was entirely
+absent; the wizard rendered its mobile layout stretched to desktop widths instead. Sent
+back to the Developer with the specific gap (missing `isDesktop` split, `<aside>` rail,
+`lg:static` override on the mobile action bar) plus two minor issues (identity prompt
+rendered as a disconnected full screen instead of a card inside paso 2). Round 2: PASS —
+Developer added the real desktop shell (matching `necesidad-wizard.tsx`'s structure,
+functional `scrollIntoView` rail navigation) and repositioned the identity prompt as a
+card within the wizard's chrome; independently re-verified both fixes and re-ran the full
+validation suite (442 tests, lint, typecheck, check:secrets, build) clean.
+
+**E7-01 marked VERIFIED.** Work done on branch `nanamex/e7-01-nin-onboarding` (branched
+from `nanamex/e6-01-fam11-pipeline`, per this project's per-story branch convention). Next
+eligible action: E7-03 (NIN-08 subir identificación) — closes the loop E7-01 left open
+with its disabled "Subir ahora" placeholder. E7-02 and E7-05 are also eligible in
+parallel.
+
+## 2026-09-04 — E7-03 VERIFIED
+
+E7-03 delivered NIN-08 identity upload with private `identity-documents` Storage, server-side
+MIME/extension/size and byte-signature validation, immutable owner-scoped document paths,
+append-only verification submissions, active-submission concurrency protection, durable cleanup
+reconciliation, and the three-state TrustBadge/verification UI. Rejected resubmission uses
+`primera_vez`; replacing a verified document uses `re-revision_por_edicion_de_perfil`. The E7-01
+"Subir ahora" prompt is wired to NIN-08 and remains optional/non-blocking.
+
+Code Review: PASS_WITH_MINOR_ISSUES. Functional QA: PASS. Visual QA: PASS_WITH_LIMITATIONS;
+browser pixel verification was unavailable, with no remaining source-level defects. E8 admin
+review and E12 retention/deletion remain out of scope; the identity-document retention policy
+must still be resolved before production collection. Validation passed: 464 tests, lint,
+typecheck, secret scan, build, and test:db.

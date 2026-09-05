@@ -100,12 +100,22 @@ function NecesidadCard({ necesidad }: { necesidad: NecesidadRow }) {
           {summary ?? "Aún no hay candidatas para esta necesidad."}
         </p>
       )}
-      <Link
-        href={isActiva ? `/familia/necesidad/${necesidad.id}` : `/familia/necesidad?draft=${necesidad.id}`}
-        className="mt-4 inline-flex min-h-11 items-center text-body-sm font-medium text-primary-600 hover:underline"
-      >
-        {isActiva ? "Ver candidatas" : "Continuar borrador"}
-      </Link>
+      <div className="mt-4 flex flex-wrap items-center gap-4">
+        <Link
+          href={isActiva ? `/familia/necesidad/${necesidad.id}` : `/familia/necesidad?draft=${necesidad.id}`}
+          className="inline-flex min-h-11 items-center text-body-sm font-medium text-primary-600 hover:underline"
+        >
+          {isActiva ? "Ver candidatas" : "Continuar borrador"}
+        </Link>
+        {isActiva && (
+          <Link
+            href={`/familia/necesidad/${necesidad.id}/pipeline`}
+            className="inline-flex min-h-11 items-center text-body-sm font-medium text-primary-600 hover:underline"
+          >
+            Ver pipeline
+          </Link>
+        )}
+      </div>
     </article>
   );
 }

@@ -13,6 +13,16 @@ Next recommended action:
 
 ---
 
+## 2026-09-04 — Developer — E7-03 NIN-08
+
+Objective: Implement the niñera identity-document upload flow and private submission boundary.
+Result: Implemented; automated validation passed. Awaiting independent review and QA.
+Artifacts changed: identity upload page/component/action, TrustBadge large variant, Storage/
+identity_verifications migration, DB probe, unit/static migration tests, onboarding link.
+Next recommended action: Code Review, Functional QA, and Visual QA; do not mark VERIFIED.
+
+---
+
 ## 2026-09-04 — Developer — E5-04 review fixes
 
 Objective: Resolve the E5-04 Code Review findings without adding E6 pipeline UI or Epic 10
@@ -614,3 +624,57 @@ cancellation, and interim handoff. Code Review PASS_WITH_MINOR_ISSUES, Functiona
 Visual QA PASS_WITH_SCOPE_LIMITATION. FAM-11 remains E6 scope and Epic 10 notification delivery
 remains deferred. Validation: 388 tests, lint, typecheck, secret scan, production build, and
 test:db all pass. Next recommended action: E6-01.
+
+## 2026-09-04 — Orchestrator — PR #15 merged
+
+Objective: Merge PR #15 (E4-03 through Epic 5) to `main` once CI is green, per the
+2026-09-03 standing overnight authorization.
+Result: `gh pr checks 15` showed all checks passed (Lint/typecheck/test/build; migrations
+apply cleanly; Vercel preview build). Merged via `gh pr merge 15 --squash`
+(commit `f267404`). Local `main` fast-forwarded to match.
+Artifacts changed: agent/STATE.md, agent/DECISIONS.md (this entry).
+Next recommended action: E6-01 — FAM-11 estado de candidatas (pipeline management).
+
+## 2026-09-04 — Developer + Code Reviewer + Functional QA + Visual QA — E6-01
+
+Objective: Implement and verify E6-01 (FAM-11 estado de candidatas), enforcing that a
+manual `nueva -> contactada` transition remains permanently unreachable outside E5-04's
+paid flow.
+Result: `advance_pipeline_state` RPC + FAM-11 kanban/segmented board built. Code Review
+PASS, Functional QA PASS, Visual QA PASS_WITH_MINOR_ISSUES (2 mobile findings, both fixed
+directly by the orchestrator: touch-target height, action-row alignment). Full validation
+suite (412 tests, lint, typecheck, check:secrets, build, test:db including a new live-DB
+probe) re-run clean after fixes. E6-01 marked VERIFIED (agent/BACKLOG.md, agent/STATE.md,
+agent/DECISIONS.md updated). Work moved from `main`'s working tree onto a proper feature
+branch (`nanamex/e6-01-fam11-pipeline`) before committing.
+Next recommended action: E7-01 (NIN-01/02 onboarding wizard) — E6-02 deliberately deferred,
+see agent/DECISIONS.md "E6-02 deferred in favor of Epic 7."
+
+## 2026-09-04 — Developer + Code Reviewer + Functional QA + Visual QA — E7-01
+
+Objective: Implement and verify E7-01 (NIN-01/02 niñera onboarding wizard), directly
+resolving the PRD addendum's Critical Issue #2 (a `no_verificada`, complete profile must
+still be discoverable/matchable).
+Result: `save_perfil_ninera` RPC + two-step wizard + new `profile-photos` Storage bucket
+built. Code Review PASS, Functional QA PASS, Visual QA round 1 REVISION_REQUIRED (missing
+desktop anchored-side-rail shell — a real, substantive gap, sent back to the Developer
+rather than patched directly given its size), round 2 PASS after the Developer added the
+shell. Full validation suite (442 tests, lint, typecheck, check:secrets, build, test:db)
+clean throughout. E7-01 marked VERIFIED (agent/BACKLOG.md, agent/STATE.md,
+agent/DECISIONS.md updated). Work done on feature branch
+`nanamex/e7-01-nin-onboarding`.
+Next recommended action: E7-03 (NIN-08 subir identificación) — closes the loop on E7-01's
+disabled "Subir ahora" placeholder. E7-02/E7-05 also eligible in parallel.
+
+---
+
+## 2026-09-04 — E7-03 Developer + Code Reviewer + Functional QA + Visual QA
+
+Objective: Implement and independently verify E7-03 — NIN-08 subir identificación.
+Result: Added secure identity-document upload with private Storage, server-side byte/file
+validation, immutable paths, append-only status submissions, durable cleanup reconciliation,
+concurrency protection, large TrustBadge states, responsive camera/gallery/desktop controls,
+preview/progress/error states, and E7-01 wiring. Code Review PASS_WITH_MINOR_ISSUES, Functional
+QA PASS, Visual QA PASS_WITH_LIMITATIONS. E8 admin review and E12 retention remain deferred.
+Validation: 464 tests, lint, typecheck, secret scan, production build, and test:db all pass.
+E7-03 marked VERIFIED. Next recommended actions: E7-02 and E7-05.

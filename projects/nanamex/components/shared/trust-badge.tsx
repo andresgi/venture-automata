@@ -9,7 +9,7 @@ import { Circle, Clock, ShieldCheck } from "@phosphor-icons/react/ssr";
  * everywhere it appears. The default is the "compact inline pill" geometry (24px height,
  * pill shape, `radius-full`) used by FAM-04 cards and other secondary placements. Detail
  * screens opt into the documented 28px variant; NIN-03's banner-scale and NIN-08's
- * large-standalone variants are documented separately and are not built here.
+ * large-standalone variant is used by NIN-08.
  *
  * Fixed geometry across all three states (no layout shift, per this component's own
  * acceptance criterion): height, border width, padding, and type scale never change
@@ -55,7 +55,7 @@ const BADGE_CONFIG: Record<VerificationStatus, BadgeConfig> = {
   },
 };
 
-export function TrustBadge({ status, size = "compact" }: { status: VerificationStatus; size?: "compact" | "detail" }) {
+export function TrustBadge({ status, size = "compact" }: { status: VerificationStatus; size?: "compact" | "detail" | "large" }) {
   const [open, setOpen] = useState(false);
   const tooltipId = useId();
   const { Icon, weight, label, explanation, colorClasses } = BADGE_CONFIG[status];
@@ -64,7 +64,7 @@ export function TrustBadge({ status, size = "compact" }: { status: VerificationS
     <span className="relative z-20 inline-block overflow-visible">
       <button
         type="button"
-        className={`inline-flex ${size === "detail" ? "h-7" : "h-6"} items-center gap-1 whitespace-nowrap rounded-full border px-2 text-caption ${colorClasses}`}
+         className={`inline-flex ${size === "large" ? "min-h-20 flex-col gap-2 border-0 px-0 text-h2" : size === "detail" ? "h-7" : "h-6"} items-center gap-1 whitespace-nowrap ${size === "large" ? "" : "rounded-full border px-2"} ${size === "large" ? "text-h2" : "text-caption"} ${colorClasses}`}
         aria-describedby={tooltipId}
         aria-expanded={open}
         onMouseEnter={() => setOpen(true)}
@@ -73,7 +73,7 @@ export function TrustBadge({ status, size = "compact" }: { status: VerificationS
         onBlur={() => setOpen(false)}
         onClick={() => setOpen((current) => !current)}
       >
-        <Icon size={14} weight={weight} aria-hidden="true" />
+         <Icon size={size === "large" ? 48 : 14} weight={weight} aria-hidden="true" />
         {label}
       </button>
       <span
