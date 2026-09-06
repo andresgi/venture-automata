@@ -7,6 +7,9 @@
 # Run this whenever you want to pull in a framework improvement; the result is a plain
 # git diff you review and commit like any other change, not a silent update.
 #
+# Every run stages scripts/sync-framework.sh.pending (see below) -- add that path to this
+# repo's .gitignore if it isn't already, so it's never accidentally committed.
+#
 # Usage:
 #   scripts/sync-framework.sh [ref]
 #
