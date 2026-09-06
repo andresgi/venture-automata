@@ -42,12 +42,25 @@
 
 set -euo pipefail
 
-# Everything lives inside main(), called at the very bottom. This is the standard pattern
-# for a script that overwrites its own file while running: bash must fully parse a
-# function body before executing any of it, so once main() starts, replacing the on-disk
-# file has zero effect on this already-running process. A bare temp-file-then-rename on
-# its own was NOT sufficient here in testing -- this bash build still re-reads the script
-# from disk in blocks during execution, and desynced mid-parse even with an atomic rename.
+# Everything lives inside main(), called at the very bottom, so bash fully parses this
+# function body before executing any of it. That was meant to make self-overwriting safe,
+# but in testing it wasn't fully reliable either -- occasionally throwing a harmless-but-
+# alarming trailing "unexpected EOF" after the real work had already completed
+# successfully (exit 0), apparently from a final EOF-check read racing an in-place file
+# replacement. Rather than keep chasing bash's exact read buffering behavior, this script
+# now never overwrites its own live path at all while running: it writes any fetched
+# update to sync-framework.sh.pending instead, and the *next* invocation -- a completely
+# fresh bash process with nothing to race -- adopts it as its first action before doing
+# anything else.
+if [ -f "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/sync-framework.sh.pending" ]; then
+  PENDING="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/sync-framework.sh.pending"
+  LIVE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/sync-framework.sh"
+  echo "==> Adopting a framework update fetched by the previous run ..."
+  mv "$PENDING" "$LIVE"
+  chmod +x "$LIVE"
+  exec "$LIVE" "$@"
+fi
+
 main() {
   local REF="${1:-main}"
   local SOURCE_REPO="https://github.com/andresgi/venture-automata.git"
@@ -89,7 +102,9 @@ main() {
   mkdir -p "$REPO_ROOT/scripts/hooks"
   local SKELETON_SCRIPTS="$TMP_DIR/templates/venture-skeleton/scripts"
   if [ -d "$SKELETON_SCRIPTS" ]; then
-    cp "$SKELETON_SCRIPTS/sync-framework.sh" "$REPO_ROOT/scripts/sync-framework.sh"
+    # Never overwrite the live sync-framework.sh while it's the one running -- see the
+    # comment at the top of this file. Stage it as .pending; the next invocation adopts it.
+    cp "$SKELETON_SCRIPTS/sync-framework.sh" "$REPO_ROOT/scripts/sync-framework.sh.pending"
     cp "$SKELETON_SCRIPTS/sync-from-github.sh" "$REPO_ROOT/scripts/sync-from-github.sh"
     cp "$SKELETON_SCRIPTS/hooks/deny-force-push.sh" "$REPO_ROOT/scripts/hooks/deny-force-push.sh"
     cp "$SKELETON_SCRIPTS/worker-lease.sh" "$REPO_ROOT/scripts/worker-lease.sh"
@@ -99,7 +114,7 @@ main() {
     cp "$SKELETON_SCRIPTS/claim-for-session.sh" "$REPO_ROOT/scripts/claim-for-session.sh"
     cp "$SKELETON_SCRIPTS/auto-checkpoint.sh" "$REPO_ROOT/scripts/auto-checkpoint.sh"
     chmod +x \
-      "$REPO_ROOT/scripts/sync-framework.sh" \
+      "$REPO_ROOT/scripts/sync-framework.sh.pending" \
       "$REPO_ROOT/scripts/sync-from-github.sh" \
       "$REPO_ROOT/scripts/hooks/deny-force-push.sh" \
       "$REPO_ROOT/scripts/worker-lease.sh" \
@@ -113,6 +128,9 @@ main() {
   local RESOLVED_SHA
   RESOLVED_SHA="$(cd "$TMP_DIR" && git rev-parse HEAD)"
   echo "==> Done. Synced from venture-automata@${REF} (${RESOLVED_SHA})."
+  echo "==> Note: sync-framework.sh itself will update on the NEXT run of this script"
+  echo "    (staged as sync-framework.sh.pending -- never overwrites its own live file"
+  echo "    while running). Everything else above is already in place."
   echo "==> Review the diff (git status / git diff) and commit if it looks right, e.g.:"
   echo "    git add AGENTS.md CLAUDE.md .claude/agents .opencode/agents scripts"
   echo "    git commit -m \"chore: sync framework from venture-automata@${RESOLVED_SHA:0:7}\""
