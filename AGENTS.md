@@ -320,6 +320,19 @@ local checkout is current:
 `scripts/sync-from-github.sh` implements this check-and-report logic; ventures scaffolded
 from `templates/venture-skeleton/` include a copy.
 
+Rule 1 above ("if not clean, stop") is a fine default for a script you run by hand and
+watch. It's the wrong default for `start-worker-session.sh`/`claim-for-session.sh`,
+because Claude's CLI does not exit when it hits a usage limit mid-session — the process
+just sits there blocked, so there is no exit event to trigger a checkpoint, and the tree is
+left dirty until someone notices and starts a new session. `scripts/auto-checkpoint.sh`
+runs before the sync check in both of those entry points: if the tree is dirty, it commits
+everything as a WIP checkpoint (never discards anything), stamps a note into
+`agent/STATE.md`'s Current Work section naming the branch/commit so a later `continue`
+knows to verify and resume that story rather than silently skip it, and pushes the
+checkpoint — all before `sync-from-github.sh` runs, so it isn't blocked by the very dirt it
+just cleaned up. `sync-from-github.sh` itself is unchanged and still refuses on a dirty
+tree when run directly or from anywhere else that doesn't call `auto-checkpoint.sh` first.
+
 ### Checkpoint after verified work
 
 Every story reaching VERIFIED must produce a real git checkpoint: commit the code changes

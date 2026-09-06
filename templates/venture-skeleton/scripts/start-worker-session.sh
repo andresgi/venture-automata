@@ -54,10 +54,16 @@ if tmux has-session -t "$SESSION" 2>/dev/null; then
   exit 1
 fi
 
+if ! "$REPO_ROOT/scripts/auto-checkpoint.sh"; then
+  echo "error: auto-checkpoint.sh could not commit/push a dirty working tree. Resolve" >&2
+  echo "that first -- see its output above." >&2
+  exit 1
+fi
+
 echo "==> Syncing with origin before starting ..."
 if ! "$REPO_ROOT/scripts/sync-from-github.sh"; then
-  echo "error: sync-from-github.sh reported a problem (dirty tree, diverged history, or" >&2
-  echo "unpushed local commits). Resolve that first -- see its output above." >&2
+  echo "error: sync-from-github.sh reported a problem (diverged history, or unpushed" >&2
+  echo "local commits it couldn't reconcile). Resolve that first -- see its output above." >&2
   exit 1
 fi
 

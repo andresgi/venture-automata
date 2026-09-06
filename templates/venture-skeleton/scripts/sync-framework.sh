@@ -28,6 +28,7 @@
 #   scripts/start-worker-session.sh
 #   scripts/_run-worker-inner.sh
 #   scripts/claim-for-session.sh
+#   scripts/auto-checkpoint.sh
 #
 # What does NOT get copied: anything project-specific (config/, product/, engineering/,
 # agent/ tracking files, app source, .claude/settings.json, opencode.jsonc). Both settings
@@ -96,6 +97,7 @@ main() {
     cp "$SKELETON_SCRIPTS/start-worker-session.sh" "$REPO_ROOT/scripts/start-worker-session.sh"
     cp "$SKELETON_SCRIPTS/_run-worker-inner.sh" "$REPO_ROOT/scripts/_run-worker-inner.sh"
     cp "$SKELETON_SCRIPTS/claim-for-session.sh" "$REPO_ROOT/scripts/claim-for-session.sh"
+    cp "$SKELETON_SCRIPTS/auto-checkpoint.sh" "$REPO_ROOT/scripts/auto-checkpoint.sh"
     chmod +x \
       "$REPO_ROOT/scripts/sync-framework.sh" \
       "$REPO_ROOT/scripts/sync-from-github.sh" \
@@ -104,7 +106,8 @@ main() {
       "$REPO_ROOT/scripts/notify-telegram.sh" \
       "$REPO_ROOT/scripts/start-worker-session.sh" \
       "$REPO_ROOT/scripts/_run-worker-inner.sh" \
-      "$REPO_ROOT/scripts/claim-for-session.sh"
+      "$REPO_ROOT/scripts/claim-for-session.sh" \
+      "$REPO_ROOT/scripts/auto-checkpoint.sh"
   fi
 
   local RESOLVED_SHA
