@@ -1,9 +1,7 @@
 #!/usr/bin/env bash
 # Pulls the venture-automata orchestrator methodology (AGENTS.md, CLAUDE.md,
-# .claude/agents/*) into this repo from a specific, pinned ref of the venture-automata
-# GitHub repo -- deliberate and reviewable, never automatic. This repo was extracted
-# from venture-automata via `git subtree split` (full history preserved) so that
-# nanamex's CI/CD and deployment are fully independent of ongoing framework changes.
+# agents/, adapters/, and native agent definitions) into this repo from a specific, pinned ref of the venture-automata
+# GitHub repo -- deliberate and reviewable, never automatic.
 # Run this whenever you want to pull in a framework improvement; the result is a plain
 # git diff you review and commit like any other change, not a silent update.
 #
@@ -20,7 +18,11 @@
 #
 # What gets copied (overwritten in place):
 #   AGENTS.md
-#   CLAUDE.md
+#   CLAUDE.md (generated)
+#   agents/
+#   adapters/ (templates and metadata; preserves local generated checksums)
+#   .codex/agents/*.toml (generated)
+#   scripts/render-adapters.py
 #   .claude/agents/*.md
 #   .opencode/agents/*.md
 #   scripts/sync-framework.sh (this script itself)
@@ -41,7 +43,11 @@
 # equivalent per-agent `permission.bash` pattern for OpenCode subagents), add them by hand
 # -- see templates/venture-skeleton/.claude/settings.json and this repo's own
 # opencode.jsonc / .opencode/agents/*.md frontmatter for the reference shape -- rather
-# than running this script against them.
+# than running this script against them. Same for the Claude Code `Notification` hook that
+# forwards permission-needed / idle-waiting-on-you prompts to scripts/notify-telegram.sh --
+# it's in templates/venture-skeleton/.claude/settings.json for new ventures to start with,
+# but requires .env.telegram (or TELEGRAM_BOT_TOKEN/TELEGRAM_CHAT_ID) to actually send
+# anything, so add/remove it by hand per venture rather than expecting a sync to manage it.
 
 set -euo pipefail
 
@@ -83,24 +89,34 @@ main() {
     exit 1
   fi
 
-  # The --branch fetch above only works for actual branch/tag names; if $REF is a raw
-  # commit SHA, fall back to checking it out explicitly in the full clone.
-  if [ -n "$(cd "$TMP_DIR" && git rev-parse --verify --quiet "$REF" 2>/dev/null || true)" ]; then
-    (cd "$TMP_DIR" && git checkout --quiet "$REF")
+  # A missing ref must fail before copying any framework files.
+  local RESOLVED_REF
+  if ! RESOLVED_REF="$(cd "$TMP_DIR" && git rev-parse --verify "${REF}^{commit}" 2>/dev/null)"; then
+    echo "error: requested framework ref '$REF' does not resolve to a commit" >&2
+    exit 1
   fi
+  (cd "$TMP_DIR" && git checkout --quiet "$RESOLVED_REF")
+
+  # Refuse customized native outputs before touching any installed framework source.
+  python3 "$TMP_DIR/scripts/render-adapters.py" --target "$REPO_ROOT" --preflight
 
   echo "==> Copying framework files into $REPO_ROOT ..."
   cp "$TMP_DIR/AGENTS.md" "$REPO_ROOT/AGENTS.md"
-  cp "$TMP_DIR/CLAUDE.md" "$REPO_ROOT/CLAUDE.md"
-  mkdir -p "$REPO_ROOT/.claude/agents"
-  rm -f "$REPO_ROOT"/.claude/agents/*.md
-  cp "$TMP_DIR"/.claude/agents/*.md "$REPO_ROOT/.claude/agents/"
-
-  if [ -d "$TMP_DIR/.opencode/agents" ]; then
-    mkdir -p "$REPO_ROOT/.opencode/agents"
-    rm -f "$REPO_ROOT"/.opencode/agents/*.md
-    cp "$TMP_DIR"/.opencode/agents/*.md "$REPO_ROOT/.opencode/agents/"
-  fi
+  mkdir -p "$REPO_ROOT/agents" "$REPO_ROOT/adapters" "$REPO_ROOT/scripts"
+  cp "$TMP_DIR"/agents/*.md "$REPO_ROOT/agents/"
+  for adapter in claude opencode codex; do
+    mkdir -p "$REPO_ROOT/adapters/$adapter"
+    cp -R "$TMP_DIR/adapters/$adapter/." "$REPO_ROOT/adapters/$adapter/"
+  done
+  cp "$TMP_DIR/adapters/roles.json" "$TMP_DIR/adapters/legacy-checksums.json" "$REPO_ROOT/adapters/"
+  cp "$TMP_DIR/scripts/render-adapters.py" "$REPO_ROOT/scripts/"
+  # Preserve the product roles as separate definitions during the scoped migration.
+  mkdir -p "$REPO_ROOT/.claude/agents" "$REPO_ROOT/.opencode/agents"
+  for role in product-researcher product-manager product-critic; do
+    cp "$TMP_DIR/.claude/agents/$role.md" "$REPO_ROOT/.claude/agents/"
+    cp "$TMP_DIR/.opencode/agents/$role.md" "$REPO_ROOT/.opencode/agents/"
+  done
+  python3 "$REPO_ROOT/scripts/render-adapters.py"
 
   mkdir -p "$REPO_ROOT/scripts/hooks"
   local SKELETON_SCRIPTS="$TMP_DIR/templates/venture-skeleton/scripts"
@@ -135,7 +151,7 @@ main() {
   echo "    (staged as sync-framework.sh.pending -- never overwrites its own live file"
   echo "    while running). Everything else above is already in place."
   echo "==> Review the diff (git status / git diff) and commit if it looks right, e.g.:"
-  echo "    git add AGENTS.md CLAUDE.md .claude/agents .opencode/agents scripts"
+  echo "    git add AGENTS.md CLAUDE.md agents adapters .claude/agents .opencode/agents .codex/agents scripts"
   echo "    git commit -m \"chore: sync framework from venture-automata@${RESOLVED_SHA:0:7}\""
 }
 

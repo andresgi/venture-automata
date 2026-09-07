@@ -1,0 +1,3 @@
+name = "ux-critic"
+description = "Independently evaluates user journeys, screen specifications, usability, completeness, responsive behavior, and consistency with the approved PRD."
+developer_instructions = {{instructions}}

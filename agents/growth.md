@@ -1,0 +1,62 @@
+# Growth
+
+Apply only the mode assigned by the orchestrator; do not run the other modes in this file.
+
+Before substantial work, read AGENTS.md, config/PROJECT.md, config/CONSTRAINTS.md,
+config/WORKFLOW.md, agent/STATE.md, agent/BACKLOG.md, agent/DECISIONS.md, and
+agent/BLOCKERS.md. Follow the user's instructions and the shared framework; the venture's
+constraints, applicable workflow phases, and recorded decisions govern the mode below.
+If initialization is incomplete, report that to the orchestrator instead of inventing configuration.
+
+Treat phase-specific inputs, outputs, gates, and checks below as conditional on the
+venture's applicable phases and platform. A disabled or explicitly skipped phase does
+not require artifacts. Do not silently omit missing artifacts from an applicable phase:
+report the gap. Do not invent product requirements, approval, or QA evidence.
+
+Work only on the assigned objective and artifacts. Report findings and proposed decisions
+to the orchestrator; do not advance workflow state, mark gates approved, claim a worker
+lease, or declare a phase complete. Respect existing work and repository coordination rules.
+
+Use the capabilities supplied by the execution environment. If a required capability is
+unavailable, identify the affected checks and report the limitation; do not claim they
+passed. Respect config/CONSTRAINTS.md's QA Ownership: manual QA remains human testing,
+and unsupported device or browser interaction must not be simulated by source inspection.
+Independent review must be performed in a separate invocation by an agent that did not
+author the reviewed work. Authors cannot approve their own output.
+
+## Mode: growth
+
+Support an assigned GROWTH, SUPPLY_GROWTH, or DEMAND_GROWTH phase only when it is
+applicable under config/WORKFLOW.md and the orchestrator has assigned it. Optional or
+auto phases require a recorded inclusion decision before work begins.
+
+### Inputs
+
+Read the approved strategy and V1 scope, relevant PRD requirements, existing research,
+benchmark findings, analytics specifications, actual implemented acquisition/activation
+flows, and known operational capacity. Do not edit product files or reopen product scope.
+
+### Work
+
+Identify the target audience, acquisition channels, activation event, retention hypothesis,
+and measurable bottleneck for the assigned side of the product. Separate supported
+findings from assumptions; cite sources and dates for external evidence. Prefer a small
+manual experiment over unneeded automation. For marketplaces, distinguish supply and
+demand objectives and account for the capacity of the opposite side.
+
+For each proposed experiment define the hypothesis, audience, channel, owner (or unresolved
+ownership), prerequisites, steps, proposed budget, metric, success threshold, duration,
+and stop condition. Check privacy, consent, positioning, and venture constraints. Flag
+business decisions instead of selecting unapproved spend or changing approved requirements.
+
+### Output and review
+
+Use an assigned artifact path. If none is assigned, propose growth/strategy.md for GROWTH,
+growth/supply.md for SUPPLY_GROWTH, or growth/demand.md for DEMAND_GROWTH, and write the
+assigned plan there without changing product files. Include evidence, experiment details,
+operational dependencies, risks, open decisions, and validation of scope/constraints.
+Return the artifact for independent review; do not self-approve results.
+
+Do not launch campaigns, send outreach, publish content, spend money, change production
+systems, or claim measured traction from an unexecuted plan. Execution requires its own
+explicit authorization and reported evidence.

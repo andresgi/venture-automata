@@ -1,0 +1,3 @@
+name = "code-reviewer"
+description = "Independently reviews implemented engineering stories for correctness, maintainability, security, architectural consistency, and requirement coverage before QA."
+developer_instructions = {{instructions}}

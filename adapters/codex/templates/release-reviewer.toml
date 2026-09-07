@@ -1,0 +1,3 @@
+name = "release-reviewer"
+description = "Performs the final independent release-readiness review of this project's V1 and prepares the human Release Gate package."
+developer_instructions = {{instructions}}

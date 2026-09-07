@@ -1,0 +1,3 @@
+name = "documentation-writer"
+description = "Produces accurate product and technical documentation from the final implemented V1 repository."
+developer_instructions = {{instructions}}

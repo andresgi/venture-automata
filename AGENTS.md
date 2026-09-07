@@ -35,9 +35,14 @@ Before starting any substantial work, read:
 
 Also read the relevant artifacts for the current project phase.
 
-If config/PROJECT.md, config/CONSTRAINTS.md, or config/WORKFLOW.md do not exist yet, this
-project has not been initialized. Do not guess at them or proceed to DISCOVERY — run
+For venture work, if config/PROJECT.md, config/CONSTRAINTS.md, or config/WORKFLOW.md do not
+exist yet, this project has not been initialized. Do not guess at them or proceed to DISCOVERY — run
 Project Initialization first (see below).
+
+Framework maintenance in this repository is not a venture phase: do not initialize a
+fictional venture to change agents, adapters, or framework tooling. Record framework work
+in `docs/framework-changes.md`; leave blank venture templates uninitialized. Existing
+user edits must be preserved.
 
 ## Project Initialization
 
@@ -111,6 +116,69 @@ BRAND/UX/UI/technical work begins even when PRODUCT_STRATEGY is `provided` rathe
 `enabled`, and ARCHITECTURE_GATE still requires approval before BUILD even when
 TECH_ARCHITECTURE is `provided`.
 
+## Orchestrator Behavior
+
+You are the project orchestrator unless explicitly assigned another role.
+
+When the user says:
+
+"continue"
+
+or equivalent:
+
+0. If config/PROJECT.md, config/CONSTRAINTS.md, or config/WORKFLOW.md is missing, this
+   project has not been initialized. Stop "continue" and run Project Initialization
+   instead (see the trigger below) rather than guessing at project state.
+1. Read config/WORKFLOW.md.
+2. Read agent/STATE.md.
+3. Read agent/BACKLOG.md.
+4. Read agent/DECISIONS.md.
+5. Read agent/BLOCKERS.md.
+6. Determine the highest-priority eligible action among phases config/WORKFLOW.md marks
+   `enabled` or `provided`, or an `auto`/`optional` phase already resolved to "include" in
+   agent/DECISIONS.md. Never select an action under a `disabled` phase. Never resolve an
+   `auto`/`optional` phase without first recording the include/skip decision in
+   agent/DECISIONS.md. For a `provided` phase, the eligible action is verifying the
+   supplied artifact exists and running its independent reviewer once in review-only mode —
+   not delegating production to the phase's producing agent (see AGENTS.md, "Project
+   Initialization -> Fast-start").
+7. Delegate specialized work whenever an appropriate project subagent exists.
+8. Evaluate returned work against acceptance criteria.
+9. Trigger required independent review.
+10. If review requires revision, send the critique back to the appropriate specialist.
+11. Continue the review loop until:
+   - verification passes,
+   - maximum review cycles are reached,
+   - a blocker is reached,
+   - or a human gate is reached.
+   A story landing on `AWAITING_MANUAL_QA` (see AGENTS.md, "Manual QA for platforms
+   without agent-drivable tooling") is NOT a blocker — log it to
+   agent/qa/PENDING_MANUAL_QA.md and move on to the next eligible independent story in
+   the same run instead of stopping.
+12. Persist workflow state before stopping, including agent/qa/PENDING_MANUAL_QA.md if it
+    changed this run.
+
+Do not perform specialist research yourself merely to avoid delegation.
+
+Do not cross human gates automatically.
+
+### Project Initialization Trigger
+
+When the user says:
+
+"Initialize this project"
+
+or equivalent, follow AGENTS.md's "Project Initialization" procedure: read AGENTS.md,
+populate config/PROJECT.md, config/CONSTRAINTS.md, and config/WORKFLOW.md (interviewing the
+user or deriving from whatever material they provide), then initialize agent/STATE.md and
+agent/BACKLOG.md. Do not begin DISCOVERY or any other phase in the same turn — stop once
+initialization is recorded and report what was populated, so the user can review it before
+work begins.
+
+If the user asks to "continue" on a project that hasn't been initialized yet (per the check
+above), treat that as an implicit request to initialize first, then stop — do not chain
+straight into DISCOVERY without the user seeing the populated config files.
+
 ## Workflow
 
 This process is deliberately generic so it can run any venture, not just this one. Which
@@ -140,24 +208,21 @@ assigns each one a status:
 | DISCOVERY | Validate the venture's core assumptions with evidence | Product Researcher | product/assumptions.md, product/research.md |
 | BENCHMARK | Map competitors and analogous products | Product Researcher | product/benchmark.md |
 | PRODUCT_STRATEGY | Turn evidence into strategy, V1 scope, and a buildable PRD | Product Manager | product/strategy.md, product/v1-scope.md, product/prd.md |
-| BRAND | Naming, voice, and identity, distinct from screen-level visual design | UI Designer / UI Critic* | (folds into UI's design/UI-SYSTEM.md unless given its own doc) |
+| BRAND | Naming, voice, and identity, distinct from screen-level visual design | Branding / UI Critic | design/UI-SYSTEM.md (brand section), or assigned design/BRAND.md |
 | UX | User journeys, information architecture, screen inventory, UX states | UX Designer / UX Critic | design/journeys.md, design/information-architecture.md, design/screen-inventory.md, design/UX-spec.md |
 | UI | Visual design system and screen-level UI specifications | UI Designer / UI Critic | design/UI-SYSTEM.md, design/UI-SPEC.md |
 | TECH_ARCHITECTURE | Application architecture, data model, security model, implementation plan | Technical Architect | engineering/architecture.md, database.md, security.md, analytics.md, implementation-plan.md |
 | BUILD | Engineering execution (includes Functional QA and Visual QA as built-in sub-steps) | Developer / Code Reviewer / Functional QA / Visual QA | application source code |
 | SECURITY_REVIEW | Independent security review of the implementation | Security Reviewer | agent/qa/security-review.md |
-| GROWTH | General acquisition, activation, and retention strategy | Product Manager / Product Researcher* | (no fixed convention yet) |
-| SUPPLY_GROWTH | Supply-side acquisition, for two-sided marketplaces | Product Manager / Product Researcher* | (no fixed convention yet) |
-| DEMAND_GROWTH | Demand-side acquisition, for two-sided marketplaces | Product Manager / Product Researcher* | (no fixed convention yet) |
+| GROWTH | General acquisition, activation, and retention strategy | Growth / Product Critic | growth/strategy.md |
+| SUPPLY_GROWTH | Supply-side acquisition, for two-sided marketplaces | Growth / Product Critic | growth/supply.md |
+| DEMAND_GROWTH | Demand-side acquisition, for two-sided marketplaces | Growth / Product Critic | growth/demand.md |
 | PRODUCT_ACCEPTANCE | Verify the built product against the approved PRD/scope | Product Acceptance | agent/qa/product-acceptance.md |
 | SOP | Operational runbooks for this venture's manual workflows | SOP Writer | operations/sop/*, operations/SOP-INDEX.md |
 | DOCUMENTATION | Product and technical documentation of what was actually built | Documentation Writer | docs/* |
 | RELEASE | Final release-readiness review and the human RELEASE_GATE package | Release Reviewer | agent/gates/release-gate.md |
 
-\* BRAND, GROWTH, SUPPLY_GROWTH, and DEMAND_GROWTH have no dedicated specialist agent in
-this repository yet. When one of these is applicable and becomes eligible, route the work
-to the closest existing agent listed above instead of inventing new process. If the fit is
-genuinely poor, escalate instead of guessing.
+Shared role files and native specialist names are mapped below under Agent Delegation.
 
 ### Ordering
 
@@ -552,12 +617,35 @@ The critic must not modify the artifact being reviewed.
 
 ### Other roles
 
-A specialist agent exists for every other phase in the catalog above: Product Manager, UX
-Designer, UX Critic, UI Designer, UI Critic, Technical Architect, Developer, Code Reviewer,
-Functional QA, Visual QA, Security Reviewer, Product Acceptance, SOP Writer, Documentation
-Writer, and Release Reviewer. Their full behavior specifications live in .claude/agents/*.md
-(or .opencode/agents/*.md, if using OpenCode) — read the relevant agent file before
-delegating to it for the first time in a run, rather than relying on this summary.
+Shared specialist behavior lives in `agents/`. Read the shared definition and select only
+the assigned mode before delegating. Native harness files are generated from those modes;
+models, tool names, and permission syntax belong in `adapters/`.
+
+| Shared definition | Native specialist / mode |
+|---|---|
+| agents/architect.md | technical-architect |
+| agents/ui-ux.md | ux-designer, ui-designer |
+| agents/developer.md | developer |
+| agents/qa.md | code-reviewer, functional-qa, visual-qa, ux-critic, ui-critic, security-reviewer, product-acceptance, release-reviewer |
+| agents/docs.md | documentation-writer, sop-writer |
+| agents/growth.md | growth (GROWTH, SUPPLY_GROWTH, DEMAND_GROWTH) |
+| agents/branding.md | branding |
+
+Product Researcher, Product Manager, and Product Critic remain unchanged in
+`.claude/agents/product-*.md` and `.opencode/agents/product-*.md`. Their migration is
+explicitly deferred. Codex receives generated copies of the existing product instructions.
+Do not create or change `agents/product.md` as part of this migration.
+
+The orchestrator passes the venture working directory, task ID, assigned mode, applicable
+phase, acceptance criteria, approved gates, and expected output paths to every specialist.
+A combined role file does not permit an author to approve its own work: use a separate
+reviewer invocation with the corresponding QA mode. Only the orchestrator advances state.
+If the harness cannot delegate independently or lacks required tools, report the capability
+gap; do not label a self-review or an unperformed check independent QA.
+
+Run `python3 scripts/render-adapters.py` after editing shared roles or adapter templates.
+Run `python3 scripts/render-adapters.py --check` to detect stale native files. Keep local
+model/tool preferences in adapter templates; runtime settings remain venture-owned.
 
 ## Research Review Loop
 

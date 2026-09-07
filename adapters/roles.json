@@ -1,0 +1,78 @@
+{
+  "technical-architect": {
+    "source": "agents/architect.md",
+    "mode": "technical-architect"
+  },
+  "developer": {
+    "source": "agents/developer.md",
+    "mode": "developer"
+  },
+  "ux-designer": {
+    "source": "agents/ui-ux.md",
+    "mode": "ux-designer"
+  },
+  "ui-designer": {
+    "source": "agents/ui-ux.md",
+    "mode": "ui-designer"
+  },
+  "code-reviewer": {
+    "source": "agents/qa.md",
+    "mode": "code-reviewer"
+  },
+  "functional-qa": {
+    "source": "agents/qa.md",
+    "mode": "functional-qa"
+  },
+  "visual-qa": {
+    "source": "agents/qa.md",
+    "mode": "visual-qa"
+  },
+  "ux-critic": {
+    "source": "agents/qa.md",
+    "mode": "ux-critic"
+  },
+  "ui-critic": {
+    "source": "agents/qa.md",
+    "mode": "ui-critic"
+  },
+  "security-reviewer": {
+    "source": "agents/qa.md",
+    "mode": "security-reviewer"
+  },
+  "product-acceptance": {
+    "source": "agents/qa.md",
+    "mode": "product-acceptance"
+  },
+  "release-reviewer": {
+    "source": "agents/qa.md",
+    "mode": "release-reviewer"
+  },
+  "documentation-writer": {
+    "source": "agents/docs.md",
+    "mode": "documentation-writer"
+  },
+  "sop-writer": {
+    "source": "agents/docs.md",
+    "mode": "sop-writer"
+  },
+  "growth": {
+    "source": "agents/growth.md",
+    "mode": "growth"
+  },
+  "branding": {
+    "source": "agents/branding.md",
+    "mode": "branding"
+  },
+  "product-researcher": {
+    "source": ".claude/agents/product-researcher.md",
+    "legacy": true
+  },
+  "product-manager": {
+    "source": ".claude/agents/product-manager.md",
+    "legacy": true
+  },
+  "product-critic": {
+    "source": ".claude/agents/product-critic.md",
+    "legacy": true
+  }
+}

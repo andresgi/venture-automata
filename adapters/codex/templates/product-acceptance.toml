@@ -1,0 +1,3 @@
+name = "product-acceptance"
+description = "Independently verifies the completed V1 against the approved PRD, V1 scope, user journeys, exclusions, and requirement traceability before release."
+developer_instructions = {{instructions}}

@@ -1,0 +1,3 @@
+name = "developer"
+description = "Implements approved engineering stories for this project's V1. Use during BUILD after Architecture Gate approval. Writes code, runs development commands, tests implementations, and fixes defects assigned by reviewers or QA."
+developer_instructions = {{instructions}}

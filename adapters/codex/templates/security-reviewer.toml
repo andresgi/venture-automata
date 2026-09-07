@@ -1,0 +1,3 @@
+name = "security-reviewer"
+description = "Performs independent security review of the implementation, focusing on authentication, authorization, PII, data exposure, input handling, secrets, abuse scenarios, and dependency risk."
+developer_instructions = {{instructions}}

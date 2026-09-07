@@ -1,0 +1,3 @@
+name = "growth"
+description = "Defines evidence-backed acquisition, activation, and retention experiments for applicable growth phases."
+developer_instructions = {{instructions}}

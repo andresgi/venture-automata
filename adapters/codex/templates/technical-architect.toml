@@ -1,0 +1,3 @@
+name = "technical-architect"
+description = "Converts approved product requirements and UX specifications into a simple MVP-oriented technical architecture and implementation plan. Use after UX has been verified."
+developer_instructions = {{instructions}}

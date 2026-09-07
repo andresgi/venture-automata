@@ -73,6 +73,18 @@ fi
 mkdir -p "$(dirname "$DEST")"
 cp -R "$SKELETON" "$DEST"
 
+# Ship a self-contained framework so agent loading does not depend on parent traversal.
+cp "$REPO_ROOT/AGENTS.md" "$REPO_ROOT/.gitignore" "$DEST/"
+cp -R "$REPO_ROOT/agents" "$REPO_ROOT/adapters" "$DEST/"
+cp "$REPO_ROOT/scripts/render-adapters.py" "$DEST/scripts/"
+mkdir -p "$DEST/.claude/agents" "$DEST/.opencode/agents"
+# Product specialists are intentionally unchanged in this migration.
+for role in product-researcher product-manager product-critic; do
+  cp "$REPO_ROOT/.claude/agents/$role.md" "$DEST/.claude/agents/"
+  cp "$REPO_ROOT/.opencode/agents/$role.md" "$DEST/.opencode/agents/"
+done
+python3 "$REPO_ROOT/scripts/render-adapters.py" --target "$DEST"
+
 # Derive a human-friendly placeholder title from the slug (e.g. invoice-pilot -> Invoice Pilot).
 # Uses awk (not sed \U, which is a GNU extension unavailable on macOS's BSD sed).
 TITLE="$(echo "$NAME" | awk -F'-' '{for(i=1;i<=NF;i++){$i=toupper(substr($i,1,1)) substr($i,2)}; print}' OFS=' ')"
@@ -89,10 +101,8 @@ echo "  Location: $DEST"
 echo
 echo "Next steps:"
 echo "  cd \"$DEST\""
-echo "  Then tell Claude: \"Initialize this project.\""
+echo "  Then tell your agent: \"Initialize this project.\""
 echo
-echo "This scaffolds config/PROJECT.md, config/CONSTRAINTS.md, config/WORKFLOW.md,"
-echo "agent/STATE.md, and agent/BACKLOG.md. It does not build/copy the shared"
-echo "framework (AGENTS.md, CLAUDE.md, .claude/agents, .opencode/agents) — those"
-echo "are inherited from this repository. For a fully standalone copy (its own"
-echo "repo, no shared parent), copy this whole repository instead."
+echo "This includes venture templates, shared agents, all three harness adapters,"
+echo "and generated native definitions. Initialize the venture configuration before work."
+echo "For a standalone repository, initialize its git history and configure origin separately."

@@ -1,0 +1,3 @@
+name = "sop-writer"
+description = "Converts this project's actual V1 operational workflows into executable SOPs for humans operating the product."
+developer_instructions = {{instructions}}

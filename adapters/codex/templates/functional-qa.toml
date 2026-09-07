@@ -1,0 +1,3 @@
+name = "functional-qa"
+description = "Independently validates implemented features against PRD requirements, UX specifications, engineering story acceptance criteria, and relevant regression behavior."
+developer_instructions = {{instructions}}

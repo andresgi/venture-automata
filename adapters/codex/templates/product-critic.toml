@@ -1,0 +1,3 @@
+name = "product-critic"
+description = "Independently critiques product research, assumptions, benchmark conclusions, strategy, scope, and PRDs. Use after meaningful product artifacts are produced and before accepting them as phase-complete."
+developer_instructions = {{instructions}}

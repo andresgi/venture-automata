@@ -1,0 +1,3 @@
+name = "ux-designer"
+description = "Converts approved product requirements into user journeys, information architecture, screen specifications, interaction behavior, and UX states. Use only after PRODUCT_GATE approval."
+developer_instructions = {{instructions}}

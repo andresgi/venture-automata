@@ -1,0 +1,3 @@
+name = "product-manager"
+description = "Converts validated research and market evidence into product strategy, MVP scope, requirements, priorities, and a buildable PRD. Use after Discovery and Benchmark and when product-definition artifacts require revision."
+developer_instructions = {{instructions}}
