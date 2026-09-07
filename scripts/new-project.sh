@@ -79,6 +79,7 @@ cp -R "$REPO_ROOT/agents" "$REPO_ROOT/adapters" "$DEST/"
 mkdir -p "$DEST/docs"
 cp "$REPO_ROOT/docs/mobile-testing.md" "$DEST/docs/"
 cp "$REPO_ROOT/scripts/render-adapters.py" "$DEST/scripts/"
+chmod +x "$DEST/scripts/mobile-build.sh" "$DEST/scripts/mobile-install.sh" "$DEST/scripts/mobile-test.sh"
 mkdir -p "$DEST/.claude/agents" "$DEST/.opencode/agents"
 # Product specialists are intentionally unchanged in this migration.
 for role in product-researcher product-manager product-critic; do

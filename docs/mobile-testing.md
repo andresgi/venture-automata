@@ -27,6 +27,19 @@ when isolation is required. Keep flows in the venture's documented mobile-test d
 never commit credentials or real user data. Missing MCP, emulator, build, or device
 capability means the affected checks are BLOCKED or UNVERIFIED.
 
+## Venture starter kit
+
+New ventures are scaffolded with `maestro/smoke.yaml` and these scripts:
+
+```bash
+./scripts/mobile-build.sh       # requires MOBILE_BUILD_COMMAND
+./scripts/mobile-install.sh     # requires MOBILE_APK_PATH
+./scripts/mobile-test.sh        # runs maestro/smoke.yaml
+```
+
+Set `MOBILE_APP_ID` and replace the smoke-flow placeholder selectors before running it.
+The scripts intentionally fail when project-specific values are missing.
+
 Official references: [Maestro MCP](https://docs.maestro.dev/getting-started/maestro-mcp),
 [Android setup](https://docs.maestro.dev/getting-started/build-and-install-your-app/android),
 and [device management](https://docs.maestro.dev/cli/start-device).

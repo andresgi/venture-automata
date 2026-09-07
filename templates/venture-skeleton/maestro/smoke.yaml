@@ -1,0 +1,7 @@
+# Replace the app ID and selectors with this venture's values.
+appId: ${MOBILE_APP_ID}
+---
+- launchApp:
+    clearState: true
+- assertVisible: "TODO: first screen"
+# Add the smallest critical journey here. Prefer accessibility labels over coordinates.
