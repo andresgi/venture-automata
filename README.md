@@ -22,6 +22,19 @@ across many ideas, not rewritten per venture.
 - `docs/mobile-testing.md` — optional Maestro MCP setup and evidence requirements for
   Android Emulator testing.
 
+## Harness-agnostic agents
+
+Agent behavior is authored once in `agents/`, then rendered into native definitions for
+Claude, OpenCode, and Codex. Shared files contain workflow behavior and named modes only;
+harness-specific models, tools, permissions, and prompt encoding live under the matching
+`adapters/<harness>/` directory. This keeps the specialist contract stable when changing
+harnesses or adding another adapter.
+
+The generated native files are checked in for discovery and should not be edited directly.
+Change the shared role or adapter template, run the renderer, and verify drift with
+`--check`. Product Researcher, Product Manager, and Product Critic remain an explicit
+migration exception until shared role definitions are introduced.
+
 **Venture** (per-project, this is what actually changes):
 
 - `config/PROJECT.md` — this venture's mission, initial hypothesis, target user, problem.
@@ -187,6 +200,10 @@ conflicts without writing; `--harness claude|opencode|codex` selects one adapter
 Model and permission settings remain adapter-specific. Codex inherits the caller's settings;
 Claude retains its existing model choices. Restart or reload the harness after changing native
 definitions. No provider login, background session, or external service is started by rendering.
+
+After committing framework changes, update an existing venture with its sync script and the
+exact framework commit or tag. Sync preflights conflicts before copying files, preserves
+venture-owned runtime settings, and regenerates native agent files.
 
 ## Known limitations
 
