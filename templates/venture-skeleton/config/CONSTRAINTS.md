@@ -25,15 +25,21 @@ content.
 
 ## QA Ownership
 
-- Mobile QA: manual (default). If this venture includes a native mobile app, this
-  framework has no agent-drivable simulator/device tooling — Visual QA and Functional QA
-  for mobile screens are performed by the human, not delegated to an agent. The Developer
-  still implements and runs automated checks (lint/typecheck/unit tests/build) as always;
-  the orchestrator then hands the story to the human for manual testing instead of
-  delegating QA, and records the human's verdict before marking the story VERIFIED. Code
-  Review always stays agent-driven regardless of platform (static analysis of source, not
-  app interaction). Override this line if agent-drivable mobile testing tooling becomes
-  available for this venture.
+- Mobile QA: manual (default). If this venture includes a native mobile app, Visual QA and
+  Functional QA for mobile screens are performed by the human unless this section
+  explicitly enables Maestro MCP with an Android Emulator. When enabled, state the
+  emulator/API configuration and where the Maestro flows live. The Developer still runs
+  automated checks (lint/typecheck/unit tests/build) as always. Code Review remains
+  agent-driven regardless of platform.
+
+### Maestro MCP (optional)
+
+- Status: disabled (default; set to enabled only after installing Maestro CLI, configuring
+  the MCP server, and confirming an Android Emulator is available to the testing harness)
+- MCP server command: `maestro mcp`
+- Android app ID: [package name]
+- Build/install command: [venture-specific command]
+- Flow directory: [venture-specific path]
 
 ## Business Constraints
 

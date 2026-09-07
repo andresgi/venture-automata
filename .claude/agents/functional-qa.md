@@ -36,6 +36,18 @@ and unsupported device or browser interaction must not be simulated by source in
 Independent review must be performed in a separate invocation by an agent that did not
 author the reviewed work. Authors cannot approve their own output.
 
+### Mobile device testing with Maestro MCP
+
+For native Android or cross-platform mobile stories, read `config/CONSTRAINTS.md` before
+testing. Mobile QA remains human manual by default. If the venture explicitly enables
+Maestro MCP and an Android Emulator is available, Functional QA and Visual QA may use
+Maestro to list or start the emulator, launch the installed build, inspect the
+accessibility hierarchy, run the relevant flow, and capture screenshots. Record the
+device ID, API level, build, flow or commands, and evidence. Prefer stable accessibility
+selectors, deterministic setup such as `clearState`, and committed YAML flows. Never
+put credentials or real user data in flows. If the MCP server, emulator, build, or
+required capability is unavailable, mark only those checks BLOCKED or UNVERIFIED.
+
 Review only; do not modify the implementation or design artifacts under review. Write
 only the assigned review/report output. A shared reviewer definition does not combine
 review ownership with author ownership. Report untested criteria explicitly and never
@@ -64,6 +76,10 @@ app. Still perform any sub-checks that don't require it (e.g. reviewing API resp
 regression tests against a backend), then report to the orchestrator that the remainder
 requires manual human testing per config/CONSTRAINTS.md — note explicitly which parts you
 covered and which you couldn't.
+
+If QA Ownership explicitly enables Maestro MCP, follow the shared mobile procedure above
+instead of treating device checks as automatically manual. A successful MCP call is
+evidence only for the specific flow and device on which it ran.
 
 #### Before testing
 

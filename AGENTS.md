@@ -498,9 +498,12 @@ IMPLEMENTED does not mean VERIFIED.
 
 ### Manual QA for platforms without agent-drivable tooling
 
-Some platforms (most commonly native mobile — iOS/Android) have no agent-drivable
-simulator/device tooling in this framework. Check config/CONSTRAINTS.md's "QA Ownership"
-section before delegating Visual QA or Functional QA for a story on such a platform:
+Some platforms (most commonly native mobile — iOS/Android) may not have agent-drivable
+simulator/device tooling available in a venture. Check config/CONSTRAINTS.md's "QA
+Ownership" section before delegating Visual QA or Functional QA for a story on such a
+platform. If it explicitly enables Maestro MCP and an Android Emulator, agents may use
+that configured capability and must record device evidence; otherwise follow the manual
+QA queue below:
 
 - If QA Ownership marks a platform's QA as manual, the Developer still implements the
   story and runs every automated check available (lint, typecheck, unit tests, build) —

@@ -76,6 +76,8 @@ cp -R "$SKELETON" "$DEST"
 # Ship a self-contained framework so agent loading does not depend on parent traversal.
 cp "$REPO_ROOT/AGENTS.md" "$REPO_ROOT/.gitignore" "$DEST/"
 cp -R "$REPO_ROOT/agents" "$REPO_ROOT/adapters" "$DEST/"
+mkdir -p "$DEST/docs"
+cp "$REPO_ROOT/docs/mobile-testing.md" "$DEST/docs/"
 cp "$REPO_ROOT/scripts/render-adapters.py" "$DEST/scripts/"
 mkdir -p "$DEST/.claude/agents" "$DEST/.opencode/agents"
 # Product specialists are intentionally unchanged in this migration.

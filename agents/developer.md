@@ -24,6 +24,18 @@ and unsupported device or browser interaction must not be simulated by source in
 Independent review must be performed in a separate invocation by an agent that did not
 author the reviewed work. Authors cannot approve their own output.
 
+### Mobile device testing
+
+For a native Android or cross-platform mobile story, check `config/CONSTRAINTS.md` for
+the venture's QA Ownership and Maestro MCP decision. If Maestro MCP is explicitly
+available, use its tools to test the built app on an Android Emulator when acceptance
+criteria require device interaction. List or start a device, install and launch the
+build, inspect the view hierarchy, exercise the flow, and capture screenshots. Record
+the device ID, build, flow, and result. Keep reusable YAML flows in the venture's
+documented mobile-test directory and pass secrets through the environment. If Maestro,
+the emulator, or the build is unavailable, report the exact blocked checks; never claim
+device validation from source inspection.
+
 For an explicit, in-scope Change Request, follow AGENTS.md's Change Requests lane:
 use the CR objective and acceptance criteria, with PRD/UX/architecture references only
 where relevant. Do not impose a phase gate on that lane. For phase-driven BUILD work,
