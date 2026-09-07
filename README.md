@@ -19,6 +19,8 @@ across many ideas, not rewritten per venture.
   definitions. Existing specialist names remain stable. The three product specialists
   remain unchanged in the original Claude/OpenCode locations during this scoped migration.
 - `CLAUDE.md` — a generated entry point importing the shared `AGENTS.md` instructions.
+- `docs/mobile-testing.md` — optional Maestro MCP setup and evidence requirements for
+  Android Emulator testing.
 
 **Venture** (per-project, this is what actually changes):
 
@@ -47,6 +49,18 @@ agent discovery. Framework changes are propagated deliberately with `scripts/syn
 
 For a standalone directory, use `./scripts/new-project.sh invoice-pilot --path ../invoice-pilot`.
 Initialize its git history and remote separately. The script refuses an existing destination.
+
+For a mobile venture, the scaffold also includes a Maestro starter flow and scripts:
+
+```bash
+./scripts/mobile-build.sh       # MOBILE_BUILD_COMMAND
+./scripts/mobile-install.sh     # MOBILE_APK_PATH
+./scripts/mobile-test.sh        # maestro/smoke.yaml
+```
+
+Set `MOBILE_APP_ID`, replace the smoke-flow selectors, and enable Maestro MCP in
+`config/CONSTRAINTS.md` only after an Android Emulator and the `maestro mcp` server are
+available to the harness. Mobile QA remains manual by default.
 
 ## Quickstart
 
@@ -145,6 +159,7 @@ adapters/                    native templates and role mapping
 scripts/render-adapters.py   deterministic rendering and drift checks
 scripts/new-project.sh        scaffold a new venture into projects/<name>/
 templates/venture-skeleton/   blank config/ + agent/ starter files
+maestro/                      repeatable Android Maestro flows (in a scaffolded venture)
 projects/<name>/              (optional) one subfolder per venture, monorepo-style
 config/, agent/, product/,
 design/, engineering/,
@@ -179,6 +194,8 @@ definitions. No provider login, background session, or external service is start
   OpenCode files; Codex renders their existing instructions from the Claude copies. This is
   an explicit migration exception, not a completed neutral product-role migration.
 - No validator for `config/WORKFLOW.md` yet.
+- Android mobile testing is opt-in. Projects must provide their own build command, APK
+  path, package ID, and flow selectors; the starter scripts fail when these are missing.
 - Permission syntax and enforcement differ between harnesses. Shared instructions describe
   review boundaries; shell access is not restricted to report directories by those instructions.
 - The current tmux launcher, worker leases, force-push hook, and checkpoint lifecycle are
