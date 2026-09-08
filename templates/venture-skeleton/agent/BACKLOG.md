@@ -42,7 +42,13 @@ Objective:
 
 [what this change does]
 
-Review: [OPTIONAL — orchestrator judgment, or REQUIRED if it touches shared state, auth,
-data, or another CONSTRAINTS.md-sensitive area]
--->
+Risk tier: [LOW | MEDIUM | HIGH | CRITICAL — impact rationale]
 
+Verification: [required checks and independent review/QA implied by the tier]
+
+Context package:
+
+- Read: [specific requirements, sections, source/test paths]
+- Do not read by default: [known unrelated artifacts/areas]
+- Validate: [commands and evidence]
+-->

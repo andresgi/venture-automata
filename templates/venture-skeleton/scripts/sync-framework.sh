@@ -34,6 +34,10 @@
 #   scripts/_run-worker-inner.sh
 #   scripts/claim-for-session.sh
 #   scripts/auto-checkpoint.sh
+#   scripts/watch-session-limit.sh
+#   scripts/mobile-emulator-start.sh
+#   scripts/mobile-emulator-status.sh
+#   scripts/mobile-emulator-stop.sh
 #
 # What does NOT get copied: anything project-specific (config/, product/, engineering/,
 # agent/ tracking files, app source, .claude/settings.json, opencode.jsonc). Both settings
@@ -132,6 +136,10 @@ main() {
     cp "$SKELETON_SCRIPTS/_run-worker-inner.sh" "$REPO_ROOT/scripts/_run-worker-inner.sh"
     cp "$SKELETON_SCRIPTS/claim-for-session.sh" "$REPO_ROOT/scripts/claim-for-session.sh"
     cp "$SKELETON_SCRIPTS/auto-checkpoint.sh" "$REPO_ROOT/scripts/auto-checkpoint.sh"
+    cp "$SKELETON_SCRIPTS/watch-session-limit.sh" "$REPO_ROOT/scripts/watch-session-limit.sh"
+    cp "$SKELETON_SCRIPTS/mobile-emulator-start.sh" "$REPO_ROOT/scripts/mobile-emulator-start.sh"
+    cp "$SKELETON_SCRIPTS/mobile-emulator-status.sh" "$REPO_ROOT/scripts/mobile-emulator-status.sh"
+    cp "$SKELETON_SCRIPTS/mobile-emulator-stop.sh" "$REPO_ROOT/scripts/mobile-emulator-stop.sh"
     chmod +x \
       "$REPO_ROOT/scripts/sync-framework.sh.pending" \
       "$REPO_ROOT/scripts/sync-from-github.sh" \
@@ -141,7 +149,11 @@ main() {
       "$REPO_ROOT/scripts/start-worker-session.sh" \
       "$REPO_ROOT/scripts/_run-worker-inner.sh" \
       "$REPO_ROOT/scripts/claim-for-session.sh" \
-      "$REPO_ROOT/scripts/auto-checkpoint.sh"
+      "$REPO_ROOT/scripts/auto-checkpoint.sh" \
+      "$REPO_ROOT/scripts/watch-session-limit.sh" \
+      "$REPO_ROOT/scripts/mobile-emulator-start.sh" \
+      "$REPO_ROOT/scripts/mobile-emulator-status.sh" \
+      "$REPO_ROOT/scripts/mobile-emulator-stop.sh"
   fi
 
   local RESOLVED_SHA

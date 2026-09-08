@@ -1,5 +1,30 @@
 # Framework changes
 
+## 2026-09-07 — Headless Android QA runner
+
+Added named-AVD headless boot, readiness, and safe-stop scripts for a KVM-enabled Ubuntu
+runner. Mobile install/test scripts now require device readiness and produce timestamped
+Maestro/JUnit evidence. Enabling Maestro MCP still requires one-time runner evidence and
+an explicit venture constraint.
+
+## 2026-09-07 — Session-limit Telegram watchdog
+
+Added an advisory tmux-pane watchdog for Claude Code, OpenCode, and Codex worker sessions.
+It uses venture-local, non-secret output patterns to notify Telegram once when a limit is
+likely detected or terminal progress stalls. It never sends input, changes work, or alters
+the worker process or lease.
+
+Claude Code permission requests are additionally forwarded through its native Notification
+hook. OpenCode and Codex permission prompts use separately configurable, advisory terminal
+patterns and never receive automatic approval.
+
+## 2026-09-07 — Token-conscious BUILD execution
+
+Added provider-neutral Minimum Sufficient Context Packages, risk-based verification,
+diff-first review, milestone-level Visual QA, and concise current-state handoffs. These
+changes reduce repeated context loading while preserving heightened review for changes with
+security, data, authorization, or journey-level impact.
+
 ## 2026-09-07 — Shared agents and three harness adapters
 
 Status: VERIFIED for the offline migration — independent code review and all seven offline

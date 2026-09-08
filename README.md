@@ -40,8 +40,9 @@ migration exception until shared role definitions are introduced.
 - `config/PROJECT.md` — this venture's mission, initial hypothesis, target user, problem.
 - `config/CONSTRAINTS.md` — hard limits: tech stack, legal, budget, non-goals.
 - `config/WORKFLOW.md` — which phases apply to this venture, and how (see below).
-- `agent/STATE.md`, `BACKLOG.md`, `DECISIONS.md`, `BLOCKERS.md`, `RUNLOG.md` — the live
-  execution trace.
+- `agent/STATE.md`, `CHECKPOINT.md`, `BACKLOG.md`, `DECISIONS.md`, `BLOCKERS.md`,
+  `RUNLOG.md` — the live execution trace. `STATE.md` and `CHECKPOINT.md` stay concise and
+  current; `RUNLOG.md` holds narrative history.
 - `product/`, `design/`, `engineering/`, `operations/` — the actual deliverables.
 
 ## Two ways to run a venture
@@ -59,6 +60,12 @@ cd projects/invoice-pilot
 The scaffold includes shared definitions, adapter templates, native agent files, and
 venture configuration templates. This avoids depending on harness-specific parent-directory
 agent discovery. Framework changes are propagated deliberately with `scripts/sync-framework.sh`.
+
+Interactive worker sessions can use `scripts/start-worker-session.sh <claude|opencode|codex>`.
+When Telegram is configured, it starts an advisory watchdog that alerts on likely session
+limits, permission prompts, or prolonged terminal inactivity; it never takes action on the
+worker automatically. Claude Code permission prompts use its native Notification hook;
+OpenCode and Codex prompts are advisory terminal-output matches.
 
 For a standalone directory, use `./scripts/new-project.sh invoice-pilot --path ../invoice-pilot`.
 Initialize its git history and remote separately. The script refuses an existing destination.

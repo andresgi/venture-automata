@@ -8,7 +8,7 @@ if [[ ! -f "$MOBILE_APK_PATH" ]]; then
 fi
 
 ADB=(adb)
-if [[ -n "${ANDROID_DEVICE_ID:-}" ]]; then
-  ADB+=( -s "$ANDROID_DEVICE_ID" )
-fi
+ANDROID_DEVICE_ID="${ANDROID_DEVICE_ID:-emulator-5554}"
+"$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/mobile-emulator-status.sh"
+ADB+=( -s "$ANDROID_DEVICE_ID" )
 "${ADB[@]}" install -r "$MOBILE_APK_PATH"

@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
-# Starts an interactive agent CLI (Claude Code or OpenCode) inside a tmux session, so it
+# Starts an interactive agent CLI (Claude Code, OpenCode, or Codex) inside a tmux session, so it
 # survives you disconnecting (e.g. closing the phone SSH app over Tailscale) and
 # reattaching later. Wraps the session with the Distributed Worker Protocol's lease
 # (see AGENTS.md) so this machine doesn't collide with another one working the same repo,
 # and sends a Telegram notification whenever the session ends for any reason.
 #
 # Usage:
-#   scripts/start-worker-session.sh <claude|opencode> [--skip-permissions]
+#   scripts/start-worker-session.sh <claude|opencode|codex> [--skip-permissions]
 #
 #   --skip-permissions  Claude only. Passes --dangerously-skip-permissions through to the
 #                        claude CLI, bypassing ALL of its permission checks -- including,
@@ -31,14 +31,14 @@ FLAG="${2:-}"
 SESSION="venture-worker"
 SKIP_PERMISSIONS=0
 
-if [ "$CLI" != "claude" ] && [ "$CLI" != "opencode" ]; then
-  echo "usage: start-worker-session.sh <claude|opencode> [--skip-permissions]" >&2
+if [ "$CLI" != "claude" ] && [ "$CLI" != "opencode" ] && [ "$CLI" != "codex" ]; then
+  echo "usage: start-worker-session.sh <claude|opencode|codex> [--skip-permissions]" >&2
   exit 1
 fi
 
 if [ -n "$FLAG" ]; then
   if [ "$FLAG" != "--skip-permissions" ]; then
-    echo "usage: start-worker-session.sh <claude|opencode> [--skip-permissions]" >&2
+    echo "usage: start-worker-session.sh <claude|opencode|codex> [--skip-permissions]" >&2
     exit 1
   fi
   if [ "$CLI" != "claude" ]; then
@@ -83,6 +83,12 @@ fi
 echo "==> Starting tmux session '$SESSION' running '$CLI' ..."
 tmux new-session -d -s "$SESSION" -c "$REPO_ROOT" \
   "bash '$REPO_ROOT/scripts/_run-worker-inner.sh' '$CLI' '$SKIP_PERMISSIONS'"
+
+if [ "${SESSION_WATCH_ENABLED:-1}" = "1" ] && [ -x "$REPO_ROOT/scripts/watch-session-limit.sh" ]; then
+  nohup "$REPO_ROOT/scripts/watch-session-limit.sh" --cli "$CLI" --session "$SESSION" \
+    >"${TMPDIR:-/tmp}/venture-session-watch-${SESSION}.log" 2>&1 &
+  echo "==> Started session-limit watchdog (set SESSION_WATCH_ENABLED=0 to disable)."
+fi
 
 echo "Started. Attach with:"
 echo "  tmux attach -t $SESSION"

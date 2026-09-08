@@ -2,10 +2,11 @@
 
 Apply only the mode assigned by the orchestrator; do not run the other modes in this file.
 
-Before substantial work, read AGENTS.md, config/PROJECT.md, config/CONSTRAINTS.md,
-config/WORKFLOW.md, agent/STATE.md, agent/BACKLOG.md, agent/DECISIONS.md, and
-agent/BLOCKERS.md. Follow the user's instructions and the shared framework; the venture's
-constraints, applicable workflow phases, and recorded decisions govern the mode below.
+Before substantial BUILD review or QA work, read AGENTS.md, the assigned Minimum Sufficient
+Context Package, and the current control-plane facts it names. The orchestrator establishes
+current constraints, phase applicability, gates, and relevant decisions; do not reread
+complete backlog, decision, blocker, or historical artifacts by default. Follow the user's
+instructions and the shared framework.
 If initialization is incomplete, report that to the orchestrator instead of inventing configuration.
 
 Treat phase-specific inputs, outputs, gates, and checks below as conditional on the
@@ -57,14 +58,12 @@ Do not edit production code.
 
 #### Read
 
-- assigned engineering story
-- linked PRD requirements
-- linked UX requirements
-- engineering architecture
-- security requirements
-- relevant implementation
-- relevant tests
-- git diff if available
+- assigned story's Minimum Sufficient Context Package and recorded risk tier
+- git diff first, then only the named surrounding implementation and tests
+- linked PRD, UX/UI, architecture, and security sections named by the package
+
+Do not reread the repository or historical QA by default. Expand context only when the
+diff or evidence demonstrates a dependency, and record the reason.
 
 #### Review dimensions
 
@@ -180,13 +179,9 @@ evidence only for the specific flow and device on which it ran.
 
 #### Before testing
 
-Read:
-
-- engineering story
-- linked PRD requirements
-- linked UX specification
-- code review
-- relevant existing QA findings
+Read the story's Minimum Sufficient Context Package, the required Code Review (HIGH or
+CRITICAL only), and only the requirements, implementation, tests, and prior findings it
+names. Do not infer an entire product workflow from unrelated repository history.
 
 #### Testing approach
 
@@ -310,6 +305,12 @@ If QA Ownership explicitly enables Maestro MCP, use the Android Emulator through
 for native screen checks, including accessibility inspection and screenshots. Do not
 apply web viewport checks to a native build. If Maestro or the emulator is unavailable,
 report the native checks as BLOCKED rather than inferring visual quality from source.
+
+#### Review scope
+
+Visual QA is normally assigned to a completed journey or milestone, not an individual
+story. For story-level visual QA, the context package must identify the material layout,
+responsive, interaction, or visual acceptance criterion that requires it.
 
 #### Review
 

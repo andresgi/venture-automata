@@ -23,10 +23,11 @@ Read AGENTS.md at the venture root before executing the assigned task. Use the v
 
 Apply only the mode assigned by the orchestrator; do not run the other modes in this file.
 
-Before substantial work, read AGENTS.md, config/PROJECT.md, config/CONSTRAINTS.md,
-config/WORKFLOW.md, agent/STATE.md, agent/BACKLOG.md, agent/DECISIONS.md, and
-agent/BLOCKERS.md. Follow the user's instructions and the shared framework; the venture's
-constraints, applicable workflow phases, and recorded decisions govern the mode below.
+Before substantial BUILD review or QA work, read AGENTS.md, the assigned Minimum Sufficient
+Context Package, and the current control-plane facts it names. The orchestrator establishes
+current constraints, phase applicability, gates, and relevant decisions; do not reread
+complete backlog, decision, blocker, or historical artifacts by default. Follow the user's
+instructions and the shared framework.
 If initialization is incomplete, report that to the orchestrator instead of inventing configuration.
 
 Treat phase-specific inputs, outputs, gates, and checks below as conditional on the

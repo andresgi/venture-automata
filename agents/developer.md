@@ -2,10 +2,11 @@
 
 Apply only the mode assigned by the orchestrator; do not run the other modes in this file.
 
-Before substantial work, read AGENTS.md, config/PROJECT.md, config/CONSTRAINTS.md,
-config/WORKFLOW.md, agent/STATE.md, agent/BACKLOG.md, agent/DECISIONS.md, and
-agent/BLOCKERS.md. Follow the user's instructions and the shared framework; the venture's
-constraints, applicable workflow phases, and recorded decisions govern the mode below.
+Before substantial BUILD work, read AGENTS.md, the assigned Minimum Sufficient Context
+Package, and the current control-plane facts it names. The orchestrator establishes current
+constraints, phase applicability, gates, and relevant decisions; do not reread complete
+backlog, decision, blocker, or historical artifacts by default. Follow the user's
+instructions and the shared framework.
 If initialization is incomplete, report that to the orchestrator instead of inventing configuration.
 
 Treat phase-specific inputs, outputs, gates, and checks below as conditional on the
@@ -36,6 +37,11 @@ documented mobile-test directory and pass secrets through the environment. If Ma
 the emulator, or the build is unavailable, report the exact blocked checks; never claim
 device validation from source inspection.
 
+For a configured headless runner, use only the named AVD and ADB serial documented in
+`config/CONSTRAINTS.md`. Confirm boot readiness before install/test and retain the generated
+Maestro/JUnit/screenshot evidence. Do not create an AVD, install SDK components, or guess
+emulator arguments during story execution; those are one-time runner setup work.
+
 For an explicit, in-scope Change Request, follow AGENTS.md's Change Requests lane:
 use the CR objective and acceptance criteria, with PRD/UX/architecture references only
 where relevant. Do not impose a phase gate on that lane. For phase-driven BUILD work,
@@ -52,22 +58,11 @@ You do not redefine product requirements or architecture.
 
 #### Before starting
 
-Read:
-
-- AGENTS.md
-- agent/STATE.md
-- agent/BACKLOG.md
-- agent/DECISIONS.md
-- agent/BLOCKERS.md
-- agent/TRACEABILITY.md
-- product/PRD.md
-- design/UX-spec.md
-- engineering/architecture.md
-- engineering/database.md
-- engineering/security.md
-- engineering/implementation-plan.md
-
-Also inspect the existing codebase before modifying it.
+Read the assigned Minimum Sufficient Context Package and the current control-plane facts
+it names. This replaces blanket reading of every product, design, engineering, QA, and
+history artifact. Use targeted search and inspect only the relevant source and tests.
+Expand context only for a named dependency or observed evidence; report the additional
+artifact and reason in the completion output.
 
 For phase-driven BUILD work with applicable TECH_ARCHITECTURE, confirm
 ARCHITECTURE_GATE has been approved. If required approval is missing, stop and report it.
@@ -80,9 +75,8 @@ Work on ONE engineering story at a time unless explicitly instructed otherwise.
 For the selected story:
 
 1. Read its requirements.
-2. Read linked PRD requirements.
-3. Read linked UX specifications.
-4. Inspect existing implementation.
+2. Read only linked PRD and UX/UI requirements named in its context package.
+3. Inspect the named implementation and tests.
 5. Identify the smallest coherent implementation.
 6. Implement it.
 7. Validate it.
@@ -157,5 +151,6 @@ Report:
 - validation results
 - known limitations
 - anything requiring reviewer attention
+- additional context loaded beyond the package, with reason
 
 The orchestrator determines whether the story advances workflow state.

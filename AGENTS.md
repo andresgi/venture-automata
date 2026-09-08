@@ -23,7 +23,7 @@ The repository is the source of truth.
 
 Do not rely on previous conversation context or assume another agent remembers prior work.
 
-Before starting any substantial work, read:
+Before starting substantial orchestration work, read:
 
 - config/PROJECT.md
 - config/CONSTRAINTS.md
@@ -34,6 +34,12 @@ Before starting any substantial work, read:
 - agent/BLOCKERS.md
 
 Also read the relevant artifacts for the current project phase.
+
+For a delegated BUILD story, the specialist instead reads the assigned Minimum Sufficient
+Context Package plus the current control-plane facts necessary for constraints, gates, and
+coordination. The orchestrator is responsible for establishing those facts; do not require a
+specialist to reread complete backlog, decision, blocker, or historical artifacts when the
+package names the relevant entries.
 
 For venture work, if config/PROJECT.md, config/CONSTRAINTS.md, or config/WORKFLOW.md do not
 exist yet, this project has not been initialized. Do not guess at them or proceed to DISCOVERY — run
@@ -142,10 +148,12 @@ or equivalent:
    supplied artifact exists and running its independent reviewer once in review-only mode —
    not delegating production to the phase's producing agent (see AGENTS.md, "Project
    Initialization -> Fast-start").
-7. Delegate specialized work whenever an appropriate project subagent exists.
-8. Evaluate returned work against acceptance criteria.
-9. Trigger required independent review.
-10. If review requires revision, send the critique back to the appropriate specialist.
+7. Assemble the selected story's Minimum Sufficient Context Package (see "Token-Conscious
+   BUILD Execution") and delegate specialized work whenever an appropriate project subagent
+   exists.
+8. Evaluate returned work against acceptance criteria and the story's verification tier.
+9. Trigger only the independent review and QA required by that tier.
+10. If a required review requires revision, send the critique back to the appropriate specialist.
 11. Continue the review loop until:
    - verification passes,
    - maximum review cycles are reached,
@@ -276,12 +284,14 @@ Procedure:
 3. Otherwise, add it to agent/BACKLOG.md under a `## Change Requests` section, with its own
    `CR-NNN` ID (distinct from PRD-derived requirement IDs), the request, and a one-line
    objective.
-4. Delegate to the Developer directly — skip Discovery/Strategy/UX/PRD ceremony and any
-   human gate. Independent review (Code Reviewer, Functional QA) is the orchestrator's
-   judgment call, not mandatory: skip it for trivial/cosmetic changes, include it for
-   anything touching shared state, auth, data, or other CONSTRAINTS.md-sensitive areas.
-5. Run the same validation as any other code change (lint, typecheck, tests, build) — the
-   IMPLEMENTED/VERIFIED bar from Implementation Rules still applies.
+4. Assign a verification tier and delegate to the Developer directly — skip
+   Discovery/Strategy/UX/PRD ceremony and any human gate. Use LOW only for isolated,
+   cosmetic, non-security-sensitive changes; changes to shared state, auth, data, or other
+   CONSTRAINTS.md-sensitive areas require at least MEDIUM.
+5. Run the validation appropriate to the changed surface and tier (lint, typecheck,
+   targeted tests, and/or production build). Do not run a check merely by habit when it
+   cannot establish anything about the change, but do run every check required by the
+   repository, change surface, or tier.
 6. Mark the Change Request IMPLEMENTED or VERIFIED in agent/BACKLOG.md (same status
    vocabulary as the rest of the backlog), and log one line in agent/RUNLOG.md.
 
@@ -328,6 +338,53 @@ After execution:
 7. Add a concise entry to agent/RUNLOG.md.
 
 Never claim work is complete unless its acceptance criteria have been checked.
+
+## Token-Conscious BUILD Execution
+
+BUILD work uses a minimum-sufficient context package. Its purpose is to give an agent the
+smallest durable set of information needed to implement or verify one story safely; it is
+provider-neutral and applies equally to Codex, Claude, DeepSeek, and other agents.
+
+### Context package
+
+Before delegating BUILD work, the orchestrator records the package in the story (or a
+linked, stable story brief). It must name:
+
+- story ID, objective, risk tier, and acceptance criteria;
+- only the relevant PRD, UX/UI, architecture, security, and decision sections;
+- the source files/modules and tests expected to be relevant;
+- validation commands and required evidence;
+- explicit non-goals and repository areas that are known to be unrelated.
+
+Agents read this package and the current control-plane facts needed to obey constraints,
+gates, and coordination. They must not reread unrelated research, growth, old QA reports,
+unrelated stories, naming work, or the repository at large. Use targeted search before
+opening files. If supplied context is insufficient, inspect the smallest additional
+artifact justified by a named dependency or observed evidence, and report why it was
+needed. This is not a prohibition on investigation when correctness requires it.
+
+Keep `agent/STATE.md` and `agent/CHECKPOINT.md` current-state-only and concise. Put
+narrative history in `agent/RUNLOG.md`; agents read historical entries only when the
+context package identifies a dependency. Completion handoffs use: changed, validated,
+risks, and next action.
+
+### Risk-based verification
+
+The orchestrator assigns a tier based on impact, not line count. A small authorization or
+data change can be HIGH or CRITICAL. When uncertain, choose the higher tier.
+
+| Tier | Minimum verification |
+|---|---|
+| LOW | Developer validation with deterministic automated checks appropriate to the changed surface. |
+| MEDIUM | Developer validation, diff-focused independent Code Review, and relevant automated tests. |
+| HIGH | MEDIUM requirements plus independent Functional QA. |
+| CRITICAL | HIGH requirements plus every applicable specialist review (for example Security, Visual, accessibility, migration/rollback). |
+
+Visual QA normally runs at a completed user-journey or milestone level, not for every
+story. Run it at story level when the story materially changes layout, responsiveness,
+interaction, or an explicitly visual acceptance criterion. Deterministic checks (lint,
+typecheck, unit/integration tests, browser automation, and builds) are evidence; use them
+instead of asking an agent to infer what they can prove.
 
 ## Distributed Worker Protocol
 
@@ -424,7 +481,7 @@ agent CLI interactively — not headless, not on a timer — by being started ma
 terminal or phone SSH session:
 
 ```
-scripts/start-worker-session.sh <claude|opencode>
+scripts/start-worker-session.sh <claude|opencode|codex>
 ```
 
 This: runs `sync-from-github.sh` first and refuses to proceed if it reports anything other
@@ -442,6 +499,19 @@ tmux session, not a headless process — there is no wall-clock-timeout risk to 
 around, unlike a fully unattended/cron-triggered invocation would have. `worker-lease.sh`
 can also be run standalone (`claim`, `release`, `release --force`, `status`) for manual
 lease management, e.g. cleaning up after a session that died without releasing.
+
+The session wrapper starts an observational `watch-session-limit.sh` process by default. It
+captures the tmux pane periodically, uses the non-secret patterns in
+`config/session-watch-patterns.conf`, and sends at most one Telegram alert for a likely
+usage/session limit or prolonged terminal inactivity. The watcher never sends input,
+terminates/restarts a session, releases its lease, or checkpoints work; its alerts are
+advisory. Set `SESSION_WATCH_ENABLED=0` before starting a session to disable it, and tune
+`SESSION_WATCH_IDLE_SECONDS` or `SESSION_WATCH_INTERVAL_SECONDS` if needed.
+
+Claude Code's scaffolded `Notification` hook separately forwards exact
+`permission_prompt` events to Telegram. OpenCode and Codex permission alerts are advisory
+tmux-pane matches from `config/session-watch-permission-patterns.conf`; review the actual
+terminal request before approving it. These alerts never grant permission.
 
 `scripts/start-worker-session.sh claude --skip-permissions` passes
 `--dangerously-skip-permissions` through to the claude CLI, for the rare case where you
@@ -492,7 +562,8 @@ client):
 
 A feature is IMPLEMENTED when development checks pass.
 
-A feature is VERIFIED only after independent QA passes.
+A feature is VERIFIED only after the verification required by its recorded risk tier passes.
+Independent review or QA remains mandatory whenever that tier requires it.
 
 IMPLEMENTED does not mean VERIFIED.
 
@@ -518,8 +589,8 @@ QA queue below:
   agent/qa/<story-id>-visual.md (or -functional.md) the same way an agent's finding would
   be recorded, remove it from agent/qa/PENDING_MANUAL_QA.md, and update its status
   (VERIFIED on PASS, REVISION_REQUIRED on FAIL — same as any other QA outcome).
-- Code Review always stays agent-driven regardless of platform — it reviews source, not a
-  running app.
+- When a story's risk tier requires Code Review, it stays agent-driven regardless of
+  platform — it reviews source, not a running app.
 - agent/qa/PENDING_MANUAL_QA.md must be empty — or every remaining entry explicitly waived
   by the human and recorded in agent/DECISIONS.md — before PRODUCT_ACCEPTANCE or RELEASE
   may proceed. The queue not blocking BUILD does not mean it's exempt from release
@@ -565,8 +636,8 @@ supplied artifact passing its review-only sanity check, not by agent-authored wo
 - Functional web application (BUILD)
 - P0 requirements implemented (BUILD)
 - P0 requirements independently verified (PRODUCT_ACCEPTANCE)
-- Functional QA passed (BUILD)
-- Mobile/responsive QA passed (BUILD / UI)
+- Required risk-tier verification passed (BUILD), including Functional QA where required
+- Mobile/responsive QA passed at applicable journey or milestone scope (BUILD / UI)
 - Critical security issues resolved (SECURITY_REVIEW)
 - Analytics specification implemented (TECH_ARCHITECTURE / BUILD)
 - Operational processes documented (SOP)
@@ -714,7 +785,8 @@ IN_PROGRESS
 Agent is actively working on it.
 
 IMPLEMENTED
-Artifact/work has been produced but has not passed independent review.
+Artifact/work has been produced but has not yet passed the verification required by its
+recorded risk tier.
 
 AWAITING_MANUAL_QA
 Implemented and passed all automated checks; independent QA is a pending manual human
@@ -726,7 +798,7 @@ REVISION_REQUIRED
 Independent review found substantive issues.
 
 VERIFIED
-Acceptance criteria and required review have passed.
+Acceptance criteria and all verification required by the recorded risk tier have passed.
 
 DEFERRED
 Explicitly postponed by decision.

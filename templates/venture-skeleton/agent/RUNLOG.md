@@ -6,9 +6,9 @@ Format:
 
 ## YYYY-MM-DD — Agent / Role
 
-Objective:
-Result:
-Artifacts changed:
-Next recommended action:
+Changed:
+Validated:
+Risks:
+Next action:
 
 ---

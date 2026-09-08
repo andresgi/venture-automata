@@ -40,6 +40,11 @@ content.
 - Android app ID: [package name]
 - Build/install command: [venture-specific command]
 - Flow directory: [venture-specific path]
+- Runner machine: [e.g. `ubuntu-home-pc`; must have KVM access]
+- AVD name: [pre-created Android Virtual Device name]
+- ADB device ID: [e.g. `emulator-5554`]
+- Emulator launch mode: headless (`-no-window`); optional extra args: [value or none]
+- Evidence directory: [e.g. `agent/qa/evidence/mobile/`]
 
 ## Business Constraints
 

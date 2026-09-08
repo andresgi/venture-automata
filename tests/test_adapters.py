@@ -105,6 +105,18 @@ class AdapterTests(unittest.TestCase):
             self.assertIn("Adapter Test", (target / "config/PROJECT.md").read_text())
             self.assertTrue((target / "agents/qa.md").exists())
             self.assertTrue((target / ".gitignore").exists())
+            self.assertTrue((target / "agent/CHECKPOINT.md").exists())
+            self.assertTrue((target / "config/session-watch-patterns.conf").exists())
+            self.assertTrue((target / "config/session-watch-permission-patterns.conf").exists())
+            watcher = target / "scripts/watch-session-limit.sh"
+            self.assertTrue(watcher.exists())
+            syntax = subprocess.run(["bash", "-n", str(watcher)], capture_output=True, text=True)
+            self.assertEqual(syntax.returncode, 0, syntax.stderr)
+            for name in ("mobile-emulator-start.sh", "mobile-emulator-status.sh", "mobile-emulator-stop.sh"):
+                script = target / "scripts" / name
+                self.assertTrue(script.exists())
+                syntax = subprocess.run(["bash", "-n", str(script)], capture_output=True, text=True)
+                self.assertEqual(syntax.returncode, 0, syntax.stderr)
             for harness in ("claude", "opencode"):
                 for role in ("product-manager", "product-critic", "product-researcher"):
                     path = "." + harness + "/agents/" + role + ".md"

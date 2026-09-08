@@ -187,7 +187,10 @@ Every implementation story must contain:
 - dependencies
 - relevant PRD requirements
 - acceptance criteria
+- risk tier (`LOW`, `MEDIUM`, `HIGH`, or `CRITICAL`) with a one-line impact rationale
 - validation expectations
+- a Minimum Sufficient Context Package: relevant artifact sections, source/test paths,
+  validation commands, and explicit non-goals/unrelated areas
 
 #### Default philosophy
 

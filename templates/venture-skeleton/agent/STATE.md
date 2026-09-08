@@ -38,6 +38,10 @@ DEFERRED, or NOT_STARTED before it's reached.)
 
 None yet — project not initialized.
 
+Keep this section to the active objective, its story ID, risk tier, owner, and next
+action. Put narrative history in `agent/RUNLOG.md` and the reusable current-story handoff
+in `agent/CHECKPOINT.md`.
+
 ## Next Eligible Action
 
 Run Project Initialization: read AGENTS.md, then populate config/PROJECT.md,

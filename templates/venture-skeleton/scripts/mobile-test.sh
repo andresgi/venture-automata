@@ -11,8 +11,13 @@ if [[ ! -f "$FLOW" ]]; then
   exit 2
 fi
 
-MAESTRO=(maestro)
-if [[ -n "${ANDROID_DEVICE_ID:-}" ]]; then
-  MAESTRO+=( --device "$ANDROID_DEVICE_ID" )
-fi
-"${MAESTRO[@]}" test "$FLOW"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ANDROID_DEVICE_ID="${ANDROID_DEVICE_ID:-emulator-5554}"
+"$SCRIPT_DIR/mobile-emulator-status.sh"
+RUN_ID="$(date -u +%Y%m%dT%H%M%SZ)"
+ARTIFACT_DIR="${MOBILE_QA_ARTIFACT_DIR:-agent/qa/evidence/mobile/${RUN_ID}}"
+mkdir -p "$ARTIFACT_DIR"
+
+MAESTRO=(maestro --device "$ANDROID_DEVICE_ID")
+"${MAESTRO[@]}" test --format JUNIT --output "$ARTIFACT_DIR/junit.xml" --debug-output "$ARTIFACT_DIR/debug" "$FLOW"
+echo "Maestro evidence: $ARTIFACT_DIR"

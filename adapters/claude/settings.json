@@ -29,7 +29,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "jq -r '.message // \"Claude needs your attention\"' | { read -r msg; scripts/notify-telegram.sh \"[$(basename \"$PWD\")] $msg\"; } 2>/dev/null || true"
+            "command": "jq -r '(.notification_type // \"notification\") + \": \" + (.message // \"Claude needs your attention\")' | { read -r msg; scripts/notify-telegram.sh \"[$(basename \"$PWD\")] Claude $msg\"; } 2>/dev/null || true"
           }
         ]
       }
