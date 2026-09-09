@@ -1,5 +1,12 @@
 # Framework changes
 
+## 2026-09-09 — Opt-in Codex permission bypass for worker sessions
+
+`scripts/start-worker-session.sh codex` retains Codex's normal permission behavior.
+Passing `--skip-permissions` now explicitly starts Codex with
+`--dangerously-bypass-approvals-and-sandbox`, matching the wrapper's existing opt-in model
+for Claude. Updated the venture skeleton so framework syncs preserve this behavior.
+
 ## 2026-09-07 — Headless Android QA runner
 
 Added named-AVD headless boot, readiness, and safe-stop scripts for a KVM-enabled Ubuntu

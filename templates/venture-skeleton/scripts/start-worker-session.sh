@@ -8,15 +8,13 @@
 # Usage:
 #   scripts/start-worker-session.sh <claude|opencode|codex> [--skip-permissions]
 #
-#   --skip-permissions  Claude only. Passes --dangerously-skip-permissions through to the
-#                        claude CLI, bypassing ALL of its permission checks -- including,
-#                        as far as we've verified, the deny-force-push.sh hook and the
-#                        git-push allow/deny rules in .claude/settings.json. Claude's own
-#                        --help text recommends this flag "only for sandboxes with no
-#                        internet access" -- this machine has full internet access and
-#                        real push credentials, so this is a deliberate, session-by-session
-#                        opt-in, never the default. Not supported for opencode (it has its
-#                        own separate permission.bash config, not this flag).
+#   --skip-permissions  Optional for Claude or Codex. For Claude, passes
+#                        --dangerously-skip-permissions. For Codex, passes
+#                        --dangerously-bypass-approvals-and-sandbox. Both bypass all
+#                        command approvals; Codex also bypasses its sandbox. This is a
+#                        deliberate, session-by-session opt-in, never the default.
+#                        Not supported for OpenCode, which has its own permission.bash
+#                        configuration.
 #
 # Then, from anywhere (including your phone over Tailscale SSH):
 #   tmux attach -t venture-worker
@@ -41,8 +39,8 @@ if [ -n "$FLAG" ]; then
     echo "usage: start-worker-session.sh <claude|opencode|codex> [--skip-permissions]" >&2
     exit 1
   fi
-  if [ "$CLI" != "claude" ]; then
-    echo "error: --skip-permissions is only supported for claude, not opencode." >&2
+  if [ "$CLI" != "claude" ] && [ "$CLI" != "codex" ]; then
+    echo "error: --skip-permissions is only supported for claude or codex, not opencode." >&2
     exit 1
   fi
   SKIP_PERMISSIONS=1
@@ -72,11 +70,16 @@ echo "==> Claiming Active Worker lease ..."
 
 if [ "$SKIP_PERMISSIONS" -eq 1 ]; then
   echo "==========================================================================" >&2
-  echo "WARNING: starting claude with --dangerously-skip-permissions." >&2
-  echo "This bypasses ALL of claude's permission checks for this session, including" >&2
-  echo "(as far as we've verified) the force-push-deny hook and git-push allow/deny" >&2
-  echo "rules. Claude's own docs recommend this only for sandboxes with no internet" >&2
-  echo "access -- this machine has real push credentials to a live repo." >&2
+  if [ "$CLI" = "claude" ]; then
+    echo "WARNING: starting claude with --dangerously-skip-permissions." >&2
+    echo "This bypasses ALL of claude's permission checks for this session, including" >&2
+    echo "(as far as we've verified) the force-push-deny hook and git-push allow/deny" >&2
+    echo "rules. Claude's own docs recommend this only for sandboxes with no internet" >&2
+    echo "access -- this machine has real push credentials to a live repo." >&2
+  else
+    echo "WARNING: starting codex with --dangerously-bypass-approvals-and-sandbox." >&2
+    echo "This bypasses ALL Codex command approvals and its sandbox for this session." >&2
+  fi
   echo "==========================================================================" >&2
 fi
 

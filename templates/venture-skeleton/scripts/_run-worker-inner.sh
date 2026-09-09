@@ -21,6 +21,8 @@ trap cleanup EXIT
 cd "$REPO_ROOT"
 if [ "$CLI" = "claude" ] && [ "$SKIP_PERMISSIONS" = "1" ]; then
   claude --dangerously-skip-permissions
+elif [ "$CLI" = "codex" ] && [ "$SKIP_PERMISSIONS" = "1" ]; then
+  codex --dangerously-bypass-approvals-and-sandbox
 else
   "$CLI"
 fi

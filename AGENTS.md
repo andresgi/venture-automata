@@ -513,16 +513,13 @@ Claude Code's scaffolded `Notification` hook separately forwards exact
 tmux-pane matches from `config/session-watch-permission-patterns.conf`; review the actual
 terminal request before approving it. These alerts never grant permission.
 
-`scripts/start-worker-session.sh claude --skip-permissions` passes
-`--dangerously-skip-permissions` through to the claude CLI, for the rare case where you
-deliberately want to skip its permission checks for a session. This is opt-in per
-invocation, never a default, and prints a loud warning every time it's used: Claude's own
-CLI help text recommends that flag "only for sandboxes with no internet access," and this
-machine has real push credentials to a live repo. As far as we've verified, it also
-bypasses `scripts/hooks/deny-force-push.sh` and the git-push allow/deny rules in
-`.claude/settings.json` — i.e. it removes the force-push protection this same protocol
-depends on. Not supported for opencode (it has its own separate `permission.bash` config,
-not this flag).
+`scripts/start-worker-session.sh <claude|codex> --skip-permissions` is an opt-in,
+per-invocation override that prints a loud warning. For Claude it passes
+`--dangerously-skip-permissions`; for Codex it passes
+`--dangerously-bypass-approvals-and-sandbox`. The latter bypasses Codex command approvals
+and its sandbox. Without `--skip-permissions`, both CLIs run with their normal permission
+behavior. Not supported for OpenCode, which has its own separate `permission.bash`
+configuration.
 
 For a long-running process with no start/exit boundary of its own to hook a sync and
 lease-claim into — e.g. `opencode web` left running for days as an "always on" mobile
