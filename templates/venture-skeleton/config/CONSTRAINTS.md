@@ -46,6 +46,16 @@ content.
 - Emulator launch mode: headless (`-no-window`); optional extra args: [value or none]
 - Evidence directory: [e.g. `agent/qa/evidence/mobile/`]
 
+### Mobbin MCP (optional)
+
+- Status: disabled (default; set to enabled only after subscribing to a Mobbin plan that
+  includes MCP access and configuring the MCP server)
+- Used by: `ui-designer` (BRAND/UI phase), to ground the design system and screen specs in
+  real production app screens instead of generic/templated output. Optional — if disabled,
+  `ui-designer` falls back to targeted WebSearch/WebFetch for a small number of named
+  references, or user-supplied screenshots.
+- MCP server: [connection details once subscribed]
+
 ## Business Constraints
 
 - Budget ceiling (if any)

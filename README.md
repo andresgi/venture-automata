@@ -67,6 +67,32 @@ limits, permission prompts, or prolonged terminal inactivity; it never takes act
 worker automatically. Claude Code permission prompts use its native Notification hook;
 OpenCode and Codex prompts are advisory terminal-output matches.
 
+## Working from more than one machine
+
+A venture can be worked from multiple machines (e.g. a laptop plus an always-on home PC)
+without two workers colliding on the same story. GitHub is the shared checkpoint, not a
+branch both machines push to directly — see `AGENTS.md`, "Distributed Worker Protocol":
+
+- **Active Worker lease** — `agent/STATE.md` tracks which machine, if any, is currently
+  working autonomously (`scripts/worker-lease.sh claim|release|status`). A worker must not
+  start autonomous work while another machine holds the lease.
+- **`scripts/sync-from-github.sh`** — run before starting work: refuses to proceed on a
+  dirty tree or diverged history rather than silently resetting or merging.
+- **`scripts/auto-checkpoint.sh`** — runs ahead of the sync check inside
+  `start-worker-session.sh`/`claim-for-session.sh`. If the tree is dirty (e.g. from a
+  session that hit a usage limit mid-work), it commits everything as a WIP checkpoint,
+  notes it in `agent/STATE.md`, and pushes — it never discards work.
+- **`scripts/start-worker-session.sh`** — syncs, claims the lease, and launches the chosen
+  CLI inside a detached `tmux` session (`venture-worker`), releasing the lease and sending
+  a Telegram notification (if configured) whenever the session ends, for any reason.
+- **`scripts/claim-for-session.sh`** — for a long-running process with no natural
+  start/exit boundary of its own (e.g. `opencode web` left running for days); sync + claim
+  once before a real work session, release manually with `worker-lease.sh release` after.
+
+Every story reaching VERIFIED gets committed and pushed as a real checkpoint before it
+counts as done from another worker's point of view. Force-pushing is never done
+autonomously.
+
 For a standalone directory, use `./scripts/new-project.sh invoice-pilot --path ../invoice-pilot`.
 Initialize its git history and remote separately. The script refuses an existing destination.
 
@@ -116,6 +142,25 @@ gate (`PRODUCT_GATE`, `ARCHITECTURE_GATE`, `RELEASE_GATE`) when one applies.
 chat. These go through a lighter `CR-NNN` lane in `agent/BACKLOG.md` — tracked and validated
 to the same bar as everything else, but without the full phase ceremony. See `AGENTS.md`,
 "Change Requests."
+
+## UI/design pipeline
+
+To reduce generic-looking, templated output, the BRAND/UX/UI phases:
+
+- Ground `ui-designer`'s design system in 3-5 concrete real-app references before drafting
+  it — via an optional Mobbin MCP integration (`config/CONSTRAINTS.md`, disabled by
+  default; requires a paid Mobbin plan) when enabled, or targeted WebSearch/WebFetch
+  otherwise.
+- Produce static HTML screen mockups (`design/mockups/`) so you can visually preview the
+  proposed design before `ARCHITECTURE_GATE`/`BUILD`, not just read a text spec.
+- Have `technical-architect` declare a frontend component directory convention
+  (`components/ui/` primitives + `components/[feature]/`, by default) so `developer` has a
+  concrete place to check for an existing component before building a near-duplicate.
+- Have `developer` run a pre-implementation design audit per UI story (token/spec/mockup
+  conflicts, reuse opportunities) against a fixed precedence order (design tokens > UI
+  spec > mockup > UX spec) before writing code.
+- Keep `visual-qa`/`ui-critic` at completed-journey/milestone scope (not per-story),
+  comparing the rendered app against the design artifacts with itemized findings.
 
 ## `config/WORKFLOW.md` statuses
 

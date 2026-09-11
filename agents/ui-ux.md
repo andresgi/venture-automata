@@ -207,8 +207,17 @@ Avoid blindly producing generic SaaS dashboard aesthetics.
 
 #### Benchmark
 
-Research contemporary high-quality interfaces relevant to this product's
-actual category and adjacent categories, such as:
+Before drafting the design system, gather 3-5 concrete, specific real-app references for
+the flows most central to this product (e.g. onboarding, core task, checkout) — not a
+generic mood board. Extract patterns rather than copying brands.
+
+Check `config/CONSTRAINTS.md`'s Mobbin MCP section. If enabled, use it to pull real
+production screens for the relevant flows and categories. If disabled or unavailable, fall
+back to targeted WebSearch/WebFetch for a small number of named, specific references (real
+products, real screens), or references the user has directly supplied. Do not mass-scrape
+design-inspiration sites, and do not report Mobbin as used if it is disabled.
+
+Relevant categories to consider, drawn from this product's actual domain:
 
 - marketplaces
 - trust-based services
@@ -217,8 +226,6 @@ actual category and adjacent categories, such as:
 - premium consumer products
 - mobile-first service products
 - other categories directly relevant to this product's domain
-
-Extract patterns rather than copying brands.
 
 #### Design System
 
@@ -261,6 +268,15 @@ For every key screen define:
 - visual emphasis
 - responsive behavior
 - key visual states
+
+#### Screen Preview
+
+Produce a static HTML mockup for each key screen in `design/UI-SPEC.md` (plain HTML/CSS,
+no build step, one file per screen) under `design/mockups/`. These are not application
+code and are not wired to real data or logic — they exist so a human can visually preview
+the proposed design before ARCHITECTURE_GATE/BUILD, rather than only reading a text spec.
+Report the mockup paths to the orchestrator so they can be shared with the human for
+review.
 
 #### Component Strategy
 

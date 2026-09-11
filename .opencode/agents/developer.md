@@ -106,6 +106,35 @@ For the selected story:
 7. Validate it.
 8. Report exact results.
 
+#### Design Source Precedence (UI stories)
+
+When a story implements a UI screen, `design/UI-SYSTEM.md`, `design/UI-SPEC.md`,
+`design/mockups/*.html`, and `design/UX-spec.md` can disagree on details. Where they
+conflict, resolve in this order:
+
+1. `design/UI-SYSTEM.md` — tokens, colors, type, spacing always win.
+2. `design/UI-SPEC.md` — layout, hierarchy, and component selection.
+3. `design/mockups/*.html` — visual proportions and placement only; mockups are
+   illustrative, not authoritative over the written spec.
+4. `design/UX-spec.md` — content, copy, and flow logic.
+
+#### Pre-Implementation Design Audit (UI stories)
+
+Before implementing a UI story, quickly check the named design artifacts against each
+other and against the existing component set. Flag, in the completion output (or to the
+orchestrator before starting if it blocks implementation):
+
+- Deviations from `design/UI-SYSTEM.md` tokens found in the mockup or spec.
+- Structural mismatches between the mockup and `design/UI-SPEC.md`.
+- Reuse opportunities: a component or pattern on this screen that duplicates or
+  near-duplicates one already built elsewhere in the codebase — prefer reusing or
+  extending it over creating a near-identical new one.
+- Logic gaps between `design/UX-spec.md` and the mockup/spec.
+
+Resolve mechanical conflicts using the precedence above without stopping. Escalate to the
+orchestrator only if the conflict looks like a product/scope decision rather than a
+straightforward precedence call (see AGENTS.md, "Failure Rules").
+
 #### Development principles
 
 Prefer:

@@ -1,5 +1,45 @@
 # Framework changes
 
+## 2026-09-11 — Frontend component organization convention from architect
+
+Added a "Frontend Component Organization" subsection to `agents/architect.md`'s
+Repository Structure responsibilities: declare a component directory convention (default
+lightweight two-tier `components/ui/` primitives + `components/[feature]/` composed
+components, seeded from `design/UI-SYSTEM.md`'s inventory) so `developer`'s reuse audit
+has a concrete place to check before building near-duplicate components. Full Atomic
+Design taxonomy (atoms/molecules/organisms/templates) is an explicit option, not the
+default — only justified when venture scale warrants the extra navigation overhead.
+
+## 2026-09-11 — Design source precedence and pre-implementation audit for developer
+
+Added a "Design Source Precedence" rule to `agents/developer.md` for UI stories
+(UI-SYSTEM.md > UI-SPEC.md > mockups > UX-spec.md when they conflict) and a
+"Pre-Implementation Design Audit" step: before implementing a UI screen, check for
+token/spec/mockup deviations, structural mismatches, and component-reuse opportunities,
+resolving mechanical conflicts via the precedence order and escalating only genuine
+product/scope decisions. Adapted from a past project's Stitch-to-Claude prompt workflow —
+kept the conflict-audit and reuse-discipline ideas, dropped the per-screen human-approval
+gate (too heavy for the autonomous orchestrator loop) and the React Native/Atomic Design
+folder taxonomy (stack-specific, belongs in a venture's own architecture.md, not the
+shared framework).
+
+## 2026-09-11 — Real-reference grounding and screen previews for UI design
+
+`ui-designer`'s Benchmark step now requires 3-5 concrete, specific real-app references
+before drafting the design system, instead of a generic mood board. Added an optional
+Mobbin MCP integration (`config/CONSTRAINTS.md`, mirroring the existing Maestro MCP
+pattern) as the preferred source when enabled; falls back to targeted WebSearch/WebFetch
+or user-supplied references when disabled. Also added a Screen Preview step: `ui-designer`
+now produces static HTML mockups per key screen under `design/mockups/` so a human can
+visually review the proposed design before ARCHITECTURE_GATE/BUILD, rather than only
+reading `design/UI-SPEC.md` prose. Visual QA (`ui-critic`/`visual-qa`) remains at
+milestone/journey scope, not per-story — considered and explicitly rejected escalating it
+to per-story granularity. Also considered and rejected pushing the design system to a
+claude.ai/design project via the DesignSync tool (deferred, not implemented) and the
+`nexu-io/open-design` MCP (rejected on trust grounds: unverifiable star count for a
+brand-new repo, unrecognized claimed integrations, and a BYOK proxy that would forward API
+keys through an unvetted third-party daemon).
+
 ## 2026-09-09 — Opt-in Codex permission bypass for worker sessions
 
 `scripts/start-worker-session.sh codex` retains Codex's normal permission behavior.

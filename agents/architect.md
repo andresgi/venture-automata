@@ -112,6 +112,22 @@ Document the chosen layout and the reasoning in engineering/architecture.md, sam
 other architecture decision — do not silently default to separate folders or a full
 monorepo tool without stating why.
 
+##### Frontend Component Organization
+
+Declare a component directory convention so `ui-designer` and `developer` have a shared
+place to check for an existing component before building a near-duplicate. Default to a
+lightweight two-tier split unless this venture's screen count or design complexity
+genuinely justifies more layers (state the reasoning if so):
+
+- `components/ui/` — small, generic, style-only primitives (Button, Input, Card, Badge,
+  etc.) that pull strictly from the design system's tokens, seeded from
+  `design/UI-SYSTEM.md`'s component inventory before screen-level work starts.
+- `components/[feature-or-screen]/` — composed, business-specific components built from
+  the primitives.
+
+Only adopt a fuller taxonomy (e.g. atoms/molecules/organisms/templates) when the venture's
+scale actually warrants the extra navigation overhead; do not impose it by default.
+
 ##### Data Model
 
 For each entity define:
