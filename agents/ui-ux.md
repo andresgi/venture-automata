@@ -205,6 +205,40 @@ the PRD) rather than defaulting to a generic SaaS tone.
 
 Avoid blindly producing generic SaaS dashboard aesthetics.
 
+#### Visual Direction Exploration
+
+Before finalizing the design system or screen specifications, create
+`design/visual-directions.md` for at least one representative key screen.
+
+Keep the functional brief invariant across all variants: target user, primary task,
+content hierarchy, required states, accessibility requirements, and MVP scope must not
+change. Derive three intentionally different visual or interaction directions from the
+venture's actual domain, audience, emotional goals, benchmark, and constraints. Do not use
+fixed labels such as "conservative / distinctive / minimal" unless they genuinely fit the
+product.
+
+For each direction document:
+
+- name and one-sentence thesis
+- domain-specific axis being explored
+- relationship to benchmark references
+- typography, color, density, layout, imagery, motion, and interaction choices
+- strengths, risks, and implementation implications
+- representative-screen prompt and generated preview, if an approved image-generation
+  capability is configured
+
+If `config/CONSTRAINTS.md` enables Visual Direction Generation, send only the approved
+design inputs and reference images through the configured provider. Generate the three
+directions as separate variants with the same functional brief and distinct direction
+briefs, then save the resulting previews with stable names. If the capability is disabled
+or unavailable, create the same direction brief and use static HTML/CSS or user-supplied
+references instead. Never claim provider-generated previews were used when they were not.
+
+Stop for `DESIGN_DIRECTION_GATE` after presenting the three directions. Record the human
+decision and rationale in `design/visual-directions.md` and `agent/DECISIONS.md`. Do not
+finalize `design/UI-SYSTEM.md`, `design/UI-SPEC.md`, or the corresponding screen mockups
+until one direction is selected or the human explicitly asks for a revision.
+
 #### Benchmark
 
 Before drafting the design system, gather 3-5 concrete, specific real-app references for

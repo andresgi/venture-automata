@@ -56,6 +56,20 @@ content.
   references, or user-supplied screenshots.
 - MCP server: [connection details once subscribed]
 
+### Visual Direction Generation (optional)
+
+- Status: disabled (default; enable only when the venture has approved access to the
+  selected image-generation provider and a safe way to supply the required design inputs)
+- Provider: OpenAI API (or explicitly named alternative)
+- Model: [venture-specific model or "current approved image model"]
+- Purpose: generate three domain-appropriate visual directions for one representative key
+  screen before finalizing the UI system, UI specs, and HTML mockups
+- Inputs: benchmark findings, relevant reference images, UX requirements, UI constraints,
+  brand direction, and the screen's functional requirements
+- Output: `design/visual-directions.md` plus generated image assets stored outside secrets
+- Data handling: do not send credentials, production user data, or unapproved confidential
+  material to the provider
+
 ## Business Constraints
 
 - Budget ceiling (if any)

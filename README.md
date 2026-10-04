@@ -151,6 +151,11 @@ To reduce generic-looking, templated output, the BRAND/UX/UI phases:
   it — via an optional Mobbin MCP integration (`config/CONSTRAINTS.md`, disabled by
   default; requires a paid Mobbin plan) when enabled, or targeted WebSearch/WebFetch
   otherwise.
+- Generate three intentionally different, domain-appropriate visual directions for one
+  representative screen using the approved benchmark, UX requirements, UI system inputs,
+  and (when enabled) the OpenAI image API. A human selects or rejects the directions before
+  the final UI system, specs, and mockups are produced; the decision is recorded in
+  `design/visual-directions.md` and `agent/DECISIONS.md`.
 - Produce static HTML screen mockups (`design/mockups/`) so you can visually preview the
   proposed design before `ARCHITECTURE_GATE`/`BUILD`, not just read a text spec.
 - Have `technical-architect` declare a frontend component directory convention

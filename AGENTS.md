@@ -218,7 +218,7 @@ assigns each one a status:
 | PRODUCT_STRATEGY | Turn evidence into strategy, V1 scope, and a buildable PRD | Product Manager | product/strategy.md, product/v1-scope.md, product/prd.md |
 | BRAND | Naming, voice, and identity, distinct from screen-level visual design | Branding / UI Critic | design/UI-SYSTEM.md (brand section), or assigned design/BRAND.md |
 | UX | User journeys, information architecture, screen inventory, UX states | UX Designer / UX Critic | design/journeys.md, design/information-architecture.md, design/screen-inventory.md, design/UX-spec.md |
-| UI | Visual design system and screen-level UI specifications | UI Designer / UI Critic | design/UI-SYSTEM.md, design/UI-SPEC.md |
+| UI | Visual direction exploration, visual design system, and screen-level UI specifications | UI Designer / UI Critic | design/visual-directions.md, design/UI-SYSTEM.md, design/UI-SPEC.md |
 | TECH_ARCHITECTURE | Application architecture, data model, security model, implementation plan | Technical Architect | engineering/architecture.md, database.md, security.md, analytics.md, implementation-plan.md |
 | BUILD | Engineering execution (includes Functional QA and Visual QA as built-in sub-steps) | Developer / Code Reviewer / Functional QA / Visual QA | application source code |
 | SECURITY_REVIEW | Independent security review of the implementation | Security Reviewer | agent/qa/security-review.md |
@@ -238,7 +238,7 @@ Among the phases that are applicable (`enabled`, `provided`, or `auto`/`optional
 to "include"), the relative order is fixed:
 
 DISCOVERY -> BENCHMARK -> PRODUCT_STRATEGY -> PRODUCT_GATE (human) -> [BRAND, UX, UI, in
-any useful order] -> TECH_ARCHITECTURE -> ARCHITECTURE_GATE (human) -> BUILD (including
+any useful order] -> DESIGN_DIRECTION_GATE (human, within UI when applicable) -> TECH_ARCHITECTURE -> ARCHITECTURE_GATE (human) -> BUILD (including
 Functional QA + Visual QA) -> SECURITY_REVIEW -> [GROWTH, SUPPLY_GROWTH, DEMAND_GROWTH, if
 applicable] -> PRODUCT_ACCEPTANCE -> SOP -> DOCUMENTATION -> RELEASE -> RELEASE_GATE
 (human) -> COMPLETE
@@ -258,6 +258,15 @@ Required whenever PRODUCT_STRATEGY is applicable (`enabled`, `provided`, or `aut
 ### ARCHITECTURE_GATE
 Required whenever TECH_ARCHITECTURE is applicable (`enabled`, `provided`, or `auto`/
 `optional` resolved to include). Before substantial application implementation begins.
+
+### DESIGN_DIRECTION_GATE
+Required whenever UI is applicable. The UI specialist must present three domain-appropriate
+visual directions for at least one representative key screen before finalizing
+`design/UI-SYSTEM.md`, `design/UI-SPEC.md`, or the corresponding HTML mockups. The human
+selects one direction, requests a revision, or rejects all three. The decision and rationale
+must be recorded in `design/visual-directions.md` and `agent/DECISIONS.md` before the UI
+specialist proceeds. This is a design checkpoint inside the UI phase, not a replacement for
+PRODUCT_GATE or ARCHITECTURE_GATE.
 
 ### RELEASE_GATE
 Always required before production release, regardless of which other phases were
