@@ -1,0 +1,49 @@
+name: Telegram idea router
+
+# Single central poller for the Telegram idea inbox, shared across every venture repo.
+# See scripts/telegram-idea-router.sh and config/telegram-routes.conf for the routing
+# logic. Each venture repo's own scripts/sync-from-github.sh calls merge-idea-issues.sh
+# to pull its routed issues into agent/BACKLOG.md.
+#
+# Required repo secrets:
+#   TELEGRAM_BOT_TOKEN
+#   TELEGRAM_CHAT_ID
+#   IDEA_ROUTER_TOKEN  -- a personal access token (repo scope) with write access to every
+#                         repo listed in config/telegram-routes.conf. The default
+#                         GITHUB_TOKEN only has access to this repo, which isn't enough
+#                         once routes point at other repos.
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: telegram-idea-router
+  cancel-in-progress: false
+
+jobs:
+  poll:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Poll Telegram and route issues
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          GH_TOKEN: ${{ secrets.IDEA_ROUTER_TOKEN }}
+        run: scripts/telegram-idea-router.sh
+
+      - name: Commit updated offset
+        run: |
+          if [ -n "$(git status --porcelain agent/.telegram-router-offset)" ]; then
+            git config user.name "telegram-idea-router"
+            git config user.email "actions@users.noreply.github.com"
+            git add agent/.telegram-router-offset
+            git commit -m "chore: advance telegram idea router offset"
+            git push
+          fi

@@ -26,6 +26,14 @@ Acceptance criteria:
 
 Do not begin DISCOVERY, or any other phase, until this task is VERIFIED.
 
+## Captured Ideas
+
+Ideas sent via the Telegram idea inbox (see AGENTS.md, "Distributed Worker Protocol" and
+scripts/telegram-idea-poll.sh), merged here automatically from GitHub issues labeled `idea`
+by scripts/merge-idea-issues.sh during the next worker sync. Each one is raw and unscoped
+until a human or the orchestrator triages it: fold it into an existing PRD requirement, spin
+it into a Change Request, or defer it. Empty until the first one is captured.
+
 ## Change Requests
 
 Ad-hoc, non-PRD asks made directly in chat (see AGENTS.md, "Change Requests"). Use `CR-NNN`

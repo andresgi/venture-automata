@@ -55,6 +55,7 @@ REMOTE="$(git rev-parse "origin/$BRANCH")"
 
 if [ "$LOCAL" = "$REMOTE" ]; then
   echo "UP_TO_DATE"
+  "$ROOT/scripts/merge-idea-issues.sh" || true
   exit 0
 fi
 
@@ -64,6 +65,7 @@ if [ "$LOCAL" = "$BASE" ]; then
   echo "REMOTE_AHEAD"
   git pull --ff-only origin "$BRANCH"
   echo "SYNCED"
+  "$ROOT/scripts/merge-idea-issues.sh" || true
   exit 0
 fi
 

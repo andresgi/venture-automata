@@ -1,5 +1,44 @@
 # Framework changes
 
+## 2026-10-04 — Telegram idea inbox for lease-independent backlog capture
+
+Added a way to drop a backlog idea from a phone, via Telegram, without needing to know
+which machine currently holds the Active Worker lease (see AGENTS.md, "Distributed Worker
+Protocol") or having any PC on at all, across multiple venture repos sharing one bot.
+
+Telegram's `getUpdates` offset is per-bot, not per-consumer: if every venture repo polled
+independently, whichever repo's workflow polled first would silently consume the message
+for the others. So polling is centralized in this framework repo: a scheduled workflow,
+`.github/workflows/telegram-idea-router.yml`, runs `scripts/telegram-idea-router.sh` every
+5 minutes. You tag each message with the target project, e.g. `#invoice-pilot fix the
+login bug`; the router looks up the tag in `config/telegram-routes.conf` (`tag=owner/repo`
+lines) and files a GitHub issue labeled `idea` directly in that repo via
+`gh issue create --repo`, replying on Telegram to confirm capture (or naming the problem —
+unroutable text, unknown tag). This requires `IDEA_ROUTER_TOKEN`, a PAT with write access
+to every repo in the routes file, since the default `GITHUB_TOKEN` only covers the repo a
+workflow runs in.
+
+Per venture, `templates/venture-skeleton/scripts/merge-idea-issues.sh` pulls that repo's
+open `idea` issues into a new `## Captured Ideas` section of `agent/BACKLOG.md` and closes
+them. It's called from `scripts/sync-from-github.sh` on a clean sync, so whichever worker
+starts a session next (via `start-worker-session.sh` or `claim-for-session.sh`, both of
+which already call `sync-from-github.sh`) is the one that picks up ideas routed while no
+worker was active. Requires `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID` as repo secrets on
+the router workflow, and `.env.telegram` locally for manual testing (already covered by
+the root `.env*` `.gitignore` rule). Captured ideas are raw and unscoped until triaged —
+folded into a PRD requirement, spun into a Change Request, or deferred.
+
+## 2026-09-14 — Domain-aware visual direction checkpoint
+
+Added a UI-phase visual direction checkpoint. The UI specialist now creates three
+intentionally different directions for a representative screen, deriving the variation
+axes from the venture's domain, audience, benchmark, brand, and constraints rather than
+using fixed labels such as "conservative" or "minimal." When configured, an approved image
+generation provider such as the OpenAI API may render the directions; the provider is not
+required for the workflow. A human selects, revises, or rejects the directions before the
+final UI system, screen specs, and HTML mockups are produced. The decision is recorded in
+`design/visual-directions.md` and `agent/DECISIONS.md`.
+
 ## 2026-09-11 — Frontend component organization convention from architect
 
 Added a "Frontend Component Organization" subsection to `agents/architect.md`'s
