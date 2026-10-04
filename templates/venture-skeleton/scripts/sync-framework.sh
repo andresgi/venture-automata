@@ -27,6 +27,7 @@
 #   .opencode/agents/*.md
 #   scripts/sync-framework.sh (this script itself)
 #   scripts/sync-from-github.sh
+#   scripts/merge-idea-issues.sh
 #   scripts/hooks/deny-force-push.sh
 #   scripts/worker-lease.sh
 #   scripts/notify-telegram.sh
@@ -129,6 +130,7 @@ main() {
     # comment at the top of this file. Stage it as .pending; the next invocation adopts it.
     cp "$SKELETON_SCRIPTS/sync-framework.sh" "$REPO_ROOT/scripts/sync-framework.sh.pending"
     cp "$SKELETON_SCRIPTS/sync-from-github.sh" "$REPO_ROOT/scripts/sync-from-github.sh"
+    cp "$SKELETON_SCRIPTS/merge-idea-issues.sh" "$REPO_ROOT/scripts/merge-idea-issues.sh"
     cp "$SKELETON_SCRIPTS/hooks/deny-force-push.sh" "$REPO_ROOT/scripts/hooks/deny-force-push.sh"
     cp "$SKELETON_SCRIPTS/worker-lease.sh" "$REPO_ROOT/scripts/worker-lease.sh"
     cp "$SKELETON_SCRIPTS/notify-telegram.sh" "$REPO_ROOT/scripts/notify-telegram.sh"
@@ -143,6 +145,7 @@ main() {
     chmod +x \
       "$REPO_ROOT/scripts/sync-framework.sh.pending" \
       "$REPO_ROOT/scripts/sync-from-github.sh" \
+      "$REPO_ROOT/scripts/merge-idea-issues.sh" \
       "$REPO_ROOT/scripts/hooks/deny-force-push.sh" \
       "$REPO_ROOT/scripts/worker-lease.sh" \
       "$REPO_ROOT/scripts/notify-telegram.sh" \
